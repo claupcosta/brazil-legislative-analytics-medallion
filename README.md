@@ -1,2 +1,14 @@
-# brazil-legislative-analytics-medallion
-Databricks-based data engineering project using Medallion Architecture to process and analyze public legislative data from the Brazilian Chamber of Deputies API.
+# Brazil Legislative Analytics Medallion
+
+Engineering Data Project using Databricks and Medallion Architecture
+to analyze Brazilian legislative open data.
+
+## Status
+🚧 In Development
+
+## Current Scope
+- Medallion Architecture
+- Star Schema Modeling
+- Data Quality
+- Traceability
+- Analytical Marts
