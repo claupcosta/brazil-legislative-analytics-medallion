@@ -1,188 +1,150 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "41fa291a-d5b2-4fde-a0c9-085ca5ad5c95",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_logger loaded successfully.\n"
-     ]
-    }
-   ],
-   "source": [
-    "# Databricks notebook source\n",
-    "# MAGIC %md\n",
-    "# MAGIC # 99 Utils — Console Logger\n",
-    "# MAGIC\n",
-    "# MAGIC **Notebook:** `utils_logger`\n",
-    "# MAGIC\n",
-    "# MAGIC Provides standardized console logging utilities for the Brazil Legislative Analytics Medallion pipeline.\n",
-    "# MAGIC\n",
-    "# MAGIC This notebook centralizes log formatting across Bronze, Silver, Gold, Marts, Quality and Jobs notebooks.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Responsibilities\n",
-    "# MAGIC - Standardize operational logging across pipeline notebooks\n",
-    "# MAGIC - Support structured log levels such as INFO, WARNING, SUCCESS and ERROR\n",
-    "# MAGIC - Include Medallion layer context in log messages\n",
-    "# MAGIC - Improve execution traceability during Databricks notebook runs\n",
-    "# MAGIC - Support troubleshooting during API ingestion and transformation steps\n",
-    "# MAGIC\n",
-    "# MAGIC ## Technical Notes\n",
-    "# MAGIC - Python functions and variables are written in English.\n",
-    "# MAGIC - Table and field names follow Portuguese mnemonic standards.\n",
-    "# MAGIC - Comments and documentation are written in English.\n",
-    "# MAGIC - This logger writes messages to the notebook execution output.\n",
-    "# MAGIC - Persistent logging is handled by `utils_table_logger`.\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "import logging\n",
-    "from typing import Optional\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_logger(\n",
-    "    logger_name: str,\n",
-    "    layer_name: str = \"pipeline\",\n",
-    ") -> logging.Logger:\n",
-    "    \"\"\"\n",
-    "    Creates or retrieves a standardized pipeline logger.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    normalized_layer = layer_name.strip().lower()\n",
-    "    full_logger_name = f\"{normalized_layer}.{logger_name}\"\n",
-    "\n",
-    "    pipeline_logger = logging.getLogger(full_logger_name)\n",
-    "\n",
-    "    if pipeline_logger.handlers:\n",
-    "        return pipeline_logger\n",
-    "\n",
-    "    pipeline_logger.setLevel(logging.INFO)\n",
-    "    pipeline_logger.propagate = False\n",
-    "\n",
-    "    log_formatter = logging.Formatter(\n",
-    "        fmt=\"%(asctime)s | %(levelname)s | %(layer)s | %(name)s | %(message)s\",\n",
-    "        datefmt=\"%Y-%m-%d %H:%M:%S\",\n",
-    "    )\n",
-    "\n",
-    "    console_handler = logging.StreamHandler()\n",
-    "    console_handler.setLevel(logging.INFO)\n",
-    "    console_handler.setFormatter(log_formatter)\n",
-    "\n",
-    "    class LayerFilter(logging.Filter):\n",
-    "        \"\"\"\n",
-    "        Adds the Medallion layer name to each log record.\n",
-    "        \"\"\"\n",
-    "\n",
-    "        def filter(self, log_record: logging.LogRecord) -> bool:\n",
-    "            log_record.layer = normalized_layer.upper()\n",
-    "            return True\n",
-    "\n",
-    "    console_handler.addFilter(LayerFilter())\n",
-    "    pipeline_logger.addHandler(console_handler)\n",
-    "\n",
-    "    return pipeline_logger\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def log_info(\n",
-    "    pipeline_logger: logging.Logger,\n",
-    "    message: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Registers an informational console log message.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    pipeline_logger.info(message)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def log_warning(\n",
-    "    pipeline_logger: logging.Logger,\n",
-    "    message: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Registers a warning console log message.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    pipeline_logger.warning(message)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def log_error(\n",
-    "    pipeline_logger: logging.Logger,\n",
-    "    message: str,\n",
-    "    error: Optional[Exception] = None,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Registers an error console log message.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if error is not None:\n",
-    "        pipeline_logger.error(f\"{message} | error_detail={str(error)}\")\n",
-    "    else:\n",
-    "        pipeline_logger.error(message)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def log_success(\n",
-    "    pipeline_logger: logging.Logger,\n",
-    "    message: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Registers a success console log message.\n",
-    "\n",
-    "    Notes\n",
-    "    -----\n",
-    "    Python logging does not provide a native SUCCESS level.\n",
-    "    For Databricks compatibility, SUCCESS is registered as INFO with a prefix.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    pipeline_logger.info(f\"[SUCCESS] {message}\")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "print(\"utils_logger loaded successfully.\")"
-   ]
-  }
- ],
- "metadata": {
-  "application/vnd.databricks.v1+notebook": {
-   "computePreferences": null,
-   "dashboards": [],
-   "environmentMetadata": {
-    "base_environment": "",
-    "environment_version": "5"
-   },
-   "inputWidgetPreferences": null,
-   "language": "python",
-   "notebookMetadata": {
-    "pythonIndentUnit": 4
-   },
-   "notebookName": "utils_logger",
-   "widgets": {}
-  },
-  "language_info": {
-   "name": "python"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 0
-}
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # Utils Layer — Console Logger
+# MAGIC
+# MAGIC **Notebook:** `utils_logger`  
+# MAGIC **Layer:** `Utils`  
+# MAGIC **Source/Endpoint:** `Python Logging Framework`  
+# MAGIC **Target:** `Reusable console logging functions`
+# MAGIC
+# MAGIC Provides standardized console logging utilities for the
+# MAGIC Brazil Legislative Analytics Medallion pipeline.
+# MAGIC
+# MAGIC This notebook centralizes operational log formatting and execution messaging
+# MAGIC across Bronze, Silver, Gold, Marts, Quality and Jobs notebooks.
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Responsibilities
+# MAGIC
+# MAGIC - Standardize operational logging across pipeline notebooks
+# MAGIC - Support structured log levels such as INFO, WARNING, SUCCESS and ERROR
+# MAGIC - Include Medallion layer context in log messages
+# MAGIC - Improve execution traceability during notebook runs
+# MAGIC - Support troubleshooting during ingestion and transformation workflows
+# MAGIC - Provide reusable logging helper functions
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Notes
+# MAGIC
+# MAGIC - Shared utility notebook across Medallion layers
+# MAGIC - Logs are written to notebook execution output
+# MAGIC - Persistent logging is handled by `utils_table_logger`
+# MAGIC - SUCCESS messages are internally registered as INFO logs for compatibility
+# MAGIC
+# MAGIC For additional architectural and governance details, refer to:
+# MAGIC
+# MAGIC - `/docs/monitoring/observability.md`
+# MAGIC - `/docs/standards/coding_standards.md`
+# MAGIC - `/docs/architecture/medallion_architecture.md`
+
+# COMMAND ----------
+
+import logging
+from typing import Optional
+
+# COMMAND ----------
+
+def get_logger(
+    logger_name: str,
+    layer_name: str = "pipeline",
+) -> logging.Logger:
+    """
+    Creates or retrieves a standardized pipeline logger.
+    """
+
+    normalized_layer = layer_name.strip().lower()
+    full_logger_name = f"{normalized_layer}.{logger_name}"
+
+    pipeline_logger = logging.getLogger(full_logger_name)
+
+    if pipeline_logger.handlers:
+        return pipeline_logger
+
+    pipeline_logger.setLevel(logging.INFO)
+    pipeline_logger.propagate = False
+
+    log_formatter = logging.Formatter(
+        fmt="%(asctime)s | %(levelname)s | %(layer)s | %(name)s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(log_formatter)
+
+    class LayerFilter(logging.Filter):
+        """
+        Adds the Medallion layer name to each log record.
+        """
+
+        def filter(self, log_record: logging.LogRecord) -> bool:
+            log_record.layer = normalized_layer.upper()
+            return True
+
+    console_handler.addFilter(LayerFilter())
+    pipeline_logger.addHandler(console_handler)
+
+    return pipeline_logger
+
+# COMMAND ----------
+
+def log_info(
+    pipeline_logger: logging.Logger,
+    message: str,
+) -> None:
+    """
+    Registers an informational console log message.
+    """
+
+    pipeline_logger.info(message)
+
+# COMMAND ----------
+
+def log_warning(
+    pipeline_logger: logging.Logger,
+    message: str,
+) -> None:
+    """
+    Registers a warning console log message.
+    """
+
+    pipeline_logger.warning(message)
+
+# COMMAND ----------
+
+def log_error(
+    pipeline_logger: logging.Logger,
+    message: str,
+    error: Optional[Exception] = None,
+) -> None:
+    """
+    Registers an error console log message.
+    """
+
+    if error is not None:
+        pipeline_logger.error(f"{message} | error_detail={str(error)}")
+    else:
+        pipeline_logger.error(message)
+
+# COMMAND ----------
+
+def log_success(
+    pipeline_logger: logging.Logger,
+    message: str,
+) -> None:
+    """
+    Registers a success console log message.
+
+    Notes
+    -----
+    Python logging does not provide a native SUCCESS level.
+    For Databricks compatibility, SUCCESS is registered as INFO with a prefix.
+    """
+
+    pipeline_logger.info(f"[SUCCESS] {message}")
+
+# COMMAND ----------
+
+print("utils_logger loaded successfully.")

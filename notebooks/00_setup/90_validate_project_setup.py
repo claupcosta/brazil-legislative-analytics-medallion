@@ -1,741 +1,474 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "89f6e784-696b-426a-bfb6-a3c11025ce6a",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "==========================================================================================\nBRAZIL LEGISLATIVE ANALYTICS MEDALLION\n01 - PROJECT CONFIGURATION\n==========================================================================================\nCONFIG LOADED SUCCESSFULLY\nPROJECT_NAME: brazil_legislative_analytics\nPROJECT_VERSION: v1.0.0\nPROJECT_ENVIRONMENT: dev\nCATALOG_NAME: brazil_legislative_analytics\nCAMARA_API_BASE_URL: https://dadosabertos.camara.leg.br/api/v2\nRUN_ID: 4b8a5831-c51b-442c-a5dc-4a8b1524b98d\n==========================================================================================\nPROJECT CONFIGURATION LOADED SUCCESSFULLY\n"
-     ]
-    }
-   ],
-   "source": [
-    "%run ./01_project_config"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "8f596ead-99cd-4d5d-a75d-44e654dad22c",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "==========================================================================================\nBRAZIL LEGISLATIVE ANALYTICS MEDALLION\n90 - VALIDATE PROJECT SETUP\n==========================================================================================\nExecution Timestamp: 2026-05-20 02:28:29.543162\nCatalog: brazil_legislative_analytics\n==========================================================================================\n"
-     ]
-    },
-    {
-     "output_type": "display_data",
-     "data": {
-      "text/html": [
-       "<style scoped>\n",
-       "  .table-result-container {\n",
-       "    max-height: 300px;\n",
-       "    overflow: auto;\n",
-       "  }\n",
-       "  table, th, td {\n",
-       "    border: 1px solid black;\n",
-       "    border-collapse: collapse;\n",
-       "  }\n",
-       "  th, td {\n",
-       "    padding: 5px;\n",
-       "  }\n",
-       "  th {\n",
-       "    text-align: left;\n",
-       "  }\n",
-       "</style><div class='table-result-container'><table class='table-result'><thead style='background-color: white'><tr><th>object_name</th><th>validated_at</th><th>validation_group</th><th>validation_message</th><th>validation_status</th></tr></thead><tbody><tr><td>brazil_legislative_analytics</td><td>2026-05-20T02:28:30.439Z</td><td>catalog_exists</td><td>Catalog exists.</td><td>PASSED</td></tr><tr><td>brazil_legislative_analytics.audit</td><td>2026-05-20T02:28:31.093Z</td><td>schema_exists</td><td>Required schema exists.</td><td>PASSED</td></tr><tr><td>brazil_legislative_analytics.bronze</td><td>2026-05-20T02:28:31.511Z</td><td>schema_exists</td><td>Required schema exists.</td><td>PASSED</td></tr><tr><td>brazil_legislative_analytics.silver</td><td>2026-05-20T02:28:32.040Z</td><td>schema_exists</td><td>Required schema exists.</td><td>PASSED</td></tr><tr><td>brazil_legislative_analytics.gold</td><td>2026-05-20T02:28:32.397Z</td><td>schema_exists</td><td>Required schema exists.</td><td>PASSED</td></tr><tr><td>brazil_legislative_analytics.marts</td><td>2026-05-20T02:28:32.832Z</td><td>schema_exists</td><td>Required schema exists.</td><td>PASSED</td></tr><tr><td>brazil_legislative_analytics.silver_base</td><td>2026-05-20T02:28:33.524Z</td><td>deprecated_schema_check</td><td>Deprecated schema does not exist or is not active.</td><td>PASSED</td></tr><tr><td>brazil_legislative_analytics.silver_curated</td><td>2026-05-20T02:28:34.021Z</td><td>deprecated_schema_check</td><td>Deprecated schema does not exist or is not active.</td><td>PASSED</td></tr><tr><td>brazil_legislative_analytics.audit.aud_log_execucao_pipeline</td><td>2026-05-20T02:28:34.460Z</td><td>audit_table_exists</td><td>Required audit table exists.</td><td>PASSED</td></tr><tr><td>brazil_legislative_analytics.audit.aud_log_erros_pipeline</td><td>2026-05-20T02:28:34.696Z</td><td>audit_table_exists</td><td>Required audit table exists.</td><td>PASSED</td></tr><tr><td>brazil_legislative_analytics.audit.aud_log_qualidade_dados</td><td>2026-05-20T02:28:35.196Z</td><td>audit_table_exists</td><td>Required audit table exists.</td><td>PASSED</td></tr></tbody></table></div>"
-      ]
-     },
-     "metadata": {
-      "application/vnd.databricks.v1+output": {
-       "addedWidgets": {},
-       "aggData": [],
-       "aggError": "",
-       "aggOverflow": false,
-       "aggSchema": [],
-       "aggSeriesLimitReached": false,
-       "aggType": "",
-       "arguments": {},
-       "columnCustomDisplayInfos": {},
-       "data": [
-        [
-         "brazil_legislative_analytics",
-         "2026-05-20T02:28:30.439Z",
-         "catalog_exists",
-         "Catalog exists.",
-         "PASSED"
-        ],
-        [
-         "brazil_legislative_analytics.audit",
-         "2026-05-20T02:28:31.093Z",
-         "schema_exists",
-         "Required schema exists.",
-         "PASSED"
-        ],
-        [
-         "brazil_legislative_analytics.bronze",
-         "2026-05-20T02:28:31.511Z",
-         "schema_exists",
-         "Required schema exists.",
-         "PASSED"
-        ],
-        [
-         "brazil_legislative_analytics.silver",
-         "2026-05-20T02:28:32.040Z",
-         "schema_exists",
-         "Required schema exists.",
-         "PASSED"
-        ],
-        [
-         "brazil_legislative_analytics.gold",
-         "2026-05-20T02:28:32.397Z",
-         "schema_exists",
-         "Required schema exists.",
-         "PASSED"
-        ],
-        [
-         "brazil_legislative_analytics.marts",
-         "2026-05-20T02:28:32.832Z",
-         "schema_exists",
-         "Required schema exists.",
-         "PASSED"
-        ],
-        [
-         "brazil_legislative_analytics.silver_base",
-         "2026-05-20T02:28:33.524Z",
-         "deprecated_schema_check",
-         "Deprecated schema does not exist or is not active.",
-         "PASSED"
-        ],
-        [
-         "brazil_legislative_analytics.silver_curated",
-         "2026-05-20T02:28:34.021Z",
-         "deprecated_schema_check",
-         "Deprecated schema does not exist or is not active.",
-         "PASSED"
-        ],
-        [
-         "brazil_legislative_analytics.audit.aud_log_execucao_pipeline",
-         "2026-05-20T02:28:34.460Z",
-         "audit_table_exists",
-         "Required audit table exists.",
-         "PASSED"
-        ],
-        [
-         "brazil_legislative_analytics.audit.aud_log_erros_pipeline",
-         "2026-05-20T02:28:34.696Z",
-         "audit_table_exists",
-         "Required audit table exists.",
-         "PASSED"
-        ],
-        [
-         "brazil_legislative_analytics.audit.aud_log_qualidade_dados",
-         "2026-05-20T02:28:35.196Z",
-         "audit_table_exists",
-         "Required audit table exists.",
-         "PASSED"
-        ]
-       ],
-       "datasetInfos": [],
-       "dbfsResultPath": null,
-       "isJsonSchema": true,
-       "metadata": {},
-       "overflow": false,
-       "plotOptions": {
-        "customPlotOptions": {},
-        "displayType": "table",
-        "pivotAggregation": null,
-        "pivotColumns": null,
-        "xColumns": null,
-        "yColumns": null
-       },
-       "removedWidgets": [],
-       "schema": [
-        {
-         "metadata": "{}",
-         "name": "object_name",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "validated_at",
-         "type": "\"timestamp\""
-        },
-        {
-         "metadata": "{}",
-         "name": "validation_group",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "validation_message",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "validation_status",
-         "type": "\"string\""
-        }
-       ],
-       "type": "table"
-      }
-     },
-     "output_type": "display_data"
-    },
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Setup validation results persisted into: brazil_legislative_analytics.audit.aud_log_qualidade_dados\n==========================================================================================\nPROJECT SETUP VALIDATION SUMMARY\n==========================================================================================\nPassed validations: 11\nWarning validations: 0\nFailed validations: 0\n==========================================================================================\nPROJECT SETUP VALIDATED SUCCESSFULLY\n"
-     ]
-    }
-   ],
-   "source": [
-    "# Databricks notebook source\n",
-    "# MAGIC %md\n",
-    "# MAGIC # 90 Validate Project Setup\n",
-    "# MAGIC\n",
-    "# MAGIC Validates the catalog, schemas and audit tables required by the Brazil Legislative Analytics Medallion project.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Purpose\n",
-    "# MAGIC This notebook checks whether the setup notebooks were executed successfully before running Bronze, Silver, Gold, Marts or Quality pipelines.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Architecture\n",
-    "# MAGIC The project uses a simplified Medallion Architecture:\n",
-    "# MAGIC\n",
-    "# MAGIC Bronze → Silver → Gold → Marts\n",
-    "# MAGIC\n",
-    "# MAGIC ## Validations\n",
-    "# MAGIC - Catalog existence\n",
-    "# MAGIC - Required schema existence\n",
-    "# MAGIC - Audit table existence\n",
-    "# MAGIC - Deprecated schema absence\n",
-    "# MAGIC - Setup validation persistence into audit quality table\n",
-    "# MAGIC\n",
-    "# MAGIC ## Documentation Standard\n",
-    "# MAGIC - Python functions and variables are written in English.\n",
-    "# MAGIC - Table and field names follow Portuguese mnemonic standards.\n",
-    "# MAGIC - Table and column comments are written in English.\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ./01_project_config\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "from datetime import datetime\n",
-    "from pyspark.sql import functions as F\n",
-    "from pyspark.sql.types import LongType, DoubleType\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "print(\"=\" * 90)\n",
-    "print(\"BRAZIL LEGISLATIVE ANALYTICS MEDALLION\")\n",
-    "print(\"90 - VALIDATE PROJECT SETUP\")\n",
-    "print(\"=\" * 90)\n",
-    "print(f\"Execution Timestamp: {datetime.now()}\")\n",
-    "print(f\"Catalog: {CATALOG_NAME}\")\n",
-    "print(\"=\" * 90)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# EXPECTED STRUCTURES\n",
-    "# ============================================================\n",
-    "\n",
-    "EXPECTED_SCHEMAS = [\n",
-    "    SCHEMA_AUDIT,\n",
-    "    SCHEMA_BRONZE,\n",
-    "    SCHEMA_SILVER,\n",
-    "    SCHEMA_GOLD,\n",
-    "    SCHEMA_MARTS,\n",
-    "]\n",
-    "\n",
-    "DEPRECATED_SCHEMAS = [\n",
-    "    \"silver_base\",\n",
-    "    \"silver_curated\",\n",
-    "]\n",
-    "\n",
-    "EXPECTED_AUDIT_TABLES = [\n",
-    "    AUD_TB_LOG_EXECUCAO_PIPELINE,\n",
-    "    AUD_TB_LOG_ERROS_PIPELINE,\n",
-    "    AUD_TB_LOG_QUALIDADE_DADOS,\n",
-    "]\n",
-    "\n",
-    "DATA_QUALITY_LOG_TABLE = (\n",
-    "    f\"{CATALOG_NAME}.\"\n",
-    "    f\"{SCHEMA_AUDIT}.\"\n",
-    "    f\"{AUD_TB_LOG_QUALIDADE_DADOS}\"\n",
-    ")\n",
-    "\n",
-    "validation_results = []\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# VALIDATION HELPERS\n",
-    "# ============================================================\n",
-    "\n",
-    "def register_validation_result(\n",
-    "    validation_group: str,\n",
-    "    object_name: str,\n",
-    "    validation_status: str,\n",
-    "    validation_message: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Stores a setup validation result in memory for\n",
-    "    final reporting and persistence.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    validation_results.append({\n",
-    "        \"validation_group\": validation_group,\n",
-    "        \"object_name\": object_name,\n",
-    "        \"validation_status\": validation_status,\n",
-    "        \"validation_message\": validation_message,\n",
-    "        \"validated_at\": datetime.now(),\n",
-    "    })\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def catalog_exists(\n",
-    "    catalog_name: str,\n",
-    ") -> bool:\n",
-    "    \"\"\"\n",
-    "    Checks whether a catalog exists in the current workspace.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    catalogs_df = spark.sql(\"SHOW CATALOGS\")\n",
-    "\n",
-    "    return (\n",
-    "        catalogs_df\n",
-    "        .filter(f\"catalog = '{catalog_name}'\")\n",
-    "        .count() > 0\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def schema_exists(\n",
-    "    catalog_name: str,\n",
-    "    schema_name: str,\n",
-    ") -> bool:\n",
-    "    \"\"\"\n",
-    "    Checks whether a schema exists inside a catalog.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    schemas_df = spark.sql(\n",
-    "        f\"SHOW SCHEMAS IN {catalog_name}\"\n",
-    "    )\n",
-    "\n",
-    "    return (\n",
-    "        schemas_df\n",
-    "        .filter(f\"databaseName = '{schema_name}'\")\n",
-    "        .count() > 0\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def table_exists(\n",
-    "    full_table_name: str,\n",
-    ") -> bool:\n",
-    "    \"\"\"\n",
-    "    Checks whether a fully qualified table exists.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return spark.catalog.tableExists(full_table_name)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 1. Validate Catalog\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "if catalog_exists(CATALOG_NAME):\n",
-    "\n",
-    "    register_validation_result(\n",
-    "        validation_group=\"catalog_exists\",\n",
-    "        object_name=CATALOG_NAME,\n",
-    "        validation_status=\"PASSED\",\n",
-    "        validation_message=\"Catalog exists.\",\n",
-    "    )\n",
-    "\n",
-    "else:\n",
-    "\n",
-    "    register_validation_result(\n",
-    "        validation_group=\"catalog_exists\",\n",
-    "        object_name=CATALOG_NAME,\n",
-    "        validation_status=\"FAILED\",\n",
-    "        validation_message=\"Catalog does not exist.\",\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 2. Validate Required Schemas\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "for schema_name in EXPECTED_SCHEMAS:\n",
-    "\n",
-    "    full_schema_name = (\n",
-    "        f\"{CATALOG_NAME}.{schema_name}\"\n",
-    "    )\n",
-    "\n",
-    "    if schema_exists(CATALOG_NAME, schema_name):\n",
-    "\n",
-    "        register_validation_result(\n",
-    "            validation_group=\"schema_exists\",\n",
-    "            object_name=full_schema_name,\n",
-    "            validation_status=\"PASSED\",\n",
-    "            validation_message=\"Required schema exists.\",\n",
-    "        )\n",
-    "\n",
-    "    else:\n",
-    "\n",
-    "        register_validation_result(\n",
-    "            validation_group=\"schema_exists\",\n",
-    "            object_name=full_schema_name,\n",
-    "            validation_status=\"FAILED\",\n",
-    "            validation_message=\"Required schema does not exist.\",\n",
-    "        )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 3. Validate Deprecated Schemas\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "for schema_name in DEPRECATED_SCHEMAS:\n",
-    "\n",
-    "    full_schema_name = (\n",
-    "        f\"{CATALOG_NAME}.{schema_name}\"\n",
-    "    )\n",
-    "\n",
-    "    if schema_exists(CATALOG_NAME, schema_name):\n",
-    "\n",
-    "        register_validation_result(\n",
-    "            validation_group=\"deprecated_schema_check\",\n",
-    "            object_name=full_schema_name,\n",
-    "            validation_status=\"WARNING\",\n",
-    "            validation_message=(\n",
-    "                \"Deprecated schema still exists \"\n",
-    "                \"and should not be used by the \"\n",
-    "                \"simplified architecture.\"\n",
-    "            ),\n",
-    "        )\n",
-    "\n",
-    "    else:\n",
-    "\n",
-    "        register_validation_result(\n",
-    "            validation_group=\"deprecated_schema_check\",\n",
-    "            object_name=full_schema_name,\n",
-    "            validation_status=\"PASSED\",\n",
-    "            validation_message=(\n",
-    "                \"Deprecated schema does not exist \"\n",
-    "                \"or is not active.\"\n",
-    "            ),\n",
-    "        )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 4. Validate Audit Tables\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "for table_name in EXPECTED_AUDIT_TABLES:\n",
-    "\n",
-    "    full_table_name = (\n",
-    "        f\"{CATALOG_NAME}.\"\n",
-    "        f\"{SCHEMA_AUDIT}.\"\n",
-    "        f\"{table_name}\"\n",
-    "    )\n",
-    "\n",
-    "    if table_exists(full_table_name):\n",
-    "\n",
-    "        register_validation_result(\n",
-    "            validation_group=\"audit_table_exists\",\n",
-    "            object_name=full_table_name,\n",
-    "            validation_status=\"PASSED\",\n",
-    "            validation_message=\"Required audit table exists.\",\n",
-    "        )\n",
-    "\n",
-    "    else:\n",
-    "\n",
-    "        register_validation_result(\n",
-    "            validation_group=\"audit_table_exists\",\n",
-    "            object_name=full_table_name,\n",
-    "            validation_status=\"FAILED\",\n",
-    "            validation_message=\"Required audit table does not exist.\",\n",
-    "        )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 5. Display Validation Results\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "validation_df = spark.createDataFrame(\n",
-    "    validation_results\n",
-    ")\n",
-    "\n",
-    "display(validation_df)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 6. Persist Setup Validation Results\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# PERSIST SETUP VALIDATION RESULTS\n",
-    "# ============================================================\n",
-    "\n",
-    "setup_quality_log_df = (\n",
-    "    validation_df\n",
-    "    .withColumn(\"qlt_id_log\", F.expr(\"uuid()\"))\n",
-    "    .withColumn(\"aud_id_execucao\", F.lit(RUN_ID))\n",
-    "    .withColumn(\"aud_tx_nome_projeto\", F.lit(PROJECT_NAME))\n",
-    "    .withColumn(\"aud_tx_versao_pipeline\", F.lit(PROJECT_VERSION))\n",
-    "    .withColumn(\"aud_tx_ambiente\", F.lit(PROJECT_ENVIRONMENT))\n",
-    "    .withColumn(\n",
-    "        \"aud_tx_nome_notebook\",\n",
-    "        F.lit(\"90_validate_project_setup\"),\n",
-    "    )\n",
-    "    .withColumn(\n",
-    "        \"aud_tx_nome_camada\",\n",
-    "        F.lit(\"setup\"),\n",
-    "    )\n",
-    "    .withColumn(\n",
-    "        \"aud_tx_nome_entidade\",\n",
-    "        F.lit(\"project_setup\"),\n",
-    "    )\n",
-    "    .withColumn(\n",
-    "        \"aud_tx_tabela_destino\",\n",
-    "        F.lit(DATA_QUALITY_LOG_TABLE),\n",
-    "    )\n",
-    "    .withColumn(\n",
-    "        \"qlt_tx_nome_regra\",\n",
-    "        F.col(\"validation_group\"),\n",
-    "    )\n",
-    "    .withColumn(\n",
-    "        \"qlt_tx_descricao_regra\",\n",
-    "        F.col(\"validation_message\"),\n",
-    "    )\n",
-    "    .withColumn(\n",
-    "        \"qlt_tx_status_validacao\",\n",
-    "        F.col(\"validation_status\"),\n",
-    "    )\n",
-    "    .withColumn(\n",
-    "        \"qlt_qt_total_registros\",\n",
-    "        F.lit(1).cast(LongType()),\n",
-    "    )\n",
-    "    .withColumn(\n",
-    "        \"qlt_qt_registros_invalidos\",\n",
-    "        F.when(\n",
-    "            F.col(\"validation_status\") == \"FAILED\",\n",
-    "            F.lit(1),\n",
-    "        )\n",
-    "        .otherwise(F.lit(0))\n",
-    "        .cast(LongType())\n",
-    "    )\n",
-    "    .withColumn(\n",
-    "        \"qlt_pc_registros_invalidos\",\n",
-    "        F.when(\n",
-    "            F.col(\"validation_status\") == \"FAILED\",\n",
-    "            F.lit(100.0),\n",
-    "        )\n",
-    "        .otherwise(F.lit(0.0))\n",
-    "        .cast(DoubleType())\n",
-    "    )\n",
-    "    .withColumn(\n",
-    "        \"qlt_dh_validacao\",\n",
-    "        F.current_timestamp(),\n",
-    "    )\n",
-    "    .withColumn(\n",
-    "        \"qlt_tx_mensagem\",\n",
-    "        F.concat(\n",
-    "            F.lit(\n",
-    "                \"Setup validation result for object: \"\n",
-    "            ),\n",
-    "            F.col(\"object_name\"),\n",
-    "            F.lit(\" | \"),\n",
-    "            F.col(\"validation_message\"),\n",
-    "        ),\n",
-    "    )\n",
-    "    .select(\n",
-    "        \"qlt_id_log\",\n",
-    "        \"aud_id_execucao\",\n",
-    "        \"aud_tx_nome_projeto\",\n",
-    "        \"aud_tx_versao_pipeline\",\n",
-    "        \"aud_tx_ambiente\",\n",
-    "        \"aud_tx_nome_notebook\",\n",
-    "        \"aud_tx_nome_camada\",\n",
-    "        \"aud_tx_nome_entidade\",\n",
-    "        \"aud_tx_tabela_destino\",\n",
-    "        \"qlt_tx_nome_regra\",\n",
-    "        \"qlt_tx_descricao_regra\",\n",
-    "        \"qlt_tx_status_validacao\",\n",
-    "        \"qlt_qt_total_registros\",\n",
-    "        \"qlt_qt_registros_invalidos\",\n",
-    "        \"qlt_pc_registros_invalidos\",\n",
-    "        \"qlt_dh_validacao\",\n",
-    "        \"qlt_tx_mensagem\",\n",
-    "    )\n",
-    ")\n",
-    "\n",
-    "setup_quality_log_df.write.mode(\n",
-    "    \"append\"\n",
-    ").saveAsTable(DATA_QUALITY_LOG_TABLE)\n",
-    "\n",
-    "print(\n",
-    "    f\"Setup validation results persisted into: \"\n",
-    "    f\"{DATA_QUALITY_LOG_TABLE}\"\n",
-    ")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 7. Validation Summary\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "failed_count = (\n",
-    "    validation_df\n",
-    "    .filter(\"validation_status = 'FAILED'\")\n",
-    "    .count()\n",
-    ")\n",
-    "\n",
-    "warning_count = (\n",
-    "    validation_df\n",
-    "    .filter(\"validation_status = 'WARNING'\")\n",
-    "    .count()\n",
-    ")\n",
-    "\n",
-    "passed_count = (\n",
-    "    validation_df\n",
-    "    .filter(\"validation_status = 'PASSED'\")\n",
-    "    .count()\n",
-    ")\n",
-    "\n",
-    "print(\"=\" * 90)\n",
-    "print(\"PROJECT SETUP VALIDATION SUMMARY\")\n",
-    "print(\"=\" * 90)\n",
-    "print(f\"Passed validations: {passed_count}\")\n",
-    "print(f\"Warning validations: {warning_count}\")\n",
-    "print(f\"Failed validations: {failed_count}\")\n",
-    "print(\"=\" * 90)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "if failed_count > 0:\n",
-    "\n",
-    "    raise Exception(\n",
-    "        f\"Project setup validation failed with \"\n",
-    "        f\"{failed_count} failed validation(s). \"\n",
-    "        \"Please review the validation output \"\n",
-    "        \"before running the pipeline.\"\n",
-    "    )\n",
-    "\n",
-    "print(\"PROJECT SETUP VALIDATED SUCCESSFULLY\")\n",
-    "\n",
-    "if warning_count > 0:\n",
-    "\n",
-    "    print(\n",
-    "        f\"WARNING: {warning_count} warning(s) found. \"\n",
-    "        \"Please review deprecated schemas or \"\n",
-    "        \"non-blocking setup issues.\"\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## Governance Notes\n",
-    "# MAGIC\n",
-    "# MAGIC This validation notebook confirms that the project setup is aligned with the simplified architecture:\n",
-    "# MAGIC\n",
-    "# MAGIC ```text\n",
-    "# MAGIC Bronze → Silver → Gold → Marts\n",
-    "# MAGIC ```\n",
-    "# MAGIC\n",
-    "# MAGIC Deprecated schemas such as `silver_base` and `silver_curated` are no longer part of the active architecture.\n",
-    "# MAGIC\n",
-    "# MAGIC Setup validation results are persisted into:\n",
-    "# MAGIC\n",
-    "# MAGIC ```text\n",
-    "# MAGIC audit.aud_log_qualidade_dados\n",
-    "# MAGIC ```\n",
-    "# MAGIC\n",
-    "# MAGIC They can be identified by:\n",
-    "# MAGIC\n",
-    "# MAGIC ```text\n",
-    "# MAGIC aud_tx_nome_camada = 'setup'\n",
-    "# MAGIC aud_tx_nome_notebook = '90_validate_project_setup'\n",
-    "# MAGIC aud_tx_nome_entidade = 'project_setup'\n",
-    "# MAGIC ```\n",
-    "# MAGIC\n",
-    "# MAGIC ## Next Step\n",
-    "# MAGIC Execute:\n",
-    "# MAGIC\n",
-    "# MAGIC `92_validate_api_connection`"
-   ]
-  }
- ],
- "metadata": {
-  "application/vnd.databricks.v1+notebook": {
-   "computePreferences": null,
-   "dashboards": [],
-   "environmentMetadata": {
-    "base_environment": "",
-    "environment_version": "5"
-   },
-   "inputWidgetPreferences": null,
-   "language": "python",
-   "notebookMetadata": {
-    "pythonIndentUnit": 4
-   },
-   "notebookName": "90_validate_project_setup",
-   "widgets": {}
-  },
-  "language_info": {
-   "name": "python"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 0
-}
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # Setup Layer — Project Setup Validation
+# MAGIC
+# MAGIC **Notebook:** `90_validate_project_setup`  
+# MAGIC **Layer:** `Setup`  
+# MAGIC **Source/Endpoint:** `Internal Spark Metadata Validation`  
+# MAGIC **Target:** `Setup validation results and audit quality logs`
+# MAGIC
+# MAGIC Validates the catalog, schemas and audit tables required by the
+# MAGIC Brazil Legislative Analytics Medallion project.
+# MAGIC
+# MAGIC This notebook verifies whether the setup structure was successfully
+# MAGIC initialized before executing Bronze, Silver, Gold, Marts or Quality pipelines.
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Responsibilities
+# MAGIC
+# MAGIC - Validate catalog existence
+# MAGIC - Validate required schema availability
+# MAGIC - Validate audit table existence
+# MAGIC - Detect deprecated schema usage
+# MAGIC - Persist setup validation results into audit tables
+# MAGIC - Generate setup validation summary
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Notes
+# MAGIC
+# MAGIC - Validation results are persisted into audit quality logs
+# MAGIC - Supports governance and operational readiness checks
+# MAGIC - Deprecated schemas are monitored for architecture compliance
+# MAGIC - Failed validations block pipeline execution
+# MAGIC
+# MAGIC For additional architectural and governance details, refer to:
+# MAGIC
+# MAGIC - `/docs/architecture/medallion_architecture.md`
+# MAGIC - `/docs/governance/data_governance.md`
+# MAGIC - `/docs/monitoring/observability.md`
+
+# COMMAND ----------
+
+# MAGIC %run ./01_project_config
+
+# COMMAND ----------
+
+from datetime import datetime
+from pyspark.sql import functions as F
+from pyspark.sql.types import LongType, DoubleType
+
+# COMMAND ----------
+
+print("=" * 90)
+print("BRAZIL LEGISLATIVE ANALYTICS MEDALLION")
+print("90 - VALIDATE PROJECT SETUP")
+print("=" * 90)
+print(f"Execution Timestamp: {datetime.now()}")
+print(f"Catalog: {CATALOG_NAME}")
+print("=" * 90)
+
+# COMMAND ----------
+
+# ============================================================
+# EXPECTED STRUCTURES
+# ============================================================
+
+EXPECTED_SCHEMAS = [
+    SCHEMA_AUDIT,
+    SCHEMA_BRONZE,
+    SCHEMA_SILVER,
+    SCHEMA_GOLD,
+    SCHEMA_MARTS,
+]
+
+DEPRECATED_SCHEMAS = [
+    "silver_base",
+    "silver_curated",
+]
+
+EXPECTED_AUDIT_TABLES = [
+    AUD_TB_LOG_EXECUCAO_PIPELINE,
+    AUD_TB_LOG_ERROS_PIPELINE,
+    AUD_TB_LOG_QUALIDADE_DADOS,
+]
+
+DATA_QUALITY_LOG_TABLE = (
+    f"{CATALOG_NAME}."
+    f"{SCHEMA_AUDIT}."
+    f"{AUD_TB_LOG_QUALIDADE_DADOS}"
+)
+
+validation_results = []
+
+# COMMAND ----------
+
+# ============================================================
+# VALIDATION HELPERS
+# ============================================================
+
+def register_validation_result(
+    validation_group: str,
+    object_name: str,
+    validation_status: str,
+    validation_message: str,
+) -> None:
+    """
+    Stores a setup validation result in memory for
+    final reporting and persistence.
+    """
+
+    validation_results.append({
+        "validation_group": validation_group,
+        "object_name": object_name,
+        "validation_status": validation_status,
+        "validation_message": validation_message,
+        "validated_at": datetime.now(),
+    })
+
+# COMMAND ----------
+
+def catalog_exists(
+    catalog_name: str,
+) -> bool:
+    """
+    Checks whether a catalog exists in the current workspace.
+    """
+
+    catalogs_df = spark.sql("SHOW CATALOGS")
+
+    return (
+        catalogs_df
+        .filter(f"catalog = '{catalog_name}'")
+        .count() > 0
+    )
+
+# COMMAND ----------
+
+def schema_exists(
+    catalog_name: str,
+    schema_name: str,
+) -> bool:
+    """
+    Checks whether a schema exists inside a catalog.
+    """
+
+    schemas_df = spark.sql(
+        f"SHOW SCHEMAS IN {catalog_name}"
+    )
+
+    return (
+        schemas_df
+        .filter(f"databaseName = '{schema_name}'")
+        .count() > 0
+    )
+
+# COMMAND ----------
+
+def table_exists(
+    full_table_name: str,
+) -> bool:
+    """
+    Checks whether a fully qualified table exists.
+    """
+
+    return spark.catalog.tableExists(full_table_name)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 1. Validate Catalog
+
+# COMMAND ----------
+
+if catalog_exists(CATALOG_NAME):
+
+    register_validation_result(
+        validation_group="catalog_exists",
+        object_name=CATALOG_NAME,
+        validation_status="PASSED",
+        validation_message="Catalog exists.",
+    )
+
+else:
+
+    register_validation_result(
+        validation_group="catalog_exists",
+        object_name=CATALOG_NAME,
+        validation_status="FAILED",
+        validation_message="Catalog does not exist.",
+    )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 2. Validate Required Schemas
+
+# COMMAND ----------
+
+for schema_name in EXPECTED_SCHEMAS:
+
+    full_schema_name = (
+        f"{CATALOG_NAME}.{schema_name}"
+    )
+
+    if schema_exists(CATALOG_NAME, schema_name):
+
+        register_validation_result(
+            validation_group="schema_exists",
+            object_name=full_schema_name,
+            validation_status="PASSED",
+            validation_message="Required schema exists.",
+        )
+
+    else:
+
+        register_validation_result(
+            validation_group="schema_exists",
+            object_name=full_schema_name,
+            validation_status="FAILED",
+            validation_message="Required schema does not exist.",
+        )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 3. Validate Deprecated Schemas
+
+# COMMAND ----------
+
+for schema_name in DEPRECATED_SCHEMAS:
+
+    full_schema_name = (
+        f"{CATALOG_NAME}.{schema_name}"
+    )
+
+    if schema_exists(CATALOG_NAME, schema_name):
+
+        register_validation_result(
+            validation_group="deprecated_schema_check",
+            object_name=full_schema_name,
+            validation_status="WARNING",
+            validation_message=(
+                "Deprecated schema still exists "
+                "and should not be used by the "
+                "simplified architecture."
+            ),
+        )
+
+    else:
+
+        register_validation_result(
+            validation_group="deprecated_schema_check",
+            object_name=full_schema_name,
+            validation_status="PASSED",
+            validation_message=(
+                "Deprecated schema does not exist "
+                "or is not active."
+            ),
+        )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 4. Validate Audit Tables
+
+# COMMAND ----------
+
+for table_name in EXPECTED_AUDIT_TABLES:
+
+    full_table_name = (
+        f"{CATALOG_NAME}."
+        f"{SCHEMA_AUDIT}."
+        f"{table_name}"
+    )
+
+    if table_exists(full_table_name):
+
+        register_validation_result(
+            validation_group="audit_table_exists",
+            object_name=full_table_name,
+            validation_status="PASSED",
+            validation_message="Required audit table exists.",
+        )
+
+    else:
+
+        register_validation_result(
+            validation_group="audit_table_exists",
+            object_name=full_table_name,
+            validation_status="FAILED",
+            validation_message="Required audit table does not exist.",
+        )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 5. Display Validation Results
+
+# COMMAND ----------
+
+validation_df = spark.createDataFrame(
+    validation_results
+)
+
+display(validation_df)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 6. Persist Setup Validation Results
+
+# COMMAND ----------
+
+# ============================================================
+# PERSIST SETUP VALIDATION RESULTS
+# ============================================================
+
+setup_quality_log_df = (
+    validation_df
+    .withColumn("qlt_id_log", F.expr("uuid()"))
+    .withColumn("aud_id_execucao", F.lit(RUN_ID))
+    .withColumn("aud_tx_nome_projeto", F.lit(PROJECT_NAME))
+    .withColumn("aud_tx_versao_pipeline", F.lit(PROJECT_VERSION))
+    .withColumn("aud_tx_ambiente", F.lit(PROJECT_ENVIRONMENT))
+    .withColumn(
+        "aud_tx_nome_notebook",
+        F.lit("90_validate_project_setup"),
+    )
+    .withColumn(
+        "aud_tx_nome_camada",
+        F.lit("setup"),
+    )
+    .withColumn(
+        "aud_tx_nome_entidade",
+        F.lit("project_setup"),
+    )
+    .withColumn(
+        "aud_tx_tabela_destino",
+        F.lit(DATA_QUALITY_LOG_TABLE),
+    )
+    .withColumn(
+        "qlt_tx_nome_regra",
+        F.col("validation_group"),
+    )
+    .withColumn(
+        "qlt_tx_descricao_regra",
+        F.col("validation_message"),
+    )
+    .withColumn(
+        "qlt_tx_status_validacao",
+        F.col("validation_status"),
+    )
+    .withColumn(
+        "qlt_qt_total_registros",
+        F.lit(1).cast(LongType()),
+    )
+    .withColumn(
+        "qlt_qt_registros_invalidos",
+        F.when(
+            F.col("validation_status") == "FAILED",
+            F.lit(1),
+        )
+        .otherwise(F.lit(0))
+        .cast(LongType())
+    )
+    .withColumn(
+        "qlt_pc_registros_invalidos",
+        F.when(
+            F.col("validation_status") == "FAILED",
+            F.lit(100.0),
+        )
+        .otherwise(F.lit(0.0))
+        .cast(DoubleType())
+    )
+    .withColumn(
+        "qlt_dh_validacao",
+        F.current_timestamp(),
+    )
+    .withColumn(
+        "qlt_tx_mensagem",
+        F.concat(
+            F.lit(
+                "Setup validation result for object: "
+            ),
+            F.col("object_name"),
+            F.lit(" | "),
+            F.col("validation_message"),
+        ),
+    )
+    .select(
+        "qlt_id_log",
+        "aud_id_execucao",
+        "aud_tx_nome_projeto",
+        "aud_tx_versao_pipeline",
+        "aud_tx_ambiente",
+        "aud_tx_nome_notebook",
+        "aud_tx_nome_camada",
+        "aud_tx_nome_entidade",
+        "aud_tx_tabela_destino",
+        "qlt_tx_nome_regra",
+        "qlt_tx_descricao_regra",
+        "qlt_tx_status_validacao",
+        "qlt_qt_total_registros",
+        "qlt_qt_registros_invalidos",
+        "qlt_pc_registros_invalidos",
+        "qlt_dh_validacao",
+        "qlt_tx_mensagem",
+    )
+)
+
+setup_quality_log_df.write.mode(
+    "append"
+).saveAsTable(DATA_QUALITY_LOG_TABLE)
+
+print(
+    f"Setup validation results persisted into: "
+    f"{DATA_QUALITY_LOG_TABLE}"
+)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 7. Validation Summary
+
+# COMMAND ----------
+
+failed_count = (
+    validation_df
+    .filter("validation_status = 'FAILED'")
+    .count()
+)
+
+warning_count = (
+    validation_df
+    .filter("validation_status = 'WARNING'")
+    .count()
+)
+
+passed_count = (
+    validation_df
+    .filter("validation_status = 'PASSED'")
+    .count()
+)
+
+print("=" * 90)
+print("PROJECT SETUP VALIDATION SUMMARY")
+print("=" * 90)
+print(f"Passed validations: {passed_count}")
+print(f"Warning validations: {warning_count}")
+print(f"Failed validations: {failed_count}")
+print("=" * 90)
+
+# COMMAND ----------
+
+if failed_count > 0:
+
+    raise Exception(
+        f"Project setup validation failed with "
+        f"{failed_count} failed validation(s). "
+        "Please review the validation output "
+        "before running the pipeline."
+    )
+
+print("PROJECT SETUP VALIDATED SUCCESSFULLY")
+
+if warning_count > 0:
+
+    print(
+        f"WARNING: {warning_count} warning(s) found. "
+        "Please review deprecated schemas or "
+        "non-blocking setup issues."
+    )
+

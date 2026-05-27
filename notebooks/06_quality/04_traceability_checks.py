@@ -1,1635 +1,590 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "4fd1c739-c253-45ae-b3a2-a8446dd009cf",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "UTILS CONFIG LOADED SUCCESSFULLY\nPROJECT_NAME: brazil_legislative_analytics\nPROJECT_VERSION: v1.0.0\nPROJECT_ENVIRONMENT: dev\nCATALOG_NAME: brazil_legislative_analytics\nRUN_ID: 41894d08-8487-4f3a-acbf-a2f23e932909\n"
-     ]
-    }
-   ],
-   "source": [
-    "%run ../99_utils/utils_config"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "373d90d3-a33b-4c1b-94a2-db74ee3bbd6f",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "UTILS CONFIG LOADED SUCCESSFULLY\nPROJECT_NAME: brazil_legislative_analytics\nPROJECT_VERSION: v1.0.0\nPROJECT_ENVIRONMENT: dev\nCATALOG_NAME: brazil_legislative_analytics\nRUN_ID: 360d896d-cabf-4413-9cf7-901ec10837b1\n"
-     ]
-    }
-   ],
-   "source": [
-    "%run ../99_utils/utils_quality"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "0cedb5ea-42c4-4ef5-85af-83fee7c65f41",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "==========================================================================================\nBRAZIL LEGISLATIVE ANALYTICS MEDALLION\n04 - TRACEABILITY CHECKS\n==========================================================================================\nExecution Timestamp: 2026-05-20 03:21:06.746294\nCatalog: brazil_legislative_analytics\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.bronze.br_deputados\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.bronze.br_frentes\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.bronze.br_frentes_membros\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.bronze.br_frentes_detalhes\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.bronze.br_eventos\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.bronze.br_votacoes\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.bronze.br_votos\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.bronze.br_despesas_ceap\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.bronze.br_cpis\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.bronze.br_cpi_eventos\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.bronze.br_proposicoes\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.silver.slv_deputados\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.silver.slv_partidos\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.silver.slv_estados\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.silver.slv_frentes\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.silver.slv_frentes_membros\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.silver.slv_eventos\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.silver.slv_votacoes\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.silver.slv_votos\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.silver.slv_despesas_ceap\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.silver.slv_fornecedores\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.silver.slv_cpis\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.silver.slv_cpi_eventos\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.silver.slv_proposicoes\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.dm_deputado\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.dm_partido\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.dm_estado\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.dm_data\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.dm_orgao\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.dm_tipo_evento\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.dm_evento\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.dm_votacao\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.dm_tipo_votacao\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.dm_frente\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.dm_fornecedor\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.dm_cpi\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.ft_frentes_membros\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.ft_eventos_presencas\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.ft_resultados_votacoes\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.ft_despesas_ceap\n==========================================================================================\n==========================================================================================\nRunning traceability checks for: brazil_legislative_analytics.gold.ft_cpi_eventos\n==========================================================================================\nTraceability quality results persisted into: brazil_legislative_analytics.audit.aud_log_qualidade_dados\n"
-     ]
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # Quality Layer — Traceability Checks
+# MAGIC
+# MAGIC **Notebook:** `04_traceability_checks`  
+# MAGIC **Layer:** `Quality`  
+# MAGIC **Source/Endpoint:** `Bronze, Silver and Gold Delta Tables`  
+# MAGIC **Target:** `Traceability validation results and audit logs`
+# MAGIC
+# MAGIC Executes cross-layer traceability validations for the
+# MAGIC Brazil Legislative Analytics Medallion project.
+# MAGIC
+# MAGIC This notebook validates whether pipeline traceability fields are
+# MAGIC consistently available and populated across Bronze, Silver and Gold layers.
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Responsibilities
+# MAGIC
+# MAGIC - Validate table existence across Medallion layers
+# MAGIC - Validate required traceability columns
+# MAGIC - Validate execution identifier availability
+# MAGIC - Validate pipeline version availability
+# MAGIC - Validate processing timestamp availability
+# MAGIC - Validate critical traceability column population
+# MAGIC - Persist traceability validation results into audit tables
+# MAGIC - Generate traceability validation summary
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Notes
+# MAGIC
+# MAGIC - Validation results are persisted into audit quality logs
+# MAGIC - Supports cross-layer governance and lineage validation
+# MAGIC - Failed validations may not block execution during early development
+# MAGIC - Pipeline blocking behavior is controlled by `FAIL_ON_ERROR`
+# MAGIC
+# MAGIC For additional architectural and governance details, refer to:
+# MAGIC
+# MAGIC - `/docs/governance/data_lineage.md`
+# MAGIC - `/docs/governance/data_quality_rules.md`
+# MAGIC - `/docs/monitoring/quality_monitoring.md`
+
+# COMMAND ----------
+
+# MAGIC %run ../99_utils/utils_config
+
+# COMMAND ----------
+
+# MAGIC %run ../99_utils/utils_quality
+
+# COMMAND ----------
+
+from datetime import datetime
+from pyspark.sql import DataFrame
+from pyspark.sql import functions as F
+
+# COMMAND ----------
+
+print("=" * 90)
+print("BRAZIL LEGISLATIVE ANALYTICS MEDALLION")
+print("04 - TRACEABILITY CHECKS")
+print("=" * 90)
+print(f"Execution Timestamp: {datetime.now()}")
+print(f"Catalog: {CATALOG_NAME}")
+print("=" * 90)
+
+# COMMAND ----------
+
+# ============================================================
+# QUALITY CONFIGURATION
+# ============================================================
+
+NOTEBOOK_NAME = "04_traceability_checks"
+LAYER_NAME = "quality"
+
+# During early development, some tables may not exist yet.
+# Set to True when all layers are active and traceability checks
+# must block the pipeline.
+FAIL_ON_ERROR = False
+
+DATA_QUALITY_LOG_TABLE = (
+    f"{CATALOG_NAME}."
+    f"{SCHEMA_AUDIT}."
+    f"{AUD_TB_LOG_QUALIDADE_DADOS}"
+)
+
+TRACEABILITY_RULES = {
+    "bronze": {
+        "schema_name": SCHEMA_BRONZE,
+        "tables": BRONZE_TABLES,
+        "required_columns": [
+            "aud_id_execucao",
+            "aud_dh_ingestao",
+            "aud_tx_endpoint_origem",
+            "aud_tx_sistema_origem",
+            "aud_tx_versao_pipeline",
+            "aud_tx_hash_registro",
+        ],
+        "critical_columns": [
+            "aud_id_execucao",
+            "aud_dh_ingestao",
+            "aud_tx_endpoint_origem",
+            "aud_tx_hash_registro",
+        ],
     },
-    {
-     "output_type": "display_data",
-     "data": {
-      "text/html": [
-       "<style scoped>\n",
-       "  .table-result-container {\n",
-       "    max-height: 300px;\n",
-       "    overflow: auto;\n",
-       "  }\n",
-       "  table, th, td {\n",
-       "    border: 1px solid black;\n",
-       "    border-collapse: collapse;\n",
-       "  }\n",
-       "  th, td {\n",
-       "    padding: 5px;\n",
-       "  }\n",
-       "  th {\n",
-       "    text-align: left;\n",
-       "  }\n",
-       "</style><div class='table-result-container'><table class='table-result'><thead style='background-color: white'><tr><th>qlt_id_log</th><th>aud_id_execucao</th><th>aud_tx_nome_projeto</th><th>aud_tx_versao_pipeline</th><th>aud_tx_ambiente</th><th>aud_tx_nome_notebook</th><th>aud_tx_nome_camada</th><th>aud_tx_nome_entidade</th><th>aud_tx_tabela_destino</th><th>qlt_tx_nome_regra</th><th>qlt_tx_descricao_regra</th><th>qlt_tx_status_validacao</th><th>qlt_qt_total_registros</th><th>qlt_qt_registros_invalidos</th><th>qlt_pc_registros_invalidos</th><th>qlt_dh_validacao</th><th>qlt_tx_mensagem</th></tr></thead><tbody><tr><td>2ea4f056-307f-47e2-80ae-625e23dd276f</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>bronze.deputados</td><td>brazil_legislative_analytics.bronze.br_deputados</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>d23666e5-1c62-49b5-9124-bf29a305c35e</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>bronze.frentes</td><td>brazil_legislative_analytics.bronze.br_frentes</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>d8c0f48e-9c3e-4fbc-96f8-8c72195a076d</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>bronze.frentes_membros</td><td>brazil_legislative_analytics.bronze.br_frentes_membros</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>802dc317-4609-48b8-8910-cae0df7cc028</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>bronze.frentes_detalhes</td><td>brazil_legislative_analytics.bronze.br_frentes_detalhes</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>567bdfb7-8688-47dc-b34b-e955ad46c171</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>bronze.eventos</td><td>brazil_legislative_analytics.bronze.br_eventos</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>b4ccf78d-e230-41c6-aa8b-87f345edbef2</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>bronze.votacoes</td><td>brazil_legislative_analytics.bronze.br_votacoes</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>0f518260-808f-4e05-b838-01fae9060359</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>bronze.votos</td><td>brazil_legislative_analytics.bronze.br_votos</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>8621a519-385b-48e3-9613-203b1696ed35</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>bronze.despesas_ceap</td><td>brazil_legislative_analytics.bronze.br_despesas_ceap</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>1ac2fd77-93ef-4db3-9293-4655761a2613</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>bronze.cpis</td><td>brazil_legislative_analytics.bronze.br_cpis</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>64dca1a1-df2d-48d5-aa39-b4058cca60e0</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>bronze.cpi_eventos</td><td>brazil_legislative_analytics.bronze.br_cpi_eventos</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>fa150484-d956-478c-8ea7-77d4dc204549</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>bronze.proposicoes</td><td>brazil_legislative_analytics.bronze.br_proposicoes</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>22319250-b662-4cb3-8dca-10bd56b9b5d0</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>silver.deputados</td><td>brazil_legislative_analytics.silver.slv_deputados</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>38b8d986-dbe1-455c-9bce-23a96db62d6c</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>silver.partidos</td><td>brazil_legislative_analytics.silver.slv_partidos</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>40102570-420a-49b0-af87-998f0e1d7698</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>silver.estados</td><td>brazil_legislative_analytics.silver.slv_estados</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>6b9ec7d0-7e6c-4de6-a43c-47c7ab2074e8</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>silver.frentes</td><td>brazil_legislative_analytics.silver.slv_frentes</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>4ca1598a-bfb2-4645-92d0-d775a6df189c</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>silver.frentes_membros</td><td>brazil_legislative_analytics.silver.slv_frentes_membros</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>729955b3-8580-42b5-8c19-b9d4a64c4df0</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>silver.eventos</td><td>brazil_legislative_analytics.silver.slv_eventos</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>17bf5720-a1b6-482e-8c9c-767358fa2037</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>silver.votacoes</td><td>brazil_legislative_analytics.silver.slv_votacoes</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>56c17417-877d-439b-a31a-cf87e17ff177</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>silver.votos</td><td>brazil_legislative_analytics.silver.slv_votos</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>6b7ae585-2bb9-4802-bfaa-416b6673a7ce</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>silver.despesas_ceap</td><td>brazil_legislative_analytics.silver.slv_despesas_ceap</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>46975409-3d89-4ac5-a1fd-97656dd3eaa0</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>silver.fornecedores</td><td>brazil_legislative_analytics.silver.slv_fornecedores</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>2093d9bf-08ce-4496-91b9-6dcb3c46a659</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>silver.cpis</td><td>brazil_legislative_analytics.silver.slv_cpis</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>363f659a-e5b2-48c5-be23-d25374cdc999</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>silver.cpi_eventos</td><td>brazil_legislative_analytics.silver.slv_cpi_eventos</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>7933fc0f-f0ae-495f-af76-be73f3d6ede7</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>silver.proposicoes</td><td>brazil_legislative_analytics.silver.slv_proposicoes</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>b8f87494-3013-4b61-84d8-aa67058d58aa</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.deputado</td><td>brazil_legislative_analytics.gold.dm_deputado</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>0a86725b-320e-46a9-bff2-b9904f82b932</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.partido</td><td>brazil_legislative_analytics.gold.dm_partido</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>e2bef3ea-cf49-43d5-9c98-54513ab1c362</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.estado</td><td>brazil_legislative_analytics.gold.dm_estado</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>7f62f5e3-3b52-4a1a-ade5-c3ccdf15e4d6</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.data</td><td>brazil_legislative_analytics.gold.dm_data</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>860b0255-f367-4251-bf8a-43fdcdf93859</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.orgao</td><td>brazil_legislative_analytics.gold.dm_orgao</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>07b2583a-86ce-4032-90db-e33472b798b2</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.tipo_evento</td><td>brazil_legislative_analytics.gold.dm_tipo_evento</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>058ced10-7ef2-4166-89ad-9f31d54a6c46</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.evento</td><td>brazil_legislative_analytics.gold.dm_evento</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>af5d15ec-e0ce-473e-982e-62a6ce9f106b</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.votacao</td><td>brazil_legislative_analytics.gold.dm_votacao</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>37c67180-6a03-4f93-89f9-387ca02b0bbc</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.tipo_votacao</td><td>brazil_legislative_analytics.gold.dm_tipo_votacao</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>a6dee70e-216c-493b-910d-03d3649ace58</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.frente</td><td>brazil_legislative_analytics.gold.dm_frente</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>57dcdf3d-def3-4208-9d26-5b95ad0097e2</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.fornecedor</td><td>brazil_legislative_analytics.gold.dm_fornecedor</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>b0849f74-a466-4ed5-9c52-cf79a6a49baf</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.cpi</td><td>brazil_legislative_analytics.gold.dm_cpi</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>bd5eb104-da02-452d-b6b0-69f0c68cd964</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.frentes_membros</td><td>brazil_legislative_analytics.gold.ft_frentes_membros</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>29065d1d-f28a-4f12-af0b-ef3190b8ada6</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.eventos_presencas</td><td>brazil_legislative_analytics.gold.ft_eventos_presencas</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>e146a67f-7128-49ac-bc58-90857ce13444</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.resultados_votacoes</td><td>brazil_legislative_analytics.gold.ft_resultados_votacoes</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>21ead6c5-a7e0-4e5b-ab9b-1258563c241b</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.despesas_ceap</td><td>brazil_legislative_analytics.gold.ft_despesas_ceap</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr><tr><td>3378e893-43ef-41af-9223-598d9ef000bb</td><td>360d896d-cabf-4413-9cf7-901ec10837b1</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>04_traceability_checks</td><td>quality</td><td>gold.cpi_eventos</td><td>brazil_legislative_analytics.gold.ft_cpi_eventos</td><td>traceability_table_exists</td><td>Validates whether the table exists for traceability checks.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:21:15.083Z</td><td>Table does not exist.</td></tr></tbody></table></div>"
-      ]
-     },
-     "metadata": {
-      "application/vnd.databricks.v1+output": {
-       "addedWidgets": {},
-       "aggData": [],
-       "aggError": "",
-       "aggOverflow": false,
-       "aggSchema": [],
-       "aggSeriesLimitReached": false,
-       "aggType": "",
-       "arguments": {},
-       "columnCustomDisplayInfos": {},
-       "data": [
-        [
-         "2ea4f056-307f-47e2-80ae-625e23dd276f",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "bronze.deputados",
-         "brazil_legislative_analytics.bronze.br_deputados",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
+    "silver": {
+        "schema_name": SCHEMA_SILVER,
+        "tables": SILVER_TABLES,
+        "required_columns": [
+            "aud_id_execucao",
+            "aud_dh_processamento",
+            "aud_tx_versao_pipeline",
+            "aud_tx_hash_registro",
         ],
-        [
-         "d23666e5-1c62-49b5-9124-bf29a305c35e",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "bronze.frentes",
-         "brazil_legislative_analytics.bronze.br_frentes",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
+        "critical_columns": [
+            "aud_id_execucao",
+            "aud_dh_processamento",
+            "aud_tx_hash_registro",
         ],
-        [
-         "d8c0f48e-9c3e-4fbc-96f8-8c72195a076d",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "bronze.frentes_membros",
-         "brazil_legislative_analytics.bronze.br_frentes_membros",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "802dc317-4609-48b8-8910-cae0df7cc028",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "bronze.frentes_detalhes",
-         "brazil_legislative_analytics.bronze.br_frentes_detalhes",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "567bdfb7-8688-47dc-b34b-e955ad46c171",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "bronze.eventos",
-         "brazil_legislative_analytics.bronze.br_eventos",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "b4ccf78d-e230-41c6-aa8b-87f345edbef2",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "bronze.votacoes",
-         "brazil_legislative_analytics.bronze.br_votacoes",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "0f518260-808f-4e05-b838-01fae9060359",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "bronze.votos",
-         "brazil_legislative_analytics.bronze.br_votos",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "8621a519-385b-48e3-9613-203b1696ed35",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "bronze.despesas_ceap",
-         "brazil_legislative_analytics.bronze.br_despesas_ceap",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "1ac2fd77-93ef-4db3-9293-4655761a2613",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "bronze.cpis",
-         "brazil_legislative_analytics.bronze.br_cpis",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "64dca1a1-df2d-48d5-aa39-b4058cca60e0",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "bronze.cpi_eventos",
-         "brazil_legislative_analytics.bronze.br_cpi_eventos",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "fa150484-d956-478c-8ea7-77d4dc204549",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "bronze.proposicoes",
-         "brazil_legislative_analytics.bronze.br_proposicoes",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "22319250-b662-4cb3-8dca-10bd56b9b5d0",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "silver.deputados",
-         "brazil_legislative_analytics.silver.slv_deputados",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "38b8d986-dbe1-455c-9bce-23a96db62d6c",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "silver.partidos",
-         "brazil_legislative_analytics.silver.slv_partidos",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "40102570-420a-49b0-af87-998f0e1d7698",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "silver.estados",
-         "brazil_legislative_analytics.silver.slv_estados",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "6b9ec7d0-7e6c-4de6-a43c-47c7ab2074e8",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "silver.frentes",
-         "brazil_legislative_analytics.silver.slv_frentes",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "4ca1598a-bfb2-4645-92d0-d775a6df189c",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "silver.frentes_membros",
-         "brazil_legislative_analytics.silver.slv_frentes_membros",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "729955b3-8580-42b5-8c19-b9d4a64c4df0",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "silver.eventos",
-         "brazil_legislative_analytics.silver.slv_eventos",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "17bf5720-a1b6-482e-8c9c-767358fa2037",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "silver.votacoes",
-         "brazil_legislative_analytics.silver.slv_votacoes",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "56c17417-877d-439b-a31a-cf87e17ff177",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "silver.votos",
-         "brazil_legislative_analytics.silver.slv_votos",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "6b7ae585-2bb9-4802-bfaa-416b6673a7ce",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "silver.despesas_ceap",
-         "brazil_legislative_analytics.silver.slv_despesas_ceap",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "46975409-3d89-4ac5-a1fd-97656dd3eaa0",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "silver.fornecedores",
-         "brazil_legislative_analytics.silver.slv_fornecedores",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "2093d9bf-08ce-4496-91b9-6dcb3c46a659",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "silver.cpis",
-         "brazil_legislative_analytics.silver.slv_cpis",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "363f659a-e5b2-48c5-be23-d25374cdc999",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "silver.cpi_eventos",
-         "brazil_legislative_analytics.silver.slv_cpi_eventos",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "7933fc0f-f0ae-495f-af76-be73f3d6ede7",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "silver.proposicoes",
-         "brazil_legislative_analytics.silver.slv_proposicoes",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "b8f87494-3013-4b61-84d8-aa67058d58aa",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.deputado",
-         "brazil_legislative_analytics.gold.dm_deputado",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "0a86725b-320e-46a9-bff2-b9904f82b932",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.partido",
-         "brazil_legislative_analytics.gold.dm_partido",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "e2bef3ea-cf49-43d5-9c98-54513ab1c362",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.estado",
-         "brazil_legislative_analytics.gold.dm_estado",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "7f62f5e3-3b52-4a1a-ade5-c3ccdf15e4d6",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.data",
-         "brazil_legislative_analytics.gold.dm_data",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "860b0255-f367-4251-bf8a-43fdcdf93859",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.orgao",
-         "brazil_legislative_analytics.gold.dm_orgao",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "07b2583a-86ce-4032-90db-e33472b798b2",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.tipo_evento",
-         "brazil_legislative_analytics.gold.dm_tipo_evento",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "058ced10-7ef2-4166-89ad-9f31d54a6c46",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.evento",
-         "brazil_legislative_analytics.gold.dm_evento",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "af5d15ec-e0ce-473e-982e-62a6ce9f106b",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.votacao",
-         "brazil_legislative_analytics.gold.dm_votacao",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "37c67180-6a03-4f93-89f9-387ca02b0bbc",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.tipo_votacao",
-         "brazil_legislative_analytics.gold.dm_tipo_votacao",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "a6dee70e-216c-493b-910d-03d3649ace58",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.frente",
-         "brazil_legislative_analytics.gold.dm_frente",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "57dcdf3d-def3-4208-9d26-5b95ad0097e2",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.fornecedor",
-         "brazil_legislative_analytics.gold.dm_fornecedor",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "b0849f74-a466-4ed5-9c52-cf79a6a49baf",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.cpi",
-         "brazil_legislative_analytics.gold.dm_cpi",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "bd5eb104-da02-452d-b6b0-69f0c68cd964",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.frentes_membros",
-         "brazil_legislative_analytics.gold.ft_frentes_membros",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "29065d1d-f28a-4f12-af0b-ef3190b8ada6",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.eventos_presencas",
-         "brazil_legislative_analytics.gold.ft_eventos_presencas",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "e146a67f-7128-49ac-bc58-90857ce13444",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.resultados_votacoes",
-         "brazil_legislative_analytics.gold.ft_resultados_votacoes",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "21ead6c5-a7e0-4e5b-ab9b-1258563c241b",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.despesas_ceap",
-         "brazil_legislative_analytics.gold.ft_despesas_ceap",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ],
-        [
-         "3378e893-43ef-41af-9223-598d9ef000bb",
-         "360d896d-cabf-4413-9cf7-901ec10837b1",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "04_traceability_checks",
-         "quality",
-         "gold.cpi_eventos",
-         "brazil_legislative_analytics.gold.ft_cpi_eventos",
-         "traceability_table_exists",
-         "Validates whether the table exists for traceability checks.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:21:15.083Z",
-         "Table does not exist."
-        ]
-       ],
-       "datasetInfos": [],
-       "dbfsResultPath": null,
-       "isJsonSchema": true,
-       "metadata": {},
-       "overflow": false,
-       "plotOptions": {
-        "customPlotOptions": {},
-        "displayType": "table",
-        "pivotAggregation": null,
-        "pivotColumns": null,
-        "xColumns": null,
-        "yColumns": null
-       },
-       "removedWidgets": [],
-       "schema": [
-        {
-         "metadata": "{}",
-         "name": "qlt_id_log",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_id_execucao",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_nome_projeto",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_versao_pipeline",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_ambiente",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_nome_notebook",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_nome_camada",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_nome_entidade",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_tabela_destino",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_tx_nome_regra",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_tx_descricao_regra",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_tx_status_validacao",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_qt_total_registros",
-         "type": "\"long\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_qt_registros_invalidos",
-         "type": "\"long\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_pc_registros_invalidos",
-         "type": "\"double\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_dh_validacao",
-         "type": "\"timestamp\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_tx_mensagem",
-         "type": "\"string\""
-        }
-       ],
-       "type": "table"
-      }
-     },
-     "output_type": "display_data"
     },
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "==========================================================================================\nTRACEABILITY QUALITY SUMMARY\n==========================================================================================\nPassed validations: 0\nWarning validations: 0\nFailed validations: 41\n==========================================================================================\nWARNING: Traceability validation finished with 41 failed validation(s). This is expected if some pipeline tables have not been created yet.\nTRACEABILITY CHECKS COMPLETED\n"
-     ]
+    "gold": {
+        "schema_name": SCHEMA_GOLD,
+        "tables": {
+            **GOLD_DIMENSION_TABLES,
+            **GOLD_FACT_TABLES,
+        },
+        "required_columns": [
+            "aud_id_execucao",
+            "aud_dh_processamento",
+            "aud_tx_versao_pipeline",
+        ],
+        "critical_columns": [
+            "aud_id_execucao",
+            "aud_dh_processamento",
+        ],
     },
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_quality loaded successfully.\n"
-     ]
-    }
-   ],
-   "source": [
-    "# Databricks notebook source\n",
-    "# MAGIC %md\n",
-    "# MAGIC # 04 Quality — Traceability Checks\n",
-    "# MAGIC\n",
-    "# MAGIC Executes cross-layer traceability validations for the Brazil Legislative Analytics Medallion project.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Purpose\n",
-    "# MAGIC This notebook validates whether pipeline traceability fields are consistently available across Bronze, Silver and Gold layers.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Scope\n",
-    "# MAGIC Traceability checks focus on:\n",
-    "# MAGIC - table existence by layer\n",
-    "# MAGIC - required traceability column availability\n",
-    "# MAGIC - execution identifier availability\n",
-    "# MAGIC - pipeline version availability\n",
-    "# MAGIC - processing timestamp availability\n",
-    "# MAGIC - record hash availability when applicable\n",
-    "# MAGIC - controlled exception handling per entity\n",
-    "# MAGIC\n",
-    "# MAGIC ## Persistence\n",
-    "# MAGIC Validation results are persisted into:\n",
-    "# MAGIC\n",
-    "# MAGIC ```text\n",
-    "# MAGIC audit.aud_log_qualidade_dados\n",
-    "# MAGIC ```\n",
-    "# MAGIC\n",
-    "# MAGIC ## Execution Policy\n",
-    "# MAGIC During early development, some pipeline tables may not exist yet.\n",
-    "# MAGIC In this case, validations are persisted as evidence, but the notebook does not block execution.\n",
-    "# MAGIC\n",
-    "# MAGIC Set `FAIL_ON_ERROR = True` when all layers are active and traceability checks must block the pipeline.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Documentation Standard\n",
-    "# MAGIC - Python functions and variables are written in English.\n",
-    "# MAGIC - Table and field names follow Portuguese mnemonic standards.\n",
-    "# MAGIC - Comments and documentation are written in English.\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ../99_utils/utils_config\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ../99_utils/utils_quality\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "from datetime import datetime\n",
-    "from pyspark.sql import DataFrame\n",
-    "from pyspark.sql import functions as F\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "print(\"=\" * 90)\n",
-    "print(\"BRAZIL LEGISLATIVE ANALYTICS MEDALLION\")\n",
-    "print(\"04 - TRACEABILITY CHECKS\")\n",
-    "print(\"=\" * 90)\n",
-    "print(f\"Execution Timestamp: {datetime.now()}\")\n",
-    "print(f\"Catalog: {CATALOG_NAME}\")\n",
-    "print(\"=\" * 90)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# QUALITY CONFIGURATION\n",
-    "# ============================================================\n",
-    "\n",
-    "NOTEBOOK_NAME = \"04_traceability_checks\"\n",
-    "LAYER_NAME = \"quality\"\n",
-    "\n",
-    "# During early development, some tables may not exist yet.\n",
-    "# Set to True when all layers are active and traceability checks\n",
-    "# must block the pipeline.\n",
-    "FAIL_ON_ERROR = False\n",
-    "\n",
-    "DATA_QUALITY_LOG_TABLE = (\n",
-    "    f\"{CATALOG_NAME}.\"\n",
-    "    f\"{SCHEMA_AUDIT}.\"\n",
-    "    f\"{AUD_TB_LOG_QUALIDADE_DADOS}\"\n",
-    ")\n",
-    "\n",
-    "TRACEABILITY_RULES = {\n",
-    "    \"bronze\": {\n",
-    "        \"schema_name\": SCHEMA_BRONZE,\n",
-    "        \"tables\": BRONZE_TABLES,\n",
-    "        \"required_columns\": [\n",
-    "            \"aud_id_execucao\",\n",
-    "            \"aud_dh_ingestao\",\n",
-    "            \"aud_tx_endpoint_origem\",\n",
-    "            \"aud_tx_sistema_origem\",\n",
-    "            \"aud_tx_versao_pipeline\",\n",
-    "            \"aud_tx_hash_registro\",\n",
-    "        ],\n",
-    "        \"critical_columns\": [\n",
-    "            \"aud_id_execucao\",\n",
-    "            \"aud_dh_ingestao\",\n",
-    "            \"aud_tx_endpoint_origem\",\n",
-    "            \"aud_tx_hash_registro\",\n",
-    "        ],\n",
-    "    },\n",
-    "    \"silver\": {\n",
-    "        \"schema_name\": SCHEMA_SILVER,\n",
-    "        \"tables\": SILVER_TABLES,\n",
-    "        \"required_columns\": [\n",
-    "            \"aud_id_execucao\",\n",
-    "            \"aud_dh_processamento\",\n",
-    "            \"aud_tx_versao_pipeline\",\n",
-    "            \"aud_tx_hash_registro\",\n",
-    "        ],\n",
-    "        \"critical_columns\": [\n",
-    "            \"aud_id_execucao\",\n",
-    "            \"aud_dh_processamento\",\n",
-    "            \"aud_tx_hash_registro\",\n",
-    "        ],\n",
-    "    },\n",
-    "    \"gold\": {\n",
-    "        \"schema_name\": SCHEMA_GOLD,\n",
-    "        \"tables\": {\n",
-    "            **GOLD_DIMENSION_TABLES,\n",
-    "            **GOLD_FACT_TABLES,\n",
-    "        },\n",
-    "        \"required_columns\": [\n",
-    "            \"aud_id_execucao\",\n",
-    "            \"aud_dh_processamento\",\n",
-    "            \"aud_tx_versao_pipeline\",\n",
-    "        ],\n",
-    "        \"critical_columns\": [\n",
-    "            \"aud_id_execucao\",\n",
-    "            \"aud_dh_processamento\",\n",
-    "        ],\n",
-    "    },\n",
-    "}\n",
-    "\n",
-    "quality_results = []\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# QUALITY HELPERS\n",
-    "# ============================================================\n",
-    "\n",
-    "def add_quality_result(\n",
-    "    rule_name: str,\n",
-    "    rule_description: str,\n",
-    "    validation_status: str,\n",
-    "    total_records: int,\n",
-    "    invalid_records: int,\n",
-    "    invalid_percentage: float,\n",
-    "    message: str,\n",
-    "    entity_name: str,\n",
-    "    target_table: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Adds a quality validation result to the in-memory result list.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    quality_results.append({\n",
-    "        \"nome_regra\": rule_name,\n",
-    "        \"descricao_regra\": rule_description,\n",
-    "        \"status_validacao\": validation_status,\n",
-    "        \"total_registros\": int(total_records) if total_records is not None else 0,\n",
-    "        \"registros_invalidos\": int(invalid_records) if invalid_records is not None else 0,\n",
-    "        \"percentual_invalidos\": float(invalid_percentage) if invalid_percentage is not None else 0.0,\n",
-    "        \"mensagem\": message,\n",
-    "        \"entity_name\": entity_name,\n",
-    "        \"target_table\": target_table,\n",
-    "    })\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def add_exception_result(\n",
-    "    entity_name: str,\n",
-    "    target_table: str,\n",
-    "    error: Exception,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Adds a controlled exception result to the quality result list.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=\"traceability_quality_exception\",\n",
-    "        rule_description=\"Captures unexpected errors during traceability validation.\",\n",
-    "        validation_status=QUALITY_FAILED,\n",
-    "        total_records=1,\n",
-    "        invalid_records=1,\n",
-    "        invalid_percentage=100.0,\n",
-    "        message=f\"Unexpected error during traceability validation: {str(error)}\",\n",
-    "        entity_name=entity_name,\n",
-    "        target_table=target_table,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def table_exists(\n",
-    "    full_table_name: str,\n",
-    ") -> bool:\n",
-    "    \"\"\"\n",
-    "    Checks whether a fully qualified table exists.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    try:\n",
-    "        return spark.catalog.tableExists(full_table_name)\n",
-    "\n",
-    "    except Exception:\n",
-    "        return False\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_table_dataframe(\n",
-    "    full_table_name: str,\n",
-    ") -> DataFrame:\n",
-    "    \"\"\"\n",
-    "    Reads a table into a Spark DataFrame.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return spark.table(full_table_name)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_full_table_name_by_layer(\n",
-    "    schema_name: str,\n",
-    "    table_name: str,\n",
-    ") -> str:\n",
-    "    \"\"\"\n",
-    "    Builds a fully qualified table name for any project layer.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return (\n",
-    "        f\"{CATALOG_NAME}.\"\n",
-    "        f\"{schema_name}.\"\n",
-    "        f\"{table_name}\"\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_table_exists(\n",
-    "    layer_name: str,\n",
-    "    entity_name: str,\n",
-    "    full_table_name: str,\n",
-    ") -> bool:\n",
-    "    \"\"\"\n",
-    "    Validates whether a table exists for traceability checks.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    exists = table_exists(full_table_name)\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=\"traceability_table_exists\",\n",
-    "        rule_description=\"Validates whether the table exists for traceability checks.\",\n",
-    "        validation_status=QUALITY_PASSED if exists else QUALITY_FAILED,\n",
-    "        total_records=1,\n",
-    "        invalid_records=0 if exists else 1,\n",
-    "        invalid_percentage=0.0 if exists else 100.0,\n",
-    "        message=(\n",
-    "            \"Table exists.\"\n",
-    "            if exists\n",
-    "            else \"Table does not exist.\"\n",
-    "        ),\n",
-    "        entity_name=f\"{layer_name}.{entity_name}\",\n",
-    "        target_table=full_table_name,\n",
-    "    )\n",
-    "\n",
-    "    return exists\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_required_traceability_columns(\n",
-    "    dataframe: DataFrame,\n",
-    "    layer_name: str,\n",
-    "    entity_name: str,\n",
-    "    full_table_name: str,\n",
-    "    required_columns: list,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Validates required traceability columns for a table.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    result = validate_required_columns(\n",
-    "        dataframe=dataframe,\n",
-    "        required_columns=required_columns,\n",
-    "    )\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=\"traceability_required_columns\",\n",
-    "        rule_description=\"Validates required traceability columns.\",\n",
-    "        validation_status=result[\"status_validacao\"],\n",
-    "        total_records=result[\"total_registros\"],\n",
-    "        invalid_records=result[\"registros_invalidos\"],\n",
-    "        invalid_percentage=result[\"percentual_invalidos\"],\n",
-    "        message=result[\"mensagem\"],\n",
-    "        entity_name=f\"{layer_name}.{entity_name}\",\n",
-    "        target_table=full_table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_column_population(\n",
-    "    dataframe: DataFrame,\n",
-    "    layer_name: str,\n",
-    "    entity_name: str,\n",
-    "    full_table_name: str,\n",
-    "    column_name: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Validates whether a traceability column is populated.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if column_name not in dataframe.columns:\n",
-    "\n",
-    "        add_quality_result(\n",
-    "            rule_name=f\"traceability_population_{column_name}\",\n",
-    "            rule_description=\"Validates whether a traceability column is populated.\",\n",
-    "            validation_status=QUALITY_FAILED,\n",
-    "            total_records=1,\n",
-    "            invalid_records=1,\n",
-    "            invalid_percentage=100.0,\n",
-    "            message=f\"Column does not exist: {column_name}\",\n",
-    "            entity_name=f\"{layer_name}.{entity_name}\",\n",
-    "            target_table=full_table_name,\n",
-    "        )\n",
-    "\n",
-    "        return\n",
-    "\n",
-    "    total_records = dataframe.count()\n",
-    "\n",
-    "    invalid_records = (\n",
-    "        dataframe\n",
-    "        .filter(\n",
-    "            F.col(column_name).isNull()\n",
-    "            | (F.trim(F.col(column_name).cast(\"string\")) == \"\")\n",
-    "        )\n",
-    "        .count()\n",
-    "    )\n",
-    "\n",
-    "    invalid_percentage = (\n",
-    "        0.0 if total_records == 0\n",
-    "        else round((invalid_records / total_records) * 100, 2)\n",
-    "    )\n",
-    "\n",
-    "    validation_status = (\n",
-    "        QUALITY_PASSED\n",
-    "        if invalid_records == 0\n",
-    "        else QUALITY_WARNING\n",
-    "    )\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=f\"traceability_population_{column_name}\",\n",
-    "        rule_description=\"Validates whether a traceability column is populated.\",\n",
-    "        validation_status=validation_status,\n",
-    "        total_records=total_records,\n",
-    "        invalid_records=invalid_records,\n",
-    "        invalid_percentage=invalid_percentage,\n",
-    "        message=f\"Records with missing {column_name}: {invalid_records}\",\n",
-    "        entity_name=f\"{layer_name}.{entity_name}\",\n",
-    "        target_table=full_table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def run_entity_checks(\n",
-    "    layer_name: str,\n",
-    "    schema_name: str,\n",
-    "    entity_name: str,\n",
-    "    table_name: str,\n",
-    "    required_columns: list,\n",
-    "    critical_columns: list,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Executes traceability checks for a single table.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    full_table_name = get_full_table_name_by_layer(\n",
-    "        schema_name=schema_name,\n",
-    "        table_name=table_name,\n",
-    "    )\n",
-    "\n",
-    "    print(\"=\" * 90)\n",
-    "    print(f\"Running traceability checks for: {full_table_name}\")\n",
-    "    print(\"=\" * 90)\n",
-    "\n",
-    "    try:\n",
-    "\n",
-    "        if not validate_table_exists(\n",
-    "            layer_name=layer_name,\n",
-    "            entity_name=entity_name,\n",
-    "            full_table_name=full_table_name,\n",
-    "        ):\n",
-    "            return\n",
-    "\n",
-    "        dataframe = get_table_dataframe(full_table_name)\n",
-    "\n",
-    "        validate_required_traceability_columns(\n",
-    "            dataframe=dataframe,\n",
-    "            layer_name=layer_name,\n",
-    "            entity_name=entity_name,\n",
-    "            full_table_name=full_table_name,\n",
-    "            required_columns=required_columns,\n",
-    "        )\n",
-    "\n",
-    "        for column_name in critical_columns:\n",
-    "\n",
-    "            validate_column_population(\n",
-    "                dataframe=dataframe,\n",
-    "                layer_name=layer_name,\n",
-    "                entity_name=entity_name,\n",
-    "                full_table_name=full_table_name,\n",
-    "                column_name=column_name,\n",
-    "            )\n",
-    "\n",
-    "    except Exception as error:\n",
-    "\n",
-    "        add_exception_result(\n",
-    "            entity_name=f\"{layer_name}.{entity_name}\",\n",
-    "            target_table=full_table_name,\n",
-    "            error=error,\n",
-    "        )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def build_traceability_quality_log() -> DataFrame:\n",
-    "    \"\"\"\n",
-    "    Builds the final traceability quality log DataFrame.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if not quality_results:\n",
-    "\n",
-    "        add_quality_result(\n",
-    "            rule_name=\"traceability_no_results\",\n",
-    "            rule_description=\"Validates whether traceability checks produced results.\",\n",
-    "            validation_status=QUALITY_WARNING,\n",
-    "            total_records=0,\n",
-    "            invalid_records=0,\n",
-    "            invalid_percentage=0.0,\n",
-    "            message=\"No traceability quality results were generated.\",\n",
-    "            entity_name=\"traceability\",\n",
-    "            target_table=DATA_QUALITY_LOG_TABLE,\n",
-    "        )\n",
-    "\n",
-    "    quality_base_df = spark.createDataFrame(\n",
-    "        quality_results\n",
-    "    )\n",
-    "\n",
-    "    return (\n",
-    "        quality_base_df\n",
-    "        .withColumn(\"qlt_id_log\", F.expr(\"uuid()\"))\n",
-    "        .withColumn(\"aud_id_execucao\", F.lit(RUN_ID))\n",
-    "        .withColumn(\"aud_tx_nome_projeto\", F.lit(PROJECT_NAME))\n",
-    "        .withColumn(\"aud_tx_versao_pipeline\", F.lit(PROJECT_VERSION))\n",
-    "        .withColumn(\"aud_tx_ambiente\", F.lit(PROJECT_ENVIRONMENT))\n",
-    "        .withColumn(\"aud_tx_nome_notebook\", F.lit(NOTEBOOK_NAME))\n",
-    "        .withColumn(\"aud_tx_nome_camada\", F.lit(LAYER_NAME))\n",
-    "        .withColumn(\"aud_tx_nome_entidade\", F.col(\"entity_name\"))\n",
-    "        .withColumn(\"aud_tx_tabela_destino\", F.col(\"target_table\"))\n",
-    "        .withColumn(\"qlt_tx_nome_regra\", F.col(\"nome_regra\"))\n",
-    "        .withColumn(\"qlt_tx_descricao_regra\", F.col(\"descricao_regra\"))\n",
-    "        .withColumn(\"qlt_tx_status_validacao\", F.col(\"status_validacao\"))\n",
-    "        .withColumn(\"qlt_qt_total_registros\", F.col(\"total_registros\"))\n",
-    "        .withColumn(\"qlt_qt_registros_invalidos\", F.col(\"registros_invalidos\"))\n",
-    "        .withColumn(\"qlt_pc_registros_invalidos\", F.col(\"percentual_invalidos\"))\n",
-    "        .withColumn(\"qlt_dh_validacao\", F.current_timestamp())\n",
-    "        .withColumn(\"qlt_tx_mensagem\", F.col(\"mensagem\"))\n",
-    "        .select(\n",
-    "            \"qlt_id_log\",\n",
-    "            \"aud_id_execucao\",\n",
-    "            \"aud_tx_nome_projeto\",\n",
-    "            \"aud_tx_versao_pipeline\",\n",
-    "            \"aud_tx_ambiente\",\n",
-    "            \"aud_tx_nome_notebook\",\n",
-    "            \"aud_tx_nome_camada\",\n",
-    "            \"aud_tx_nome_entidade\",\n",
-    "            \"aud_tx_tabela_destino\",\n",
-    "            \"qlt_tx_nome_regra\",\n",
-    "            \"qlt_tx_descricao_regra\",\n",
-    "            \"qlt_tx_status_validacao\",\n",
-    "            \"qlt_qt_total_registros\",\n",
-    "            \"qlt_qt_registros_invalidos\",\n",
-    "            \"qlt_pc_registros_invalidos\",\n",
-    "            \"qlt_dh_validacao\",\n",
-    "            \"qlt_tx_mensagem\",\n",
-    "        )\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 1. Execute Traceability Checks\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "for layer_name, layer_config in TRACEABILITY_RULES.items():\n",
-    "\n",
-    "    for entity_name, table_name in layer_config[\"tables\"].items():\n",
-    "\n",
-    "        run_entity_checks(\n",
-    "            layer_name=layer_name,\n",
-    "            schema_name=layer_config[\"schema_name\"],\n",
-    "            entity_name=entity_name,\n",
-    "            table_name=table_name,\n",
-    "            required_columns=layer_config[\"required_columns\"],\n",
-    "            critical_columns=layer_config[\"critical_columns\"],\n",
-    "        )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 2. Persist Quality Results\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "quality_log_df = build_traceability_quality_log()\n",
-    "\n",
-    "quality_log_df.write.mode(\n",
-    "    \"append\"\n",
-    ").saveAsTable(DATA_QUALITY_LOG_TABLE)\n",
-    "\n",
-    "print(\n",
-    "    f\"Traceability quality results persisted into: \"\n",
-    "    f\"{DATA_QUALITY_LOG_TABLE}\"\n",
-    ")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 3. Display Quality Results\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "display(quality_log_df)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 4. Quality Summary\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "failed_count = (\n",
-    "    quality_log_df\n",
-    "    .filter(\"qlt_tx_status_validacao = 'FAILED'\")\n",
-    "    .count()\n",
-    ")\n",
-    "\n",
-    "warning_count = (\n",
-    "    quality_log_df\n",
-    "    .filter(\"qlt_tx_status_validacao = 'WARNING'\")\n",
-    "    .count()\n",
-    ")\n",
-    "\n",
-    "passed_count = (\n",
-    "    quality_log_df\n",
-    "    .filter(\"qlt_tx_status_validacao = 'PASSED'\")\n",
-    "    .count()\n",
-    ")\n",
-    "\n",
-    "print(\"=\" * 90)\n",
-    "print(\"TRACEABILITY QUALITY SUMMARY\")\n",
-    "print(\"=\" * 90)\n",
-    "print(f\"Passed validations: {passed_count}\")\n",
-    "print(f\"Warning validations: {warning_count}\")\n",
-    "print(f\"Failed validations: {failed_count}\")\n",
-    "print(\"=\" * 90)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# QUALITY EXECUTION POLICY\n",
-    "# ============================================================\n",
-    "\n",
-    "if failed_count > 0 and FAIL_ON_ERROR:\n",
-    "\n",
-    "    raise Exception(\n",
-    "        f\"Traceability validation failed with \"\n",
-    "        f\"{failed_count} failed validation(s).\"\n",
-    "    )\n",
-    "\n",
-    "if failed_count > 0:\n",
-    "\n",
-    "    print(\n",
-    "        f\"WARNING: Traceability validation finished with \"\n",
-    "        f\"{failed_count} failed validation(s). \"\n",
-    "        \"This is expected if some pipeline tables have not been created yet.\"\n",
-    "    )\n",
-    "\n",
-    "print(\"TRACEABILITY CHECKS COMPLETED\")"
-   ]
-  }
- ],
- "metadata": {
-  "application/vnd.databricks.v1+notebook": {
-   "computePreferences": null,
-   "dashboards": [],
-   "environmentMetadata": {
-    "base_environment": "",
-    "environment_version": "5"
-   },
-   "inputWidgetPreferences": null,
-   "language": "python",
-   "notebookMetadata": {
-    "pythonIndentUnit": 4
-   },
-   "notebookName": "04_traceability_checks",
-   "widgets": {}
-  },
-  "language_info": {
-   "name": "python"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 0
 }
+
+quality_results = []
+
+# COMMAND ----------
+
+# ============================================================
+# QUALITY HELPERS
+# ============================================================
+
+def add_quality_result(
+    rule_name: str,
+    rule_description: str,
+    validation_status: str,
+    total_records: int,
+    invalid_records: int,
+    invalid_percentage: float,
+    message: str,
+    entity_name: str,
+    target_table: str,
+) -> None:
+    """
+    Adds a quality validation result to the in-memory result list.
+    """
+
+    quality_results.append({
+        "nome_regra": rule_name,
+        "descricao_regra": rule_description,
+        "status_validacao": validation_status,
+        "total_registros": int(total_records) if total_records is not None else 0,
+        "registros_invalidos": int(invalid_records) if invalid_records is not None else 0,
+        "percentual_invalidos": float(invalid_percentage) if invalid_percentage is not None else 0.0,
+        "mensagem": message,
+        "entity_name": entity_name,
+        "target_table": target_table,
+    })
+
+# COMMAND ----------
+
+def add_exception_result(
+    entity_name: str,
+    target_table: str,
+    error: Exception,
+) -> None:
+    """
+    Adds a controlled exception result to the quality result list.
+    """
+
+    add_quality_result(
+        rule_name="traceability_quality_exception",
+        rule_description="Captures unexpected errors during traceability validation.",
+        validation_status=QUALITY_FAILED,
+        total_records=1,
+        invalid_records=1,
+        invalid_percentage=100.0,
+        message=f"Unexpected error during traceability validation: {str(error)}",
+        entity_name=entity_name,
+        target_table=target_table,
+    )
+
+# COMMAND ----------
+
+def table_exists(
+    full_table_name: str,
+) -> bool:
+    """
+    Checks whether a fully qualified table exists.
+    """
+
+    try:
+        return spark.catalog.tableExists(full_table_name)
+
+    except Exception:
+        return False
+
+# COMMAND ----------
+
+def get_table_dataframe(
+    full_table_name: str,
+) -> DataFrame:
+    """
+    Reads a table into a Spark DataFrame.
+    """
+
+    return spark.table(full_table_name)
+
+# COMMAND ----------
+
+def get_full_table_name_by_layer(
+    schema_name: str,
+    table_name: str,
+) -> str:
+    """
+    Builds a fully qualified table name for any project layer.
+    """
+
+    return (
+        f"{CATALOG_NAME}."
+        f"{schema_name}."
+        f"{table_name}"
+    )
+
+# COMMAND ----------
+
+def validate_table_exists(
+    layer_name: str,
+    entity_name: str,
+    full_table_name: str,
+) -> bool:
+    """
+    Validates whether a table exists for traceability checks.
+    """
+
+    exists = table_exists(full_table_name)
+
+    add_quality_result(
+        rule_name="traceability_table_exists",
+        rule_description="Validates whether the table exists for traceability checks.",
+        validation_status=QUALITY_PASSED if exists else QUALITY_FAILED,
+        total_records=1,
+        invalid_records=0 if exists else 1,
+        invalid_percentage=0.0 if exists else 100.0,
+        message=(
+            "Table exists."
+            if exists
+            else "Table does not exist."
+        ),
+        entity_name=f"{layer_name}.{entity_name}",
+        target_table=full_table_name,
+    )
+
+    return exists
+
+# COMMAND ----------
+
+def validate_required_traceability_columns(
+    dataframe: DataFrame,
+    layer_name: str,
+    entity_name: str,
+    full_table_name: str,
+    required_columns: list,
+) -> None:
+    """
+    Validates required traceability columns for a table.
+    """
+
+    result = validate_required_columns(
+        dataframe=dataframe,
+        required_columns=required_columns,
+    )
+
+    add_quality_result(
+        rule_name="traceability_required_columns",
+        rule_description="Validates required traceability columns.",
+        validation_status=result["status_validacao"],
+        total_records=result["total_registros"],
+        invalid_records=result["registros_invalidos"],
+        invalid_percentage=result["percentual_invalidos"],
+        message=result["mensagem"],
+        entity_name=f"{layer_name}.{entity_name}",
+        target_table=full_table_name,
+    )
+
+# COMMAND ----------
+
+def validate_column_population(
+    dataframe: DataFrame,
+    layer_name: str,
+    entity_name: str,
+    full_table_name: str,
+    column_name: str,
+) -> None:
+    """
+    Validates whether a traceability column is populated.
+    """
+
+    if column_name not in dataframe.columns:
+
+        add_quality_result(
+            rule_name=f"traceability_population_{column_name}",
+            rule_description="Validates whether a traceability column is populated.",
+            validation_status=QUALITY_FAILED,
+            total_records=1,
+            invalid_records=1,
+            invalid_percentage=100.0,
+            message=f"Column does not exist: {column_name}",
+            entity_name=f"{layer_name}.{entity_name}",
+            target_table=full_table_name,
+        )
+
+        return
+
+    total_records = dataframe.count()
+
+    invalid_records = (
+        dataframe
+        .filter(
+            F.col(column_name).isNull()
+            | (F.trim(F.col(column_name).cast("string")) == "")
+        )
+        .count()
+    )
+
+    invalid_percentage = (
+        0.0 if total_records == 0
+        else round((invalid_records / total_records) * 100, 2)
+    )
+
+    validation_status = (
+        QUALITY_PASSED
+        if invalid_records == 0
+        else QUALITY_WARNING
+    )
+
+    add_quality_result(
+        rule_name=f"traceability_population_{column_name}",
+        rule_description="Validates whether a traceability column is populated.",
+        validation_status=validation_status,
+        total_records=total_records,
+        invalid_records=invalid_records,
+        invalid_percentage=invalid_percentage,
+        message=f"Records with missing {column_name}: {invalid_records}",
+        entity_name=f"{layer_name}.{entity_name}",
+        target_table=full_table_name,
+    )
+
+# COMMAND ----------
+
+def run_entity_checks(
+    layer_name: str,
+    schema_name: str,
+    entity_name: str,
+    table_name: str,
+    required_columns: list,
+    critical_columns: list,
+) -> None:
+    """
+    Executes traceability checks for a single table.
+    """
+
+    full_table_name = get_full_table_name_by_layer(
+        schema_name=schema_name,
+        table_name=table_name,
+    )
+
+    print("=" * 90)
+    print(f"Running traceability checks for: {full_table_name}")
+    print("=" * 90)
+
+    try:
+
+        if not validate_table_exists(
+            layer_name=layer_name,
+            entity_name=entity_name,
+            full_table_name=full_table_name,
+        ):
+            return
+
+        dataframe = get_table_dataframe(full_table_name)
+
+        validate_required_traceability_columns(
+            dataframe=dataframe,
+            layer_name=layer_name,
+            entity_name=entity_name,
+            full_table_name=full_table_name,
+            required_columns=required_columns,
+        )
+
+        for column_name in critical_columns:
+
+            validate_column_population(
+                dataframe=dataframe,
+                layer_name=layer_name,
+                entity_name=entity_name,
+                full_table_name=full_table_name,
+                column_name=column_name,
+            )
+
+    except Exception as error:
+
+        add_exception_result(
+            entity_name=f"{layer_name}.{entity_name}",
+            target_table=full_table_name,
+            error=error,
+        )
+
+# COMMAND ----------
+
+def build_traceability_quality_log() -> DataFrame:
+    """
+    Builds the final traceability quality log DataFrame.
+    """
+
+    if not quality_results:
+
+        add_quality_result(
+            rule_name="traceability_no_results",
+            rule_description="Validates whether traceability checks produced results.",
+            validation_status=QUALITY_WARNING,
+            total_records=0,
+            invalid_records=0,
+            invalid_percentage=0.0,
+            message="No traceability quality results were generated.",
+            entity_name="traceability",
+            target_table=DATA_QUALITY_LOG_TABLE,
+        )
+
+    quality_base_df = spark.createDataFrame(
+        quality_results
+    )
+
+    return (
+        quality_base_df
+        .withColumn("qlt_id_log", F.expr("uuid()"))
+        .withColumn("aud_id_execucao", F.lit(RUN_ID))
+        .withColumn("aud_tx_nome_projeto", F.lit(PROJECT_NAME))
+        .withColumn("aud_tx_versao_pipeline", F.lit(PROJECT_VERSION))
+        .withColumn("aud_tx_ambiente", F.lit(PROJECT_ENVIRONMENT))
+        .withColumn("aud_tx_nome_notebook", F.lit(NOTEBOOK_NAME))
+        .withColumn("aud_tx_nome_camada", F.lit(LAYER_NAME))
+        .withColumn("aud_tx_nome_entidade", F.col("entity_name"))
+        .withColumn("aud_tx_tabela_destino", F.col("target_table"))
+        .withColumn("qlt_tx_nome_regra", F.col("nome_regra"))
+        .withColumn("qlt_tx_descricao_regra", F.col("descricao_regra"))
+        .withColumn("qlt_tx_status_validacao", F.col("status_validacao"))
+        .withColumn("qlt_qt_total_registros", F.col("total_registros"))
+        .withColumn("qlt_qt_registros_invalidos", F.col("registros_invalidos"))
+        .withColumn("qlt_pc_registros_invalidos", F.col("percentual_invalidos"))
+        .withColumn("qlt_dh_validacao", F.current_timestamp())
+        .withColumn("qlt_tx_mensagem", F.col("mensagem"))
+        .select(
+            "qlt_id_log",
+            "aud_id_execucao",
+            "aud_tx_nome_projeto",
+            "aud_tx_versao_pipeline",
+            "aud_tx_ambiente",
+            "aud_tx_nome_notebook",
+            "aud_tx_nome_camada",
+            "aud_tx_nome_entidade",
+            "aud_tx_tabela_destino",
+            "qlt_tx_nome_regra",
+            "qlt_tx_descricao_regra",
+            "qlt_tx_status_validacao",
+            "qlt_qt_total_registros",
+            "qlt_qt_registros_invalidos",
+            "qlt_pc_registros_invalidos",
+            "qlt_dh_validacao",
+            "qlt_tx_mensagem",
+        )
+    )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 1. Execute Traceability Checks
+
+# COMMAND ----------
+
+for layer_name, layer_config in TRACEABILITY_RULES.items():
+
+    for entity_name, table_name in layer_config["tables"].items():
+
+        run_entity_checks(
+            layer_name=layer_name,
+            schema_name=layer_config["schema_name"],
+            entity_name=entity_name,
+            table_name=table_name,
+            required_columns=layer_config["required_columns"],
+            critical_columns=layer_config["critical_columns"],
+        )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 2. Persist Quality Results
+
+# COMMAND ----------
+
+quality_log_df = build_traceability_quality_log()
+
+quality_log_df.write.mode(
+    "append"
+).saveAsTable(DATA_QUALITY_LOG_TABLE)
+
+print(
+    f"Traceability quality results persisted into: "
+    f"{DATA_QUALITY_LOG_TABLE}"
+)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 3. Display Quality Results
+
+# COMMAND ----------
+
+display(quality_log_df)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 4. Quality Summary
+
+# COMMAND ----------
+
+failed_count = (
+    quality_log_df
+    .filter("qlt_tx_status_validacao = 'FAILED'")
+    .count()
+)
+
+warning_count = (
+    quality_log_df
+    .filter("qlt_tx_status_validacao = 'WARNING'")
+    .count()
+)
+
+passed_count = (
+    quality_log_df
+    .filter("qlt_tx_status_validacao = 'PASSED'")
+    .count()
+)
+
+print("=" * 90)
+print("TRACEABILITY QUALITY SUMMARY")
+print("=" * 90)
+print(f"Passed validations: {passed_count}")
+print(f"Warning validations: {warning_count}")
+print(f"Failed validations: {failed_count}")
+print("=" * 90)
+
+# COMMAND ----------
+
+# ============================================================
+# QUALITY EXECUTION POLICY
+# ============================================================
+
+if failed_count > 0 and FAIL_ON_ERROR:
+
+    raise Exception(
+        f"Traceability validation failed with "
+        f"{failed_count} failed validation(s)."
+    )
+
+if failed_count > 0:
+
+    print(
+        f"WARNING: Traceability validation finished with "
+        f"{failed_count} failed validation(s). "
+        "This is expected if some pipeline tables have not been created yet."
+    )
+
+print("TRACEABILITY CHECKS COMPLETED")

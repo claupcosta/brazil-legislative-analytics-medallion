@@ -1,500 +1,578 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "49ffd37e-b94a-4e18-bd9e-82fc642a308d",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "PROJECT CONFIGURATION LOADED SUCCESSFULLY\nPROJECT_NAME: brazil_legislative_analytics\nPROJECT_VERSION: v1.0.0\nPROJECT_ENVIRONMENT: dev\nCATALOG_NAME: brazil_legislative_analytics\nRUN_ID: e3645c5b-3cf8-4311-911b-254afd7ddc7b\n"
-     ]
-    }
-   ],
-   "source": [
-    "# Databricks notebook source\n",
-    "# MAGIC %md\n",
-    "# MAGIC # 01 Project Configuration\n",
-    "# MAGIC\n",
-    "# MAGIC Centralizes global project configuration used across Setup, Bronze,\n",
-    "# MAGIC Silver, Gold, Marts, Quality and Jobs notebooks.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Responsibilities\n",
-    "# MAGIC - Define project metadata\n",
-    "# MAGIC - Define catalog and schema names\n",
-    "# MAGIC - Define audit table references\n",
-    "# MAGIC - Define API configuration\n",
-    "# MAGIC - Define naming conventions\n",
-    "# MAGIC - Define table names by Medallion layer\n",
-    "# MAGIC - Define execution status values\n",
-    "# MAGIC - Provide helper functions for fully qualified table names\n",
-    "# MAGIC\n",
-    "# MAGIC ## Performance Note\n",
-    "# MAGIC This notebook does not automatically execute `USE CATALOG`\n",
-    "# MAGIC to avoid unnecessary catalog calls when imported by other notebooks.\n",
-    "# MAGIC All pipeline notebooks should use fully qualified table names.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Documentation Standard\n",
-    "# MAGIC - Python functions and variables are written in English.\n",
-    "# MAGIC - Table and field names follow Portuguese mnemonic standards.\n",
-    "# MAGIC - Table and column comments are written in English.\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "from datetime import datetime\n",
-    "import uuid\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# PROJECT METADATA\n",
-    "# ============================================================\n",
-    "\n",
-    "PROJECT_NAME = \"brazil_legislative_analytics\"\n",
-    "PROJECT_VERSION = \"v1.0.0\"\n",
-    "PROJECT_ENVIRONMENT = \"dev\"\n",
-    "\n",
-    "# Backward compatibility only.\n",
-    "# New notebooks must use PROJECT_VERSION.\n",
-    "PIPELINE_VERSION = PROJECT_VERSION\n",
-    "\n",
-    "RUN_ID = str(uuid.uuid4())\n",
-    "EXECUTION_TIMESTAMP = datetime.now()\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# CATALOG CONFIGURATION\n",
-    "# ============================================================\n",
-    "\n",
-    "CATALOG_NAME = \"brazil_legislative_analytics\"\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# SCHEMA NAMES\n",
-    "# ============================================================\n",
-    "\n",
-    "SCHEMA_AUDIT = \"audit\"\n",
-    "SCHEMA_BRONZE = \"bronze\"\n",
-    "SCHEMA_SILVER = \"silver\"\n",
-    "SCHEMA_GOLD = \"gold\"\n",
-    "SCHEMA_MARTS = \"marts\"\n",
-    "\n",
-    "AUDIT_SCHEMA = f\"{CATALOG_NAME}.{SCHEMA_AUDIT}\"\n",
-    "BRONZE_SCHEMA = f\"{CATALOG_NAME}.{SCHEMA_BRONZE}\"\n",
-    "SILVER_SCHEMA = f\"{CATALOG_NAME}.{SCHEMA_SILVER}\"\n",
-    "GOLD_SCHEMA = f\"{CATALOG_NAME}.{SCHEMA_GOLD}\"\n",
-    "MARTS_SCHEMA = f\"{CATALOG_NAME}.{SCHEMA_MARTS}\"\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# AUDIT TABLES\n",
-    "# ============================================================\n",
-    "\n",
-    "AUD_TB_LOG_EXECUCAO_PIPELINE = \"aud_log_execucao_pipeline\"\n",
-    "AUD_TB_LOG_ERROS_PIPELINE = \"aud_log_erros_pipeline\"\n",
-    "AUD_TB_LOG_QUALIDADE_DADOS = \"aud_log_qualidade_dados\"\n",
-    "\n",
-    "AUDIT_PIPELINE_LOGS = f\"{AUDIT_SCHEMA}.{AUD_TB_LOG_EXECUCAO_PIPELINE}\"\n",
-    "AUDIT_PIPELINE_ERRORS = f\"{AUDIT_SCHEMA}.{AUD_TB_LOG_ERROS_PIPELINE}\"\n",
-    "AUDIT_DATA_QUALITY_LOGS = f\"{AUDIT_SCHEMA}.{AUD_TB_LOG_QUALIDADE_DADOS}\"\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# API CONFIGURATION\n",
-    "# ============================================================\n",
-    "\n",
-    "CAMARA_API_BASE_URL = \"https://dadosabertos.camara.leg.br/api/v2\"\n",
-    "\n",
-    "API_REQUEST_TIMEOUT_SECONDS = 120\n",
-    "API_DEFAULT_PAGE_SIZE = 100\n",
-    "API_MAX_RETRY_ATTEMPTS = 3\n",
-    "API_RETRY_SLEEP_SECONDS = 2\n",
-    "\n",
-    "API_PAGE_PARAMETER_NAME = \"pagina\"\n",
-    "API_PAGE_SIZE_PARAMETER_NAME = \"itens\"\n",
-    "API_RESPONSE_DATA_FIELD = \"dados\"\n",
-    "\n",
-    "API_ENDPOINTS = {\n",
-    "    \"deputados\": \"/deputados\",\n",
-    "    \"frentes\": \"/frentes\",\n",
-    "    \"frentes_detalhes\": \"/frentes/{id}\",\n",
-    "    \"frentes_membros\": \"/frentes/{id}/membros\",\n",
-    "    \"eventos\": \"/eventos\",\n",
-    "    \"votacoes\": \"/votacoes\",\n",
-    "    \"votos\": \"/votacoes/{id}/votos\",\n",
-    "    \"despesas_ceap\": \"/deputados/{id}/despesas\",\n",
-    "    \"cpis\": \"/orgaos\",\n",
-    "    \"cpi_eventos\": \"/eventos\",\n",
-    "    \"proposicoes\": \"/proposicoes\",\n",
-    "}\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# NAMING CONVENTIONS\n",
-    "# ============================================================\n",
-    "\n",
-    "TABLE_PREFIXES = {\n",
-    "    \"br\": \"bronze\",\n",
-    "    \"slv\": \"silver\",\n",
-    "    \"dm\": \"dimension\",\n",
-    "    \"ft\": \"fact\",\n",
-    "    \"am\": \"analytical_mart\",\n",
-    "    \"ref\": \"reference\",\n",
-    "    \"aud\": \"audit\",\n",
-    "}\n",
-    "\n",
-    "COLUMN_PREFIXES = {\n",
-    "    \"id\": \"identifier\",\n",
-    "    \"cd\": \"code\",\n",
-    "    \"tx\": \"text\",\n",
-    "    \"dt\": \"date\",\n",
-    "    \"dh\": \"datetime\",\n",
-    "    \"vl\": \"value\",\n",
-    "    \"qt\": \"quantity\",\n",
-    "    \"pc\": \"percentage\",\n",
-    "    \"fl\": \"flag\",\n",
-    "    \"nr\": \"number\",\n",
-    "}\n",
-    "\n",
-    "MNEMONICS = {\n",
-    "    \"dep\": \"deputy\",\n",
-    "    \"prt\": \"party\",\n",
-    "    \"uf\": \"state\",\n",
-    "    \"leg\": \"legislature\",\n",
-    "    \"frn\": \"front\",\n",
-    "    \"evt\": \"event\",\n",
-    "    \"vot\": \"voting\",\n",
-    "    \"votres\": \"voting_result\",\n",
-    "    \"dsp\": \"expense\",\n",
-    "    \"forn\": \"supplier\",\n",
-    "    \"cpi\": \"parliamentary_inquiry_commission\",\n",
-    "    \"prop\": \"proposition\",\n",
-    "    \"org\": \"organization\",\n",
-    "    \"aud\": \"audit\",\n",
-    "    \"qlt\": \"quality\",\n",
-    "    \"err\": \"error\",\n",
-    "}\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# BRONZE TABLES\n",
-    "# ============================================================\n",
-    "\n",
-    "BRONZE_TABLES = {\n",
-    "    \"deputados\": \"br_deputados\",\n",
-    "    \"frentes\": \"br_frentes\",\n",
-    "    \"frentes_detalhes\": \"br_frentes_detalhes\",\n",
-    "    \"frentes_membros\": \"br_frentes_membros\",\n",
-    "    \"eventos\": \"br_eventos\",\n",
-    "    \"votacoes\": \"br_votacoes\",\n",
-    "    \"votos\": \"br_votos\",\n",
-    "    \"despesas_ceap\": \"br_despesas_ceap\",\n",
-    "    \"cpis\": \"br_cpis\",\n",
-    "    \"cpi_eventos\": \"br_cpi_eventos\",\n",
-    "    \"proposicoes\": \"br_proposicoes\",\n",
-    "}\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# SILVER TABLES\n",
-    "# ============================================================\n",
-    "\n",
-    "SILVER_TABLES = {\n",
-    "    \"deputados\": \"slv_deputados\",\n",
-    "    \"partidos\": \"slv_partidos\",\n",
-    "    \"estados\": \"slv_estados\",\n",
-    "    \"frentes\": \"slv_frentes\",\n",
-    "    \"frentes_membros\": \"slv_frentes_membros\",\n",
-    "    \"eventos\": \"slv_eventos\",\n",
-    "    \"votacoes\": \"slv_votacoes\",\n",
-    "    \"votos\": \"slv_votos\",\n",
-    "    \"despesas_ceap\": \"slv_despesas_ceap\",\n",
-    "    \"fornecedores\": \"slv_fornecedores\",\n",
-    "    \"cpis\": \"slv_cpis\",\n",
-    "    \"cpi_eventos\": \"slv_cpi_eventos\",\n",
-    "    \"proposicoes\": \"slv_proposicoes\",\n",
-    "}\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# GOLD DIMENSION TABLES\n",
-    "# ============================================================\n",
-    "\n",
-    "GOLD_DIMENSION_TABLES = {\n",
-    "    \"deputado\": \"dm_deputado\",\n",
-    "    \"partido\": \"dm_partido\",\n",
-    "    \"estado\": \"dm_estado\",\n",
-    "    \"data\": \"dm_data\",\n",
-    "    \"orgao\": \"dm_orgao\",\n",
-    "    \"tipo_evento\": \"dm_tipo_evento\",\n",
-    "    \"evento\": \"dm_evento\",\n",
-    "    \"votacao\": \"dm_votacao\",\n",
-    "    \"tipo_votacao\": \"dm_tipo_votacao\",\n",
-    "    \"frente\": \"dm_frente\",\n",
-    "    \"fornecedor\": \"dm_fornecedor\",\n",
-    "    \"cpi\": \"dm_cpi\",\n",
-    "}\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# GOLD FACT TABLES\n",
-    "# ============================================================\n",
-    "\n",
-    "GOLD_FACT_TABLES = {\n",
-    "    \"frentes_membros\": \"ft_frentes_membros\",\n",
-    "    \"eventos_presencas\": \"ft_eventos_presencas\",\n",
-    "    \"resultados_votacoes\": \"ft_resultados_votacoes\",\n",
-    "    \"despesas_ceap\": \"ft_despesas_ceap\",\n",
-    "    \"cpi_eventos\": \"ft_cpi_eventos\",\n",
-    "}\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# MART TABLES\n",
-    "# ============================================================\n",
-    "\n",
-    "MART_TABLES = {\n",
-    "    \"atlas_frentes\": \"am_atlas_frentes\",\n",
-    "    \"calendario_eventos\": \"am_calendario_eventos\",\n",
-    "    \"correlacao_frentes_votacoes\": \"am_correlacao_frentes_votacoes\",\n",
-    "    \"panorama_despesas_ceap\": \"am_panorama_despesas_ceap\",\n",
-    "    \"auditoria_cpis\": \"am_auditoria_cpis\",\n",
-    "    \"monitor_presenca_absenteismo\": \"am_monitor_presenca_absenteismo\",\n",
-    "}\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# REFERENCE TABLES\n",
-    "# ============================================================\n",
-    "\n",
-    "REFERENCE_TABLES = {\n",
-    "    \"opcoes_voto\": \"ref_opcoes_voto\",\n",
-    "    \"tipos_evento\": \"ref_tipos_evento\",\n",
-    "    \"tipos_votacao\": \"ref_tipos_votacao\",\n",
-    "    \"tipos_despesa\": \"ref_tipos_despesa\",\n",
-    "    \"tipos_documento\": \"ref_tipos_documento\",\n",
-    "}\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# TRACEABILITY COLUMNS\n",
-    "# ============================================================\n",
-    "\n",
-    "TRACEABILITY_COLUMNS = [\n",
-    "    \"aud_id_execucao\",\n",
-    "    \"aud_dh_ingestao\",\n",
-    "    \"aud_dh_processamento\",\n",
-    "    \"aud_tx_endpoint_origem\",\n",
-    "    \"aud_tx_sistema_origem\",\n",
-    "    \"aud_tx_versao_pipeline\",\n",
-    "    \"aud_tx_hash_registro\",\n",
-    "]\n",
-    "\n",
-    "BRONZE_REQUIRED_COLUMNS = [\n",
-    "    \"aud_id_execucao\",\n",
-    "    \"aud_dh_ingestao\",\n",
-    "    \"aud_tx_endpoint_origem\",\n",
-    "    \"aud_tx_sistema_origem\",\n",
-    "    \"aud_tx_versao_pipeline\",\n",
-    "    \"aud_tx_hash_registro\",\n",
-    "]\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# QUALITY STATUS\n",
-    "# ============================================================\n",
-    "\n",
-    "QUALITY_PASSED = \"PASSED\"\n",
-    "QUALITY_WARNING = \"WARNING\"\n",
-    "QUALITY_FAILED = \"FAILED\"\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# EXECUTION STATUS VALUES\n",
-    "# ============================================================\n",
-    "\n",
-    "EXECUTION_STATUS_STARTED = \"STARTED\"\n",
-    "EXECUTION_STATUS_SUCCESS = \"SUCCESS\"\n",
-    "EXECUTION_STATUS_WARNING = \"WARNING\"\n",
-    "EXECUTION_STATUS_FAILED = \"FAILED\"\n",
-    "\n",
-    "LOAD_TYPE_FULL = \"FULL\"\n",
-    "LOAD_TYPE_INCREMENTAL = \"INCREMENTAL\"\n",
-    "LOAD_TYPE_REPLAY = \"REPLAY\"\n",
-    "LOAD_TYPE_FALLBACK = \"FALLBACK\"\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# HELPER FUNCTIONS\n",
-    "# ============================================================\n",
-    "\n",
-    "def get_full_table_name(\n",
-    "    schema_name: str,\n",
-    "    table_name: str,\n",
-    ") -> str:\n",
-    "    \"\"\"\n",
-    "    Builds a fully qualified table name.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return (\n",
-    "        f\"{CATALOG_NAME}.\"\n",
-    "        f\"{schema_name}.\"\n",
-    "        f\"{table_name}\"\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_bronze_table(\n",
-    "    table_name: str,\n",
-    ") -> str:\n",
-    "    \"\"\"\n",
-    "    Builds a fully qualified Bronze table name.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return get_full_table_name(\n",
-    "        schema_name=SCHEMA_BRONZE,\n",
-    "        table_name=table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_silver_table(\n",
-    "    table_name: str,\n",
-    ") -> str:\n",
-    "    \"\"\"\n",
-    "    Builds a fully qualified Silver table name.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return get_full_table_name(\n",
-    "        schema_name=SCHEMA_SILVER,\n",
-    "        table_name=table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_gold_table(\n",
-    "    table_name: str,\n",
-    ") -> str:\n",
-    "    \"\"\"\n",
-    "    Builds a fully qualified Gold table name.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return get_full_table_name(\n",
-    "        schema_name=SCHEMA_GOLD,\n",
-    "        table_name=table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_mart_table(\n",
-    "    table_name: str,\n",
-    ") -> str:\n",
-    "    \"\"\"\n",
-    "    Builds a fully qualified Mart table name.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return get_full_table_name(\n",
-    "        schema_name=SCHEMA_MARTS,\n",
-    "        table_name=table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_audit_table(\n",
-    "    table_name: str,\n",
-    ") -> str:\n",
-    "    \"\"\"\n",
-    "    Builds a fully qualified Audit table name.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return get_full_table_name(\n",
-    "        schema_name=SCHEMA_AUDIT,\n",
-    "        table_name=table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# OPTIONAL SPARK CATALOG ACTIVATION\n",
-    "# ============================================================\n",
-    "#\n",
-    "# Disabled by default to reduce catalog overhead when this\n",
-    "# notebook is imported through %run by other notebooks.\n",
-    "#\n",
-    "# Enable only when executing this notebook manually and needed.\n",
-    "#\n",
-    "# ============================================================\n",
-    "\n",
-    "SET_ACTIVE_CATALOG = False\n",
-    "\n",
-    "if SET_ACTIVE_CATALOG:\n",
-    "    spark.sql(f\"USE CATALOG {CATALOG_NAME}\")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# VALIDATION OUTPUT\n",
-    "# ============================================================\n",
-    "\n",
-    "print(\"PROJECT CONFIGURATION LOADED SUCCESSFULLY\")\n",
-    "print(f\"PROJECT_NAME: {PROJECT_NAME}\")\n",
-    "print(f\"PROJECT_VERSION: {PROJECT_VERSION}\")\n",
-    "print(f\"PROJECT_ENVIRONMENT: {PROJECT_ENVIRONMENT}\")\n",
-    "print(f\"CATALOG_NAME: {CATALOG_NAME}\")\n",
-    "print(f\"RUN_ID: {RUN_ID}\")"
-   ]
-  }
- ],
- "metadata": {
-  "application/vnd.databricks.v1+notebook": {
-   "computePreferences": null,
-   "dashboards": [],
-   "environmentMetadata": {
-    "base_environment": "",
-    "environment_version": "5"
-   },
-   "inputWidgetPreferences": null,
-   "language": "python",
-   "notebookMetadata": {
-    "pythonIndentUnit": 4
-   },
-   "notebookName": "01_project_config",
-   "widgets": {}
-  },
-  "language_info": {
-   "name": "python"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 0
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # 00 Setup — Project Configuration
+# MAGIC
+# MAGIC **Notebook:** `01_project_config`
+# MAGIC
+# MAGIC Centralizes global project configuration used across Bronze, Silver,
+# MAGIC Gold, Marts, Quality and Utility notebooks.
+# MAGIC
+# MAGIC This notebook defines:
+# MAGIC
+# MAGIC - Project metadata
+# MAGIC - Catalog and schema configuration
+# MAGIC - Volume and raw file locations
+# MAGIC - API endpoints and operational settings
+# MAGIC - Reference years and legislatures
+# MAGIC - Naming conventions and table registries
+# MAGIC - Traceability standards
+# MAGIC - Execution status constants
+# MAGIC - Helper functions used across the pipeline
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Responsibilities
+# MAGIC
+# MAGIC - Centralize global pipeline configuration
+# MAGIC - Standardize table naming conventions
+# MAGIC - Centralize API operational settings
+# MAGIC - Register Bronze, Silver, Gold and Mart table mappings
+# MAGIC - Define audit and traceability standards
+# MAGIC - Provide reusable helper functions
+# MAGIC - Centralize reference year governance
+# MAGIC - Support controlled analytical scope management
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Notes
+# MAGIC
+# MAGIC - API ingestion notebooks use controlled reference years to improve stability
+# MAGIC - CSV fallback notebooks use broader historical ranges available in Unity Catalog Volumes
+# MAGIC - CSV fallback is the recommended operational ingestion strategy for high-volume datasets
+# MAGIC - Naming conventions follow Portuguese mnemonic standards
+# MAGIC - Comments and documentation are written in English
+# MAGIC - Helper functions are shared across all Medallion layers
+# MAGIC - Governance and traceability standards are centrally managed in this notebook
+# MAGIC - Legislature scope currently prioritizes Legislatures 56 and 57
+# MAGIC - CSV fallback historical scope currently covers files from 2021 to 2026
+# MAGIC
+# MAGIC For additional architectural and governance details, refer to:
+# MAGIC
+# MAGIC - `/docs/architecture/medallion_architecture.md`
+# MAGIC - `/docs/governance/data_lineage.md`
+# MAGIC - `/docs/governance/naming_conventions.md`
+
+# COMMAND ----------
+
+from datetime import datetime
+import uuid
+
+# COMMAND ----------
+
+# ============================================================
+# PROJECT METADATA
+# ============================================================
+
+PROJECT_NAME = "brazil_legislative_analytics"
+PROJECT_VERSION = "v1.0.0"
+PROJECT_ENVIRONMENT = "dev"
+
+PIPELINE_VERSION = PROJECT_VERSION
+
+RUN_ID = str(uuid.uuid4())
+EXECUTION_TIMESTAMP = datetime.now()
+
+# COMMAND ----------
+
+# ============================================================
+# CATALOG CONFIGURATION
+# ============================================================
+
+CATALOG_NAME = "brazil_legislative_analytics"
+
+# COMMAND ----------
+
+# ============================================================
+# SCHEMA NAMES
+# ============================================================
+
+SCHEMA_AUDIT = "audit"
+SCHEMA_BRONZE = "bronze"
+SCHEMA_SILVER = "silver"
+SCHEMA_GOLD = "gold"
+SCHEMA_MARTS = "marts"
+
+AUDIT_SCHEMA = f"{CATALOG_NAME}.{SCHEMA_AUDIT}"
+BRONZE_SCHEMA = f"{CATALOG_NAME}.{SCHEMA_BRONZE}"
+SILVER_SCHEMA = f"{CATALOG_NAME}.{SCHEMA_SILVER}"
+GOLD_SCHEMA = f"{CATALOG_NAME}.{SCHEMA_GOLD}"
+MARTS_SCHEMA = f"{CATALOG_NAME}.{SCHEMA_MARTS}"
+
+# COMMAND ----------
+
+# ============================================================
+# VOLUME / RAW FILES CONFIGURATION
+# ============================================================
+
+VOLUME_RAW_FILES = (
+    f"/Volumes/{CATALOG_NAME}/"
+    f"{SCHEMA_BRONZE}/"
+    "raw_files"
+)
+
+VOLUME_RAW_ORGAOS = f"{VOLUME_RAW_FILES}/orgaos"
+VOLUME_RAW_VOTACOES = f"{VOLUME_RAW_FILES}/votacoes"
+VOLUME_RAW_VOTOS = f"{VOLUME_RAW_FILES}/votacoes_votos"
+VOLUME_RAW_CEAP = f"{VOLUME_RAW_FILES}/ceap"
+VOLUME_RAW_ORGAOS_MEMBROS = f"{VOLUME_RAW_FILES}/orgaos_membros"
+VOLUME_RAW_PROPOSICOES = f"{VOLUME_RAW_FILES}/proposicoes"
+
+# COMMAND ----------
+
+# ============================================================
+# AUDIT TABLES
+# ============================================================
+
+AUD_TB_LOG_EXECUCAO_PIPELINE = "aud_log_execucao_pipeline"
+AUD_TB_LOG_ERROS_PIPELINE = "aud_log_erros_pipeline"
+AUD_TB_LOG_QUALIDADE_DADOS = "aud_log_qualidade_dados"
+
+AUDIT_PIPELINE_LOGS = f"{AUDIT_SCHEMA}.{AUD_TB_LOG_EXECUCAO_PIPELINE}"
+AUDIT_PIPELINE_ERRORS = f"{AUDIT_SCHEMA}.{AUD_TB_LOG_ERROS_PIPELINE}"
+AUDIT_DATA_QUALITY_LOGS = f"{AUDIT_SCHEMA}.{AUD_TB_LOG_QUALIDADE_DADOS}"
+
+# COMMAND ----------
+
+# ============================================================
+# API CONFIGURATION
+# ============================================================
+
+CAMARA_API_BASE_URL = "https://dadosabertos.camara.leg.br/api/v2"
+
+API_REQUEST_TIMEOUT_SECONDS = 120
+API_DEFAULT_PAGE_SIZE = 100
+API_MAX_RETRY_ATTEMPTS = 3
+API_RETRY_SLEEP_SECONDS = 2
+
+API_PAGE_PARAMETER_NAME = "pagina"
+API_PAGE_SIZE_PARAMETER_NAME = "itens"
+API_RESPONSE_DATA_FIELD = "dados"
+
+API_ENDPOINTS = {
+    "deputados": "/deputados",
+    "frentes": "/frentes",
+    "frentes_detalhes": "/frentes/{id}",
+    "frentes_membros": "/frentes/{id}/membros",
+    "eventos": "/eventos",
+    "votacoes": "/votacoes",
+    "votos": "/votacoes/{id}/votos",
+    "despesas_ceap": "/deputados/{id}/despesas",
+    "orgaos": "/orgaos",
+    "orgaos_membros": "/orgaos/{id}/membros",
+    "proposicoes": "/proposicoes",
 }
+
+# COMMAND ----------
+
+# ============================================================
+# REFERENCE YEAR CONFIGURATION
+# ============================================================
+#
+# API ingestion notebooks use controlled reference years
+# to reduce timeout risk and improve execution stability.
+#
+# CSV fallback notebooks use the complete historical
+# range currently available in Unity Catalog Volumes.
+#
+# ============================================================
+
+# ------------------------------------------------------------
+# API INGESTION REFERENCE YEARS
+# ------------------------------------------------------------
+
+DEFAULT_REFERENCE_YEARS = [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025,
+    2026,
+]
+
+EVENTOS_REFERENCE_YEARS = [
+    2025,
+    2026,
+]
+
+PROPOSICOES_REFERENCE_YEARS = [
+    2025,
+    2026,
+]
+
+CEAP_REFERENCE_YEARS = [
+    2025,
+    2026,
+]
+
+# ------------------------------------------------------------
+# CSV FALLBACK REFERENCE YEARS
+# ------------------------------------------------------------
+#
+# These ranges represent the complete historical files
+# currently available in Unity Catalog Volumes.
+#
+# CSV fallback is the recommended operational ingestion
+# strategy for high-volume datasets.
+#
+# ------------------------------------------------------------
+
+CSV_REFERENCE_YEARS = [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025,
+    2026,
+]
+
+VOTACOES_CSV_REFERENCE_YEARS = CSV_REFERENCE_YEARS
+
+VOTOS_CSV_REFERENCE_YEARS = CSV_REFERENCE_YEARS
+
+PROPOSICOES_CSV_REFERENCE_YEARS = CSV_REFERENCE_YEARS
+
+CEAP_CSV_REFERENCE_YEARS = CSV_REFERENCE_YEARS
+
+# ------------------------------------------------------------
+# LEGISLATURE REFERENCE CONFIGURATION
+# ------------------------------------------------------------
+
+REFERENCE_LEGISLATURES = [
+    56,
+    57,
+]
+
+# ------------------------------------------------------------
+# CSV FALLBACK EXECUTION MODE
+# ------------------------------------------------------------
+
+CSV_REFERENCE_YEAR_MODE = "controlled_range"
+
+# COMMAND ----------
+
+# ============================================================
+# NAMING CONVENTIONS
+# ============================================================
+
+TABLE_PREFIXES = {
+    "br": "bronze",
+    "slv": "silver",
+    "dm": "dimension",
+    "ft": "fact",
+    "am": "analytical_mart",
+    "ref": "reference",
+    "aud": "audit",
+}
+
+COLUMN_PREFIXES = {
+    "id": "identifier",
+    "cd": "code",
+    "tx": "text",
+    "dt": "date",
+    "dh": "datetime",
+    "vl": "value",
+    "qt": "quantity",
+    "pc": "percentage",
+    "fl": "flag",
+    "nr": "number",
+}
+
+MNEMONICS = {
+    "dep": "deputy",
+    "prt": "party",
+    "uf": "state",
+    "leg": "legislature",
+    "frn": "front",
+    "evt": "event",
+    "vot": "voting",
+    "votres": "voting_result",
+    "desp": "expense",
+    "forn": "supplier",
+    "cpi": "parliamentary_inquiry_commission",
+    "prop": "proposition",
+    "org": "organization",
+    "mbr": "member",
+    "aud": "audit",
+    "qlt": "quality",
+    "err": "error",
+}
+
+# COMMAND ----------
+
+# ============================================================
+# BRONZE TABLES
+# ============================================================
+
+BRONZE_TABLES = {
+    "deputados": "br_deputados",
+    "frentes": "br_frentes",
+    "frentes_detalhes": "br_frentes_detalhes",
+    "frentes_membros": "br_frentes_membros",
+    "eventos": "br_eventos",
+    "votacoes": "br_votacoes",
+    "votos": "br_votos",
+    "despesas_ceap": "br_despesas_ceap",
+    "orgaos": "br_orgaos",
+    "orgaos_membros": "br_orgaos_membros",
+    "proposicoes": "br_proposicoes",
+}
+
+# COMMAND ----------
+
+# ============================================================
+# SILVER TABLES
+# ============================================================
+
+SILVER_TABLES = {
+    "deputados": "slv_deputados",
+    "partidos": "slv_partidos",
+    "estados": "slv_estados",
+    "frentes": "slv_frentes",
+    "frentes_membros": "slv_frentes_membros",
+    "eventos": "slv_eventos",
+    "votacoes": "slv_votacoes",
+    "votos": "slv_votos",
+    "despesas_ceap": "slv_despesas_ceap",
+    "fornecedores": "slv_fornecedores",
+    "orgaos": "slv_orgaos",
+    "orgaos_membros": "slv_orgaos_membros",
+    "cpis": "slv_cpis",
+    "proposicoes": "slv_proposicoes",
+}
+
+# COMMAND ----------
+
+# ============================================================
+# GOLD DIMENSION TABLES
+# ============================================================
+
+GOLD_DIMENSION_TABLES = {
+    "deputado": "dm_deputado",
+    "partido": "dm_partido",
+    "estado": "dm_estado",
+    "data": "dm_data",
+    "orgao": "dm_orgao",
+    "tipo_evento": "dm_tipo_evento",
+    "evento": "dm_evento",
+    "votacao": "dm_votacao",
+    "tipo_votacao": "dm_tipo_votacao",
+    "frente": "dm_frente",
+    "fornecedor": "dm_fornecedor",
+    "cpi": "dm_cpi",
+}
+
+# COMMAND ----------
+
+# ============================================================
+# GOLD FACT TABLES
+# ============================================================
+
+GOLD_FACT_TABLES = {
+    "frentes_membros": "ft_frentes_membros",
+    "eventos_presencas": "ft_eventos_presencas",
+    "resultados_votacoes": "ft_resultados_votacoes",
+    "despesas_ceap": "ft_despesas_ceap",
+    "orgaos_membros": "ft_orgaos_membros",
+    "cpi_membros": "ft_cpi_membros",
+    "cpi_eventos": "ft_cpi_eventos",
+}
+
+# COMMAND ----------
+
+# ============================================================
+# MART TABLES
+# ============================================================
+
+MART_TABLES = {
+    "atlas_frentes": "am_atlas_frentes",
+    "calendario_eventos": "am_calendario_eventos",
+    "correlacao_frentes_votacoes": "am_correlacao_frentes_votacoes",
+    "panorama_despesas_ceap": "am_panorama_despesas_ceap",
+    "auditoria_cpis": "am_auditoria_cpis",
+    "monitor_presenca_absenteismo": "am_monitor_presenca_absenteismo",
+}
+
+# COMMAND ----------
+
+# ============================================================
+# REFERENCE TABLES
+# ============================================================
+
+REFERENCE_TABLES = {
+    "opcoes_voto": "ref_opcoes_voto",
+    "tipos_evento": "ref_tipos_evento",
+    "tipos_votacao": "ref_tipos_votacao",
+    "tipos_despesa": "ref_tipos_despesa",
+    "tipos_documento": "ref_tipos_documento",
+}
+
+# COMMAND ----------
+
+# ============================================================
+# TRACEABILITY COLUMNS
+# ============================================================
+
+TRACEABILITY_COLUMNS = [
+    "aud_id_execucao",
+    "aud_dh_ingestao",
+    "aud_dh_processamento",
+    "aud_tx_endpoint_origem",
+    "aud_tx_sistema_origem",
+    "aud_tx_versao_pipeline",
+    "aud_tx_hash_registro",
+]
+
+BRONZE_REQUIRED_COLUMNS = [
+    "aud_id_execucao",
+    "aud_dh_ingestao",
+    "aud_tx_endpoint_origem",
+    "aud_tx_sistema_origem",
+    "aud_tx_versao_pipeline",
+    "aud_tx_hash_registro",
+]
+
+# COMMAND ----------
+
+# ============================================================
+# QUALITY STATUS
+# ============================================================
+
+QUALITY_PASSED = "PASSED"
+QUALITY_WARNING = "WARNING"
+QUALITY_FAILED = "FAILED"
+
+# COMMAND ----------
+
+# ============================================================
+# EXECUTION STATUS VALUES
+# ============================================================
+
+EXECUTION_STATUS_STARTED = "STARTED"
+EXECUTION_STATUS_SUCCESS = "SUCCESS"
+EXECUTION_STATUS_WARNING = "WARNING"
+EXECUTION_STATUS_FAILED = "FAILED"
+
+LOAD_TYPE_FULL = "FULL"
+LOAD_TYPE_INCREMENTAL = "INCREMENTAL"
+LOAD_TYPE_REPLAY = "REPLAY"
+LOAD_TYPE_FALLBACK = "FALLBACK"
+
+# COMMAND ----------
+
+# ============================================================
+# HELPER FUNCTIONS
+# ============================================================
+
+def get_full_table_name(
+    schema_name: str,
+    table_name: str,
+) -> str:
+    """
+    Builds a fully qualified table name.
+    """
+
+    return (
+        f"{CATALOG_NAME}."
+        f"{schema_name}."
+        f"{table_name}"
+    )
+
+# COMMAND ----------
+
+def get_bronze_table(
+    table_name: str,
+) -> str:
+    """
+    Builds a fully qualified Bronze table name.
+    """
+
+    return get_full_table_name(
+        schema_name=SCHEMA_BRONZE,
+        table_name=table_name,
+    )
+
+# COMMAND ----------
+
+def get_silver_table(
+    table_name: str,
+) -> str:
+    """
+    Builds a fully qualified Silver table name.
+    """
+
+    return get_full_table_name(
+        schema_name=SCHEMA_SILVER,
+        table_name=table_name,
+    )
+
+# COMMAND ----------
+
+def get_gold_table(
+    table_name: str,
+) -> str:
+    """
+    Builds a fully qualified Gold table name.
+    """
+
+    return get_full_table_name(
+        schema_name=SCHEMA_GOLD,
+        table_name=table_name,
+    )
+
+# COMMAND ----------
+
+def get_mart_table(
+    table_name: str,
+) -> str:
+    """
+    Builds a fully qualified Mart table name.
+    """
+
+    return get_full_table_name(
+        schema_name=SCHEMA_MARTS,
+        table_name=table_name,
+    )
+
+# COMMAND ----------
+
+def get_audit_table(
+    table_name: str,
+) -> str:
+    """
+    Builds a fully qualified Audit table name.
+    """
+
+    return get_full_table_name(
+        schema_name=SCHEMA_AUDIT,
+        table_name=table_name,
+    )
+
+# COMMAND ----------
+
+# ============================================================
+# OPTIONAL SPARK CATALOG ACTIVATION
+# ============================================================
+
+SET_ACTIVE_CATALOG = False
+
+if SET_ACTIVE_CATALOG:
+    spark.sql(f"USE CATALOG {CATALOG_NAME}")
+
+# COMMAND ----------
+
+# ============================================================
+# VALIDATION OUTPUT
+# ============================================================
+
+print("PROJECT CONFIGURATION LOADED SUCCESSFULLY")
+print(f"PROJECT_NAME: {PROJECT_NAME}")
+print(f"PROJECT_VERSION: {PROJECT_VERSION}")
+print(f"PROJECT_ENVIRONMENT: {PROJECT_ENVIRONMENT}")
+print(f"CATALOG_NAME: {CATALOG_NAME}")
+print(f"VOLUME_RAW_FILES: {VOLUME_RAW_FILES}")
+print(f"RUN_ID: {RUN_ID}")
+print(f"DEFAULT_REFERENCE_YEARS: {DEFAULT_REFERENCE_YEARS}")
+print(f"CSV_REFERENCE_YEARS: {CSV_REFERENCE_YEARS}")
+print(f"REFERENCE_LEGISLATURES: {REFERENCE_LEGISLATURES}")

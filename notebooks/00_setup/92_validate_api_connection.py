@@ -1,828 +1,565 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "collapsed": true,
-     "inputWidgets": {},
-     "nuid": "20b305c3-6b3f-4efe-9e68-89903b3a09d3",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "PROJECT CONFIGURATION LOADED SUCCESSFULLY\nPROJECT_NAME: brazil_legislative_analytics\nPROJECT_VERSION: v1.0.0\nPROJECT_ENVIRONMENT: dev\nCATALOG_NAME: brazil_legislative_analytics\nRUN_ID: bb18fddf-7f49-4292-b2ea-75a4a274bdb9\n"
-     ]
-    }
-   ],
-   "source": [
-    "%run ./01_project_config"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "collapsed": true,
-     "inputWidgets": {},
-     "nuid": "280b8876-f782-4360-9585-7ff5fd4ee3db",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "PROJECT CONFIGURATION LOADED SUCCESSFULLY\nPROJECT_NAME: brazil_legislative_analytics\nPROJECT_VERSION: v1.0.0\nPROJECT_ENVIRONMENT: dev\nCATALOG_NAME: brazil_legislative_analytics\nRUN_ID: a9bb1065-03df-4205-aa28-a6a622597aea\n"
-     ]
-    }
-   ],
-   "source": [
-    "%run ../99_utils/utils_api_client"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "971a64f0-40c7-4f19-9736-e5681bc41a1a",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "==========================================================================================\nBRAZIL LEGISLATIVE ANALYTICS MEDALLION\n92 - VALIDATE API CONNECTION\n==========================================================================================\nExecution Timestamp: 2026-05-20 04:37:46.942779\nAPI Base URL: https://dadosabertos.camara.leg.br/api/v2\n==========================================================================================\n==========================================================================================\nValidating endpoint: /deputados\n==========================================================================================\n==========================================================================================\nValidating endpoint: /frentes\n==========================================================================================\n==========================================================================================\nValidating endpoint: /votacoes\n==========================================================================================\n"
-     ]
-    },
-    {
-     "output_type": "display_data",
-     "data": {
-      "text/html": [
-       "<style scoped>\n",
-       "  .table-result-container {\n",
-       "    max-height: 300px;\n",
-       "    overflow: auto;\n",
-       "  }\n",
-       "  table, th, td {\n",
-       "    border: 1px solid black;\n",
-       "    border-collapse: collapse;\n",
-       "  }\n",
-       "  th, td {\n",
-       "    padding: 5px;\n",
-       "  }\n",
-       "  th {\n",
-       "    text-align: left;\n",
-       "  }\n",
-       "</style><div class='table-result-container'><table class='table-result'><thead style='background-color: white'><tr><th>endpoint_path</th><th>entity_name</th><th>response_time_seconds</th><th>validated_at</th><th>validation_message</th><th>validation_status</th><th>validation_type</th></tr></thead><tbody><tr><td>/deputados</td><td>deputados</td><td>0.95</td><td>2026-05-20T04:37:47.891Z</td><td>API endpoint validated successfully.</td><td>PASSED</td><td>fast_endpoint</td></tr><tr><td>/frentes</td><td>frentes</td><td>0.5</td><td>2026-05-20T04:37:48.396Z</td><td>API endpoint validated successfully.</td><td>PASSED</td><td>fast_endpoint</td></tr><tr><td>/votacoes</td><td>votacoes</td><td>7.58</td><td>2026-05-20T04:37:55.976Z</td><td>API endpoint validated successfully.</td><td>PASSED</td><td>fast_endpoint</td></tr><tr><td>parameterized_endpoint_validation</td><td>parameterized_endpoints</td><td>0.0</td><td>2026-05-20T04:37:55.976Z</td><td>Parameterized endpoint validation was skipped in FAST mode.</td><td>WARNING</td><td>parameterized_endpoint_skipped</td></tr></tbody></table></div>"
-      ]
-     },
-     "metadata": {
-      "application/vnd.databricks.v1+output": {
-       "addedWidgets": {},
-       "aggData": [],
-       "aggError": "",
-       "aggOverflow": false,
-       "aggSchema": [],
-       "aggSeriesLimitReached": false,
-       "aggType": "",
-       "arguments": {},
-       "columnCustomDisplayInfos": {},
-       "data": [
-        [
-         "/deputados",
-         "deputados",
-         0.95,
-         "2026-05-20T04:37:47.891Z",
-         "API endpoint validated successfully.",
-         "PASSED",
-         "fast_endpoint"
-        ],
-        [
-         "/frentes",
-         "frentes",
-         0.5,
-         "2026-05-20T04:37:48.396Z",
-         "API endpoint validated successfully.",
-         "PASSED",
-         "fast_endpoint"
-        ],
-        [
-         "/votacoes",
-         "votacoes",
-         7.58,
-         "2026-05-20T04:37:55.976Z",
-         "API endpoint validated successfully.",
-         "PASSED",
-         "fast_endpoint"
-        ],
-        [
-         "parameterized_endpoint_validation",
-         "parameterized_endpoints",
-         0.0,
-         "2026-05-20T04:37:55.976Z",
-         "Parameterized endpoint validation was skipped in FAST mode.",
-         "WARNING",
-         "parameterized_endpoint_skipped"
-        ]
-       ],
-       "datasetInfos": [],
-       "dbfsResultPath": null,
-       "isJsonSchema": true,
-       "metadata": {},
-       "overflow": false,
-       "plotOptions": {
-        "customPlotOptions": {},
-        "displayType": "table",
-        "pivotAggregation": null,
-        "pivotColumns": null,
-        "xColumns": null,
-        "yColumns": null
-       },
-       "removedWidgets": [],
-       "schema": [
-        {
-         "metadata": "{}",
-         "name": "endpoint_path",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "entity_name",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "response_time_seconds",
-         "type": "\"double\""
-        },
-        {
-         "metadata": "{}",
-         "name": "validated_at",
-         "type": "\"timestamp\""
-        },
-        {
-         "metadata": "{}",
-         "name": "validation_message",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "validation_status",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "validation_type",
-         "type": "\"string\""
-        }
-       ],
-       "type": "table"
-      }
-     },
-     "output_type": "display_data"
-    },
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "API validation results persisted into: brazil_legislative_analytics.audit.aud_log_qualidade_dados\n==========================================================================================\nAPI VALIDATION SUMMARY\n==========================================================================================\nValidation mode: FAST\nPassed validations: 3\nWarning validations: 1\nFailed validations: 0\n==========================================================================================\nWARNING: 1 warning(s) found. Review API validation results before Bronze ingestion.\nAPI VALIDATION COMPLETED\n"
-     ]
-    },
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_config loaded successfully.\n"
-     ]
-    },
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_api_client loaded successfully.\n"
-     ]
-    }
-   ],
-   "source": [
-    "# Databricks notebook source\n",
-    "# MAGIC %md\n",
-    "# MAGIC # 92 Validate API Connection\n",
-    "# MAGIC\n",
-    "# MAGIC Validates connectivity, availability and basic response structure of the Câmara dos Deputados Open Data API.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Purpose\n",
-    "# MAGIC This notebook validates whether the external API is reachable before executing Bronze ingestion pipelines.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Validation Strategy\n",
-    "# MAGIC The notebook supports two validation modes:\n",
-    "# MAGIC\n",
-    "# MAGIC - `FAST`: validates only essential endpoints with short timeout.\n",
-    "# MAGIC - `DEEP`: validates additional endpoints and parameterized endpoints.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Persistence\n",
-    "# MAGIC Validation results are persisted into:\n",
-    "# MAGIC\n",
-    "# MAGIC ```text\n",
-    "# MAGIC audit.aud_log_qualidade_dados\n",
-    "# MAGIC ```\n",
-    "# MAGIC\n",
-    "# MAGIC ## Documentation Standard\n",
-    "# MAGIC - Python functions and variables are written in English.\n",
-    "# MAGIC - Table and field names follow Portuguese mnemonic standards.\n",
-    "# MAGIC - Comments and documentation are written in English.\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ./01_project_config\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ../99_utils/utils_api_client\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "from datetime import datetime\n",
-    "from typing import Optional, Dict, Any\n",
-    "import time\n",
-    "\n",
-    "from pyspark.sql import functions as F\n",
-    "from pyspark.sql.types import LongType, DoubleType\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "print(\"=\" * 90)\n",
-    "print(\"BRAZIL LEGISLATIVE ANALYTICS MEDALLION\")\n",
-    "print(\"92 - VALIDATE API CONNECTION\")\n",
-    "print(\"=\" * 90)\n",
-    "print(f\"Execution Timestamp: {datetime.now()}\")\n",
-    "print(f\"API Base URL: {CAMARA_API_BASE_URL}\")\n",
-    "print(\"=\" * 90)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# API VALIDATION CONFIGURATION\n",
-    "# ============================================================\n",
-    "\n",
-    "VALIDATION_MODE = \"FAST\"\n",
-    "FAIL_ON_ERROR = False\n",
-    "\n",
-    "FAST_REQUEST_TIMEOUT_SECONDS = 15\n",
-    "DEEP_REQUEST_TIMEOUT_SECONDS = 60\n",
-    "\n",
-    "API_TEST_QUERY_PARAMS = {\n",
-    "    API_PAGE_PARAMETER_NAME: 1,\n",
-    "    API_PAGE_SIZE_PARAMETER_NAME: 1,\n",
-    "}\n",
-    "\n",
-    "FAST_API_ENDPOINTS = [\n",
-    "    {\"entity_name\": \"deputados\", \"endpoint_path\": \"/deputados\"},\n",
-    "    {\"entity_name\": \"frentes\", \"endpoint_path\": \"/frentes\"},\n",
-    "    {\"entity_name\": \"votacoes\", \"endpoint_path\": \"/votacoes\"},\n",
-    "]\n",
-    "\n",
-    "DEEP_API_ENDPOINTS = [\n",
-    "    {\"entity_name\": \"eventos\", \"endpoint_path\": \"/eventos\"},\n",
-    "    {\"entity_name\": \"proposicoes\", \"endpoint_path\": \"/proposicoes\"},\n",
-    "    {\"entity_name\": \"orgaos\", \"endpoint_path\": \"/orgaos\"},\n",
-    "]\n",
-    "\n",
-    "if VALIDATION_MODE == \"DEEP\":\n",
-    "    API_ENDPOINTS_TO_VALIDATE = (\n",
-    "        FAST_API_ENDPOINTS\n",
-    "        + DEEP_API_ENDPOINTS\n",
-    "    )\n",
-    "    REQUEST_TIMEOUT_SECONDS = DEEP_REQUEST_TIMEOUT_SECONDS\n",
-    "\n",
-    "else:\n",
-    "    API_ENDPOINTS_TO_VALIDATE = FAST_API_ENDPOINTS\n",
-    "    REQUEST_TIMEOUT_SECONDS = FAST_REQUEST_TIMEOUT_SECONDS\n",
-    "\n",
-    "DATA_QUALITY_LOG_TABLE = (\n",
-    "    f\"{CATALOG_NAME}.\"\n",
-    "    f\"{SCHEMA_AUDIT}.\"\n",
-    "    f\"{AUD_TB_LOG_QUALIDADE_DADOS}\"\n",
-    ")\n",
-    "\n",
-    "validation_results = []\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# API VALIDATION HELPERS\n",
-    "# ============================================================\n",
-    "\n",
-    "def request_endpoint(\n",
-    "    endpoint_path: str,\n",
-    "    query_params: Optional[Dict[str, Any]] = None,\n",
-    ") -> dict:\n",
-    "    \"\"\"\n",
-    "    Requests a Câmara API endpoint using the project API client.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return fetch_camara_api_data(\n",
-    "        endpoint_path=endpoint_path,\n",
-    "        query_params=query_params,\n",
-    "        request_timeout_seconds=REQUEST_TIMEOUT_SECONDS,\n",
-    "        max_retry_attempts=1,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def extract_first_id(\n",
-    "    api_response: dict,\n",
-    "    id_field: str = \"id\",\n",
-    ") -> Optional[str]:\n",
-    "    \"\"\"\n",
-    "    Extracts the first identifier from an API response.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    records = api_response.get(API_RESPONSE_DATA_FIELD, [])\n",
-    "\n",
-    "    if not records:\n",
-    "        return None\n",
-    "\n",
-    "    first_record = records[0]\n",
-    "\n",
-    "    return first_record.get(id_field)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def register_api_validation(\n",
-    "    entity_name: str,\n",
-    "    endpoint_path: str,\n",
-    "    validation_status: str,\n",
-    "    validation_message: str,\n",
-    "    response_time_seconds: float,\n",
-    "    validation_type: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Stores API validation results for final reporting and persistence.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    validation_results.append({\n",
-    "        \"entity_name\": entity_name,\n",
-    "        \"endpoint_path\": endpoint_path,\n",
-    "        \"validation_type\": validation_type,\n",
-    "        \"validation_status\": validation_status,\n",
-    "        \"validation_message\": validation_message,\n",
-    "        \"response_time_seconds\": response_time_seconds,\n",
-    "        \"validated_at\": datetime.now(),\n",
-    "    })\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_endpoint(\n",
-    "    entity_name: str,\n",
-    "    endpoint_path: str,\n",
-    "    query_params: Optional[Dict[str, Any]],\n",
-    "    validation_type: str,\n",
-    "    fail_as_warning: bool = False,\n",
-    ") -> Optional[dict]:\n",
-    "    \"\"\"\n",
-    "    Validates a single API endpoint and stores the result.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    print(\"=\" * 90)\n",
-    "    print(f\"Validating endpoint: {endpoint_path}\")\n",
-    "    print(\"=\" * 90)\n",
-    "\n",
-    "    validation_start_time = time.time()\n",
-    "\n",
-    "    try:\n",
-    "        api_response = request_endpoint(\n",
-    "            endpoint_path=endpoint_path,\n",
-    "            query_params=query_params,\n",
-    "        )\n",
-    "\n",
-    "        response_time_seconds = round(\n",
-    "            time.time() - validation_start_time,\n",
-    "            2,\n",
-    "        )\n",
-    "\n",
-    "        if not isinstance(api_response, dict):\n",
-    "            status = (\n",
-    "                \"WARNING\"\n",
-    "                if fail_as_warning\n",
-    "                else \"FAILED\"\n",
-    "            )\n",
-    "\n",
-    "            register_api_validation(\n",
-    "                entity_name=entity_name,\n",
-    "                endpoint_path=endpoint_path,\n",
-    "                validation_status=status,\n",
-    "                validation_message=\"API response is not a dictionary structure.\",\n",
-    "                response_time_seconds=response_time_seconds,\n",
-    "                validation_type=validation_type,\n",
-    "            )\n",
-    "\n",
-    "            return None\n",
-    "\n",
-    "        if API_RESPONSE_DATA_FIELD not in api_response:\n",
-    "            status = (\n",
-    "                \"WARNING\"\n",
-    "                if fail_as_warning\n",
-    "                else \"FAILED\"\n",
-    "            )\n",
-    "\n",
-    "            register_api_validation(\n",
-    "                entity_name=entity_name,\n",
-    "                endpoint_path=endpoint_path,\n",
-    "                validation_status=status,\n",
-    "                validation_message=\"API response does not contain the expected 'dados' field.\",\n",
-    "                response_time_seconds=response_time_seconds,\n",
-    "                validation_type=validation_type,\n",
-    "            )\n",
-    "\n",
-    "            return None\n",
-    "\n",
-    "        register_api_validation(\n",
-    "            entity_name=entity_name,\n",
-    "            endpoint_path=endpoint_path,\n",
-    "            validation_status=\"PASSED\",\n",
-    "            validation_message=\"API endpoint validated successfully.\",\n",
-    "            response_time_seconds=response_time_seconds,\n",
-    "            validation_type=validation_type,\n",
-    "        )\n",
-    "\n",
-    "        return api_response\n",
-    "\n",
-    "    except Exception as api_error:\n",
-    "        response_time_seconds = round(\n",
-    "            time.time() - validation_start_time,\n",
-    "            2,\n",
-    "        )\n",
-    "\n",
-    "        status = (\n",
-    "            \"WARNING\"\n",
-    "            if fail_as_warning\n",
-    "            else \"FAILED\"\n",
-    "        )\n",
-    "\n",
-    "        register_api_validation(\n",
-    "            entity_name=entity_name,\n",
-    "            endpoint_path=endpoint_path,\n",
-    "            validation_status=status,\n",
-    "            validation_message=str(api_error),\n",
-    "            response_time_seconds=response_time_seconds,\n",
-    "            validation_type=validation_type,\n",
-    "        )\n",
-    "\n",
-    "        return None\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 1. Validate API Endpoints\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "api_responses = {}\n",
-    "\n",
-    "for endpoint_config in API_ENDPOINTS_TO_VALIDATE:\n",
-    "    entity_name = endpoint_config[\"entity_name\"]\n",
-    "    endpoint_path = endpoint_config[\"endpoint_path\"]\n",
-    "\n",
-    "    api_response = validate_endpoint(\n",
-    "        entity_name=entity_name,\n",
-    "        endpoint_path=endpoint_path,\n",
-    "        query_params=API_TEST_QUERY_PARAMS,\n",
-    "        validation_type=(\n",
-    "            \"fast_endpoint\"\n",
-    "            if VALIDATION_MODE == \"FAST\"\n",
-    "            else \"deep_endpoint\"\n",
-    "        ),\n",
-    "        fail_as_warning=not FAIL_ON_ERROR,\n",
-    "    )\n",
-    "\n",
-    "    api_responses[entity_name] = api_response\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 2. Validate Parameterized API Endpoints\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "parameterized_endpoints = []\n",
-    "\n",
-    "if VALIDATION_MODE == \"DEEP\":\n",
-    "\n",
-    "    test_front_id = None\n",
-    "    test_voting_id = None\n",
-    "    test_deputy_id = None\n",
-    "\n",
-    "    if api_responses.get(\"frentes\") is not None:\n",
-    "        test_front_id = extract_first_id(\n",
-    "            api_response=api_responses[\"frentes\"],\n",
-    "            id_field=\"id\",\n",
-    "        )\n",
-    "\n",
-    "    if api_responses.get(\"votacoes\") is not None:\n",
-    "        test_voting_id = extract_first_id(\n",
-    "            api_response=api_responses[\"votacoes\"],\n",
-    "            id_field=\"id\",\n",
-    "        )\n",
-    "\n",
-    "    if api_responses.get(\"deputados\") is not None:\n",
-    "        test_deputy_id = extract_first_id(\n",
-    "            api_response=api_responses[\"deputados\"],\n",
-    "            id_field=\"id\",\n",
-    "        )\n",
-    "\n",
-    "    print(\"=\" * 90)\n",
-    "    print(\"DYNAMIC API IDENTIFIERS\")\n",
-    "    print(\"=\" * 90)\n",
-    "    print(f\"Front ID: {test_front_id}\")\n",
-    "    print(f\"Voting ID: {test_voting_id}\")\n",
-    "    print(f\"Deputy ID: {test_deputy_id}\")\n",
-    "    print(\"=\" * 90)\n",
-    "\n",
-    "    if test_front_id is not None:\n",
-    "        parameterized_endpoints.append({\n",
-    "            \"entity_name\": \"frente_detalhe\",\n",
-    "            \"endpoint_path\": f\"/frentes/{test_front_id}\",\n",
-    "        })\n",
-    "\n",
-    "        parameterized_endpoints.append({\n",
-    "            \"entity_name\": \"frentes_membros\",\n",
-    "            \"endpoint_path\": f\"/frentes/{test_front_id}/membros\",\n",
-    "        })\n",
-    "\n",
-    "    if test_voting_id is not None:\n",
-    "        parameterized_endpoints.append({\n",
-    "            \"entity_name\": \"votos\",\n",
-    "            \"endpoint_path\": f\"/votacoes/{test_voting_id}/votos\",\n",
-    "        })\n",
-    "\n",
-    "    if test_deputy_id is not None:\n",
-    "        parameterized_endpoints.append({\n",
-    "            \"entity_name\": \"despesas_ceap\",\n",
-    "            \"endpoint_path\": f\"/deputados/{test_deputy_id}/despesas\",\n",
-    "        })\n",
-    "\n",
-    "    if not parameterized_endpoints:\n",
-    "        register_api_validation(\n",
-    "            entity_name=\"parameterized_endpoints\",\n",
-    "            endpoint_path=\"dynamic_identifier_resolution\",\n",
-    "            validation_status=\"WARNING\",\n",
-    "            validation_message=\"No dynamic identifiers were resolved for parameterized endpoint validation.\",\n",
-    "            response_time_seconds=0.0,\n",
-    "            validation_type=\"parameterized_endpoint\",\n",
-    "        )\n",
-    "\n",
-    "    for endpoint_config in parameterized_endpoints:\n",
-    "        validate_endpoint(\n",
-    "            entity_name=endpoint_config[\"entity_name\"],\n",
-    "            endpoint_path=endpoint_config[\"endpoint_path\"],\n",
-    "            query_params=API_TEST_QUERY_PARAMS,\n",
-    "            validation_type=\"parameterized_endpoint\",\n",
-    "            fail_as_warning=True,\n",
-    "        )\n",
-    "\n",
-    "else:\n",
-    "\n",
-    "    register_api_validation(\n",
-    "        entity_name=\"parameterized_endpoints\",\n",
-    "        endpoint_path=\"parameterized_endpoint_validation\",\n",
-    "        validation_status=\"WARNING\",\n",
-    "        validation_message=\"Parameterized endpoint validation was skipped in FAST mode.\",\n",
-    "        response_time_seconds=0.0,\n",
-    "        validation_type=\"parameterized_endpoint_skipped\",\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 3. Display Validation Results\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "validation_df = spark.createDataFrame(\n",
-    "    validation_results\n",
-    ")\n",
-    "\n",
-    "display(validation_df)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 4. Persist API Validation Results\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "api_quality_log_df = (\n",
-    "    validation_df\n",
-    "    .withColumn(\"qlt_id_log\", F.expr(\"uuid()\"))\n",
-    "    .withColumn(\"aud_id_execucao\", F.lit(RUN_ID))\n",
-    "    .withColumn(\"aud_tx_nome_projeto\", F.lit(PROJECT_NAME))\n",
-    "    .withColumn(\"aud_tx_versao_pipeline\", F.lit(PROJECT_VERSION))\n",
-    "    .withColumn(\"aud_tx_ambiente\", F.lit(PROJECT_ENVIRONMENT))\n",
-    "    .withColumn(\"aud_tx_nome_notebook\", F.lit(\"92_validate_api_connection\"))\n",
-    "    .withColumn(\"aud_tx_nome_camada\", F.lit(\"setup\"))\n",
-    "    .withColumn(\"aud_tx_nome_entidade\", F.col(\"entity_name\"))\n",
-    "    .withColumn(\"aud_tx_tabela_destino\", F.lit(DATA_QUALITY_LOG_TABLE))\n",
-    "    .withColumn(\"qlt_tx_nome_regra\", F.col(\"validation_type\"))\n",
-    "    .withColumn(\n",
-    "        \"qlt_tx_descricao_regra\",\n",
-    "        F.concat(\n",
-    "            F.lit(\"Validates API endpoint connectivity and response structure: \"),\n",
-    "            F.col(\"endpoint_path\"),\n",
-    "        ),\n",
-    "    )\n",
-    "    .withColumn(\"qlt_tx_status_validacao\", F.col(\"validation_status\"))\n",
-    "    .withColumn(\"qlt_qt_total_registros\", F.lit(1).cast(LongType()))\n",
-    "    .withColumn(\n",
-    "        \"qlt_qt_registros_invalidos\",\n",
-    "        F.when(\n",
-    "            F.col(\"validation_status\") == \"FAILED\",\n",
-    "            F.lit(1),\n",
-    "        )\n",
-    "        .otherwise(F.lit(0))\n",
-    "        .cast(LongType()),\n",
-    "    )\n",
-    "    .withColumn(\n",
-    "        \"qlt_pc_registros_invalidos\",\n",
-    "        F.when(\n",
-    "            F.col(\"validation_status\") == \"FAILED\",\n",
-    "            F.lit(100.0),\n",
-    "        )\n",
-    "        .otherwise(F.lit(0.0))\n",
-    "        .cast(DoubleType()),\n",
-    "    )\n",
-    "    .withColumn(\"qlt_dh_validacao\", F.current_timestamp())\n",
-    "    .withColumn(\n",
-    "        \"qlt_tx_mensagem\",\n",
-    "        F.concat(\n",
-    "            F.lit(\"Endpoint: \"),\n",
-    "            F.col(\"endpoint_path\"),\n",
-    "            F.lit(\" | Validation mode: \"),\n",
-    "            F.lit(VALIDATION_MODE),\n",
-    "            F.lit(\" | Validation type: \"),\n",
-    "            F.col(\"validation_type\"),\n",
-    "            F.lit(\" | Response time: \"),\n",
-    "            F.col(\"response_time_seconds\").cast(\"string\"),\n",
-    "            F.lit(\" seconds | \"),\n",
-    "            F.col(\"validation_message\"),\n",
-    "        ),\n",
-    "    )\n",
-    "    .select(\n",
-    "        \"qlt_id_log\",\n",
-    "        \"aud_id_execucao\",\n",
-    "        \"aud_tx_nome_projeto\",\n",
-    "        \"aud_tx_versao_pipeline\",\n",
-    "        \"aud_tx_ambiente\",\n",
-    "        \"aud_tx_nome_notebook\",\n",
-    "        \"aud_tx_nome_camada\",\n",
-    "        \"aud_tx_nome_entidade\",\n",
-    "        \"aud_tx_tabela_destino\",\n",
-    "        \"qlt_tx_nome_regra\",\n",
-    "        \"qlt_tx_descricao_regra\",\n",
-    "        \"qlt_tx_status_validacao\",\n",
-    "        \"qlt_qt_total_registros\",\n",
-    "        \"qlt_qt_registros_invalidos\",\n",
-    "        \"qlt_pc_registros_invalidos\",\n",
-    "        \"qlt_dh_validacao\",\n",
-    "        \"qlt_tx_mensagem\",\n",
-    "    )\n",
-    ")\n",
-    "\n",
-    "api_quality_log_df.write.mode(\n",
-    "    \"append\"\n",
-    ").saveAsTable(DATA_QUALITY_LOG_TABLE)\n",
-    "\n",
-    "print(\n",
-    "    f\"API validation results persisted into: \"\n",
-    "    f\"{DATA_QUALITY_LOG_TABLE}\"\n",
-    ")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 5. Validation Summary\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "failed_count = (\n",
-    "    validation_df\n",
-    "    .filter(\"validation_status = 'FAILED'\")\n",
-    "    .count()\n",
-    ")\n",
-    "\n",
-    "warning_count = (\n",
-    "    validation_df\n",
-    "    .filter(\"validation_status = 'WARNING'\")\n",
-    "    .count()\n",
-    ")\n",
-    "\n",
-    "passed_count = (\n",
-    "    validation_df\n",
-    "    .filter(\"validation_status = 'PASSED'\")\n",
-    "    .count()\n",
-    ")\n",
-    "\n",
-    "print(\"=\" * 90)\n",
-    "print(\"API VALIDATION SUMMARY\")\n",
-    "print(\"=\" * 90)\n",
-    "print(f\"Validation mode: {VALIDATION_MODE}\")\n",
-    "print(f\"Passed validations: {passed_count}\")\n",
-    "print(f\"Warning validations: {warning_count}\")\n",
-    "print(f\"Failed validations: {failed_count}\")\n",
-    "print(\"=\" * 90)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "if failed_count > 0 and FAIL_ON_ERROR:\n",
-    "\n",
-    "    raise Exception(\n",
-    "        f\"API validation failed with \"\n",
-    "        f\"{failed_count} failed endpoint validation(s).\"\n",
-    "    )\n",
-    "\n",
-    "if failed_count > 0:\n",
-    "\n",
-    "    print(\n",
-    "        f\"WARNING: API validation finished with \"\n",
-    "        f\"{failed_count} failed validation(s). \"\n",
-    "        \"This may be caused by API slowness or provider instability.\"\n",
-    "    )\n",
-    "\n",
-    "if warning_count > 0:\n",
-    "\n",
-    "    print(\n",
-    "        f\"WARNING: {warning_count} warning(s) found. \"\n",
-    "        \"Review API validation results before Bronze ingestion.\"\n",
-    "    )\n",
-    "\n",
-    "print(\"API VALIDATION COMPLETED\")"
-   ]
-  }
- ],
- "metadata": {
-  "application/vnd.databricks.v1+notebook": {
-   "computePreferences": {
-    "hardware": {
-     "accelerator": null,
-     "gpuPoolId": null,
-     "memory": null
-    },
-    "software": {
-     "pinSparkToX86": null
-    }
-   },
-   "dashboards": [],
-   "environmentMetadata": {
-    "base_environment": "",
-    "environment_version": "5"
-   },
-   "inputWidgetPreferences": null,
-   "language": "python",
-   "notebookMetadata": {
-    "pythonIndentUnit": 4
-   },
-   "notebookName": "92_validate_api_connection",
-   "widgets": {}
-  },
-  "language_info": {
-   "name": "python"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 0
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # Setup Layer — API Connectivity Validation
+# MAGIC
+# MAGIC **Notebook:** `92_validate_api_connection`  
+# MAGIC **Layer:** `Setup`  
+# MAGIC **Source/Endpoint:** `Câmara dos Deputados Open Data API`  
+# MAGIC **Target:** `API validation results and audit quality logs`
+# MAGIC
+# MAGIC Validates connectivity, availability and response structure of the
+# MAGIC Câmara dos Deputados Open Data API before executing Bronze ingestion pipelines.
+# MAGIC
+# MAGIC This notebook verifies whether the external API is reachable and
+# MAGIC operational for Medallion ingestion workflows.
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Responsibilities
+# MAGIC
+# MAGIC - Validate API endpoint connectivity
+# MAGIC - Validate API response structure
+# MAGIC - Validate parameterized endpoint accessibility
+# MAGIC - Measure API response time
+# MAGIC - Persist API validation results into audit tables
+# MAGIC - Generate API validation summary
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Notes
+# MAGIC
+# MAGIC - Supports FAST and DEEP validation modes
+# MAGIC - Validation results are persisted into audit quality logs
+# MAGIC - Parameterized endpoint validation is optional
+# MAGIC - API instability may generate warning validations
+# MAGIC
+# MAGIC For additional architectural and governance details, refer to:
+# MAGIC
+# MAGIC - `/docs/architecture/medallion_architecture.md`
+# MAGIC - `/docs/governance/data_governance.md`
+# MAGIC - `/docs/monitoring/api_validation.md`
+
+# COMMAND ----------
+
+# MAGIC %run ./01_project_config
+
+# COMMAND ----------
+
+# MAGIC %run ../99_utils/utils_api_client
+
+# COMMAND ----------
+
+from datetime import datetime
+from typing import Optional, Dict, Any
+import time
+
+from pyspark.sql import functions as F
+from pyspark.sql.types import LongType, DoubleType
+
+# COMMAND ----------
+
+print("=" * 90)
+print("BRAZIL LEGISLATIVE ANALYTICS MEDALLION")
+print("92 - VALIDATE API CONNECTION")
+print("=" * 90)
+print(f"Execution Timestamp: {datetime.now()}")
+print(f"API Base URL: {CAMARA_API_BASE_URL}")
+print("=" * 90)
+
+# COMMAND ----------
+
+# ============================================================
+# API VALIDATION CONFIGURATION
+# ============================================================
+
+VALIDATION_MODE = "FAST"
+FAIL_ON_ERROR = False
+
+FAST_REQUEST_TIMEOUT_SECONDS = 15
+DEEP_REQUEST_TIMEOUT_SECONDS = 60
+
+API_TEST_QUERY_PARAMS = {
+    API_PAGE_PARAMETER_NAME: 1,
+    API_PAGE_SIZE_PARAMETER_NAME: 1,
 }
+
+FAST_API_ENDPOINTS = [
+    {"entity_name": "deputados", "endpoint_path": "/deputados"},
+    {"entity_name": "frentes", "endpoint_path": "/frentes"},
+    {"entity_name": "votacoes", "endpoint_path": "/votacoes"},
+]
+
+DEEP_API_ENDPOINTS = [
+    {"entity_name": "eventos", "endpoint_path": "/eventos"},
+    {"entity_name": "proposicoes", "endpoint_path": "/proposicoes"},
+    {"entity_name": "orgaos", "endpoint_path": "/orgaos"},
+]
+
+if VALIDATION_MODE == "DEEP":
+    API_ENDPOINTS_TO_VALIDATE = (
+        FAST_API_ENDPOINTS
+        + DEEP_API_ENDPOINTS
+    )
+    REQUEST_TIMEOUT_SECONDS = DEEP_REQUEST_TIMEOUT_SECONDS
+
+else:
+    API_ENDPOINTS_TO_VALIDATE = FAST_API_ENDPOINTS
+    REQUEST_TIMEOUT_SECONDS = FAST_REQUEST_TIMEOUT_SECONDS
+
+DATA_QUALITY_LOG_TABLE = (
+    f"{CATALOG_NAME}."
+    f"{SCHEMA_AUDIT}."
+    f"{AUD_TB_LOG_QUALIDADE_DADOS}"
+)
+
+validation_results = []
+
+# COMMAND ----------
+
+# ============================================================
+# API VALIDATION HELPERS
+# ============================================================
+
+def request_endpoint(
+    endpoint_path: str,
+    query_params: Optional[Dict[str, Any]] = None,
+) -> dict:
+    """
+    Requests a Câmara API endpoint using the project API client.
+    """
+
+    return fetch_camara_api_data(
+        endpoint_path=endpoint_path,
+        query_params=query_params,
+        request_timeout_seconds=REQUEST_TIMEOUT_SECONDS,
+        max_retry_attempts=1,
+    )
+
+# COMMAND ----------
+
+def extract_first_id(
+    api_response: dict,
+    id_field: str = "id",
+) -> Optional[str]:
+    """
+    Extracts the first identifier from an API response.
+    """
+
+    records = api_response.get(API_RESPONSE_DATA_FIELD, [])
+
+    if not records:
+        return None
+
+    first_record = records[0]
+
+    return first_record.get(id_field)
+
+# COMMAND ----------
+
+def register_api_validation(
+    entity_name: str,
+    endpoint_path: str,
+    validation_status: str,
+    validation_message: str,
+    response_time_seconds: float,
+    validation_type: str,
+) -> None:
+    """
+    Stores API validation results for final reporting and persistence.
+    """
+
+    validation_results.append({
+        "entity_name": entity_name,
+        "endpoint_path": endpoint_path,
+        "validation_type": validation_type,
+        "validation_status": validation_status,
+        "validation_message": validation_message,
+        "response_time_seconds": response_time_seconds,
+        "validated_at": datetime.now(),
+    })
+
+# COMMAND ----------
+
+def validate_endpoint(
+    entity_name: str,
+    endpoint_path: str,
+    query_params: Optional[Dict[str, Any]],
+    validation_type: str,
+    fail_as_warning: bool = False,
+) -> Optional[dict]:
+    """
+    Validates a single API endpoint and stores the result.
+    """
+
+    print("=" * 90)
+    print(f"Validating endpoint: {endpoint_path}")
+    print("=" * 90)
+
+    validation_start_time = time.time()
+
+    try:
+        api_response = request_endpoint(
+            endpoint_path=endpoint_path,
+            query_params=query_params,
+        )
+
+        response_time_seconds = round(
+            time.time() - validation_start_time,
+            2,
+        )
+
+        if not isinstance(api_response, dict):
+            status = (
+                "WARNING"
+                if fail_as_warning
+                else "FAILED"
+            )
+
+            register_api_validation(
+                entity_name=entity_name,
+                endpoint_path=endpoint_path,
+                validation_status=status,
+                validation_message="API response is not a dictionary structure.",
+                response_time_seconds=response_time_seconds,
+                validation_type=validation_type,
+            )
+
+            return None
+
+        if API_RESPONSE_DATA_FIELD not in api_response:
+            status = (
+                "WARNING"
+                if fail_as_warning
+                else "FAILED"
+            )
+
+            register_api_validation(
+                entity_name=entity_name,
+                endpoint_path=endpoint_path,
+                validation_status=status,
+                validation_message="API response does not contain the expected 'dados' field.",
+                response_time_seconds=response_time_seconds,
+                validation_type=validation_type,
+            )
+
+            return None
+
+        register_api_validation(
+            entity_name=entity_name,
+            endpoint_path=endpoint_path,
+            validation_status="PASSED",
+            validation_message="API endpoint validated successfully.",
+            response_time_seconds=response_time_seconds,
+            validation_type=validation_type,
+        )
+
+        return api_response
+
+    except Exception as api_error:
+        response_time_seconds = round(
+            time.time() - validation_start_time,
+            2,
+        )
+
+        status = (
+            "WARNING"
+            if fail_as_warning
+            else "FAILED"
+        )
+
+        register_api_validation(
+            entity_name=entity_name,
+            endpoint_path=endpoint_path,
+            validation_status=status,
+            validation_message=str(api_error),
+            response_time_seconds=response_time_seconds,
+            validation_type=validation_type,
+        )
+
+        return None
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 1. Validate API Endpoints
+
+# COMMAND ----------
+
+api_responses = {}
+
+for endpoint_config in API_ENDPOINTS_TO_VALIDATE:
+    entity_name = endpoint_config["entity_name"]
+    endpoint_path = endpoint_config["endpoint_path"]
+
+    api_response = validate_endpoint(
+        entity_name=entity_name,
+        endpoint_path=endpoint_path,
+        query_params=API_TEST_QUERY_PARAMS,
+        validation_type=(
+            "fast_endpoint"
+            if VALIDATION_MODE == "FAST"
+            else "deep_endpoint"
+        ),
+        fail_as_warning=not FAIL_ON_ERROR,
+    )
+
+    api_responses[entity_name] = api_response
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 2. Validate Parameterized API Endpoints
+
+# COMMAND ----------
+
+parameterized_endpoints = []
+
+if VALIDATION_MODE == "DEEP":
+
+    test_front_id = None
+    test_voting_id = None
+    test_deputy_id = None
+
+    if api_responses.get("frentes") is not None:
+        test_front_id = extract_first_id(
+            api_response=api_responses["frentes"],
+            id_field="id",
+        )
+
+    if api_responses.get("votacoes") is not None:
+        test_voting_id = extract_first_id(
+            api_response=api_responses["votacoes"],
+            id_field="id",
+        )
+
+    if api_responses.get("deputados") is not None:
+        test_deputy_id = extract_first_id(
+            api_response=api_responses["deputados"],
+            id_field="id",
+        )
+
+    print("=" * 90)
+    print("DYNAMIC API IDENTIFIERS")
+    print("=" * 90)
+    print(f"Front ID: {test_front_id}")
+    print(f"Voting ID: {test_voting_id}")
+    print(f"Deputy ID: {test_deputy_id}")
+    print("=" * 90)
+
+    if test_front_id is not None:
+        parameterized_endpoints.append({
+            "entity_name": "frente_detalhe",
+            "endpoint_path": f"/frentes/{test_front_id}",
+        })
+
+        parameterized_endpoints.append({
+            "entity_name": "frentes_membros",
+            "endpoint_path": f"/frentes/{test_front_id}/membros",
+        })
+
+    if test_voting_id is not None:
+        parameterized_endpoints.append({
+            "entity_name": "votos",
+            "endpoint_path": f"/votacoes/{test_voting_id}/votos",
+        })
+
+    if test_deputy_id is not None:
+        parameterized_endpoints.append({
+            "entity_name": "despesas_ceap",
+            "endpoint_path": f"/deputados/{test_deputy_id}/despesas",
+        })
+
+    if not parameterized_endpoints:
+        register_api_validation(
+            entity_name="parameterized_endpoints",
+            endpoint_path="dynamic_identifier_resolution",
+            validation_status="WARNING",
+            validation_message="No dynamic identifiers were resolved for parameterized endpoint validation.",
+            response_time_seconds=0.0,
+            validation_type="parameterized_endpoint",
+        )
+
+    for endpoint_config in parameterized_endpoints:
+        validate_endpoint(
+            entity_name=endpoint_config["entity_name"],
+            endpoint_path=endpoint_config["endpoint_path"],
+            query_params=API_TEST_QUERY_PARAMS,
+            validation_type="parameterized_endpoint",
+            fail_as_warning=True,
+        )
+
+else:
+
+    register_api_validation(
+        entity_name="parameterized_endpoints",
+        endpoint_path="parameterized_endpoint_validation",
+        validation_status="WARNING",
+        validation_message="Parameterized endpoint validation was skipped in FAST mode.",
+        response_time_seconds=0.0,
+        validation_type="parameterized_endpoint_skipped",
+    )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 3. Display Validation Results
+
+# COMMAND ----------
+
+validation_df = spark.createDataFrame(
+    validation_results
+)
+
+display(validation_df)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 4. Persist API Validation Results
+
+# COMMAND ----------
+
+api_quality_log_df = (
+    validation_df
+    .withColumn("qlt_id_log", F.expr("uuid()"))
+    .withColumn("aud_id_execucao", F.lit(RUN_ID))
+    .withColumn("aud_tx_nome_projeto", F.lit(PROJECT_NAME))
+    .withColumn("aud_tx_versao_pipeline", F.lit(PROJECT_VERSION))
+    .withColumn("aud_tx_ambiente", F.lit(PROJECT_ENVIRONMENT))
+    .withColumn("aud_tx_nome_notebook", F.lit("92_validate_api_connection"))
+    .withColumn("aud_tx_nome_camada", F.lit("setup"))
+    .withColumn("aud_tx_nome_entidade", F.col("entity_name"))
+    .withColumn("aud_tx_tabela_destino", F.lit(DATA_QUALITY_LOG_TABLE))
+    .withColumn("qlt_tx_nome_regra", F.col("validation_type"))
+    .withColumn(
+        "qlt_tx_descricao_regra",
+        F.concat(
+            F.lit("Validates API endpoint connectivity and response structure: "),
+            F.col("endpoint_path"),
+        ),
+    )
+    .withColumn("qlt_tx_status_validacao", F.col("validation_status"))
+    .withColumn("qlt_qt_total_registros", F.lit(1).cast(LongType()))
+    .withColumn(
+        "qlt_qt_registros_invalidos",
+        F.when(
+            F.col("validation_status") == "FAILED",
+            F.lit(1),
+        )
+        .otherwise(F.lit(0))
+        .cast(LongType()),
+    )
+    .withColumn(
+        "qlt_pc_registros_invalidos",
+        F.when(
+            F.col("validation_status") == "FAILED",
+            F.lit(100.0),
+        )
+        .otherwise(F.lit(0.0))
+        .cast(DoubleType()),
+    )
+    .withColumn("qlt_dh_validacao", F.current_timestamp())
+    .withColumn(
+        "qlt_tx_mensagem",
+        F.concat(
+            F.lit("Endpoint: "),
+            F.col("endpoint_path"),
+            F.lit(" | Validation mode: "),
+            F.lit(VALIDATION_MODE),
+            F.lit(" | Validation type: "),
+            F.col("validation_type"),
+            F.lit(" | Response time: "),
+            F.col("response_time_seconds").cast("string"),
+            F.lit(" seconds | "),
+            F.col("validation_message"),
+        ),
+    )
+    .select(
+        "qlt_id_log",
+        "aud_id_execucao",
+        "aud_tx_nome_projeto",
+        "aud_tx_versao_pipeline",
+        "aud_tx_ambiente",
+        "aud_tx_nome_notebook",
+        "aud_tx_nome_camada",
+        "aud_tx_nome_entidade",
+        "aud_tx_tabela_destino",
+        "qlt_tx_nome_regra",
+        "qlt_tx_descricao_regra",
+        "qlt_tx_status_validacao",
+        "qlt_qt_total_registros",
+        "qlt_qt_registros_invalidos",
+        "qlt_pc_registros_invalidos",
+        "qlt_dh_validacao",
+        "qlt_tx_mensagem",
+    )
+)
+
+api_quality_log_df.write.mode(
+    "append"
+).saveAsTable(DATA_QUALITY_LOG_TABLE)
+
+print(
+    f"API validation results persisted into: "
+    f"{DATA_QUALITY_LOG_TABLE}"
+)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 5. Validation Summary
+
+# COMMAND ----------
+
+failed_count = (
+    validation_df
+    .filter("validation_status = 'FAILED'")
+    .count()
+)
+
+warning_count = (
+    validation_df
+    .filter("validation_status = 'WARNING'")
+    .count()
+)
+
+passed_count = (
+    validation_df
+    .filter("validation_status = 'PASSED'")
+    .count()
+)
+
+print("=" * 90)
+print("API VALIDATION SUMMARY")
+print("=" * 90)
+print(f"Validation mode: {VALIDATION_MODE}")
+print(f"Passed validations: {passed_count}")
+print(f"Warning validations: {warning_count}")
+print(f"Failed validations: {failed_count}")
+print("=" * 90)
+
+# COMMAND ----------
+
+if failed_count > 0 and FAIL_ON_ERROR:
+
+    raise Exception(
+        f"API validation failed with "
+        f"{failed_count} failed endpoint validation(s)."
+    )
+
+if failed_count > 0:
+
+    print(
+        f"WARNING: API validation finished with "
+        f"{failed_count} failed validation(s). "
+        "This may be caused by API slowness or provider instability."
+    )
+
+if warning_count > 0:
+
+    print(
+        f"WARNING: {warning_count} warning(s) found. "
+        "Review API validation results before Bronze ingestion."
+    )
+
+print("API VALIDATION COMPLETED")

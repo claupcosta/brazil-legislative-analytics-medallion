@@ -1,318 +1,251 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "3edfbec9-0811-4302-9e66-e7ceca7db8c8",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Project configuration loaded successfully.\nProject: brazil_legislative_analytics\nCatalog: brazil_legislative_analytics\nEnvironment: dev\nDefault legislatures: [56, 57]\nAnalysis years: [2022, 2023, 2024, 2025, 2026]\n"
-     ]
-    }
-   ],
-   "source": [
-    "%run ./utils_config"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "65453c9f-e737-466b-9878-edf6a0179b81",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_hash loaded successfully.\n"
-     ]
-    }
-   ],
-   "source": [
-    "# Databricks notebook source\n",
-    "# MAGIC %md\n",
-    "# MAGIC # 99 Utils — Hash Utilities\n",
-    "# MAGIC\n",
-    "# MAGIC **Notebook:** `utils_hash`\n",
-    "# MAGIC\n",
-    "# MAGIC Provides reusable hash functions for record traceability, deduplication and incremental processing.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Responsibilities\n",
-    "# MAGIC - Generate deterministic row-level hashes\n",
-    "# MAGIC - Validate hash input columns before execution\n",
-    "# MAGIC - Support record comparison across pipeline executions\n",
-    "# MAGIC - Support deduplication logic in Silver\n",
-    "# MAGIC - Support incremental processing and replay strategies\n",
-    "# MAGIC - Improve traceability across Bronze, Silver, Gold and Marts\n",
-    "# MAGIC\n",
-    "# MAGIC ## Technical Notes\n",
-    "# MAGIC - Hash values are generated using SHA2-256.\n",
-    "# MAGIC - Null values are normalized before hash generation.\n",
-    "# MAGIC - Column existence is validated before hash generation.\n",
-    "# MAGIC - Python functions and variables are written in English.\n",
-    "# MAGIC - Table and field names follow Portuguese mnemonic standards.\n",
-    "# MAGIC - Comments and documentation are written in English.\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ./utils_config\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "from typing import List, Optional\n",
-    "from pyspark.sql import DataFrame, Column\n",
-    "from pyspark.sql import functions as F\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "HASH_NULL_VALUE = \"__NULL__\"\n",
-    "HASH_SEPARATOR = \"||\"\n",
-    "HASH_BITS = 256\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_dataframe(dataframe: DataFrame) -> None:\n",
-    "    \"\"\"\n",
-    "    Validates whether the input DataFrame is valid for hash operations.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if dataframe is None:\n",
-    "        raise ValueError(\"Input DataFrame cannot be None.\")\n",
-    "\n",
-    "    if not hasattr(dataframe, \"columns\"):\n",
-    "        raise TypeError(\"Input object must be a Spark DataFrame.\")\n",
-    "\n",
-    "    if len(dataframe.columns) == 0:\n",
-    "        raise ValueError(\"Input DataFrame must contain at least one column.\")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_columns(\n",
-    "    dataframe: DataFrame,\n",
-    "    columns: List[str],\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Validates whether all requested columns exist in the DataFrame.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    validate_dataframe(dataframe)\n",
-    "\n",
-    "    if columns is None or len(columns) == 0:\n",
-    "        raise ValueError(\"Column list cannot be empty.\")\n",
-    "\n",
-    "    missing_columns = [\n",
-    "        column\n",
-    "        for column in columns\n",
-    "        if column not in dataframe.columns\n",
-    "    ]\n",
-    "\n",
-    "    if missing_columns:\n",
-    "        raise ValueError(\n",
-    "            \"The following columns do not exist in the DataFrame: \"\n",
-    "            f\"{missing_columns}\"\n",
-    "        )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def normalize_column(column: str) -> Column:\n",
-    "    \"\"\"\n",
-    "    Normalizes a column before hash generation.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return F.coalesce(\n",
-    "        F.col(column).cast(\"string\"),\n",
-    "        F.lit(HASH_NULL_VALUE)\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def generate_hash(columns: List[str]) -> Column:\n",
-    "    \"\"\"\n",
-    "    Generates a SHA2-256 hash expression based on a list of columns.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if columns is None or len(columns) == 0:\n",
-    "        raise ValueError(\"Column list cannot be empty.\")\n",
-    "\n",
-    "    normalized_columns = [\n",
-    "        normalize_column(column)\n",
-    "        for column in columns\n",
-    "    ]\n",
-    "\n",
-    "    return F.sha2(\n",
-    "        F.concat_ws(HASH_SEPARATOR, *normalized_columns),\n",
-    "        HASH_BITS\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def add_hash(\n",
-    "    dataframe: DataFrame,\n",
-    "    columns: List[str],\n",
-    "    hash_column: str = \"aud_tx_hash_registro\",\n",
-    ") -> DataFrame:\n",
-    "    \"\"\"\n",
-    "    Adds a deterministic record hash column to a DataFrame.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    validate_columns(\n",
-    "        dataframe=dataframe,\n",
-    "        columns=columns\n",
-    "    )\n",
-    "\n",
-    "    try:\n",
-    "        return dataframe.withColumn(\n",
-    "            hash_column,\n",
-    "            generate_hash(columns)\n",
-    "        )\n",
-    "\n",
-    "    except Exception as error:\n",
-    "        raise RuntimeError(\n",
-    "            f\"Failed to add hash column '{hash_column}'. \"\n",
-    "            f\"Original error: {str(error)}\"\n",
-    "        )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def add_all_hash(\n",
-    "    dataframe: DataFrame,\n",
-    "    hash_column: str = \"aud_tx_hash_registro\",\n",
-    "    excluded_columns: Optional[List[str]] = None,\n",
-    ") -> DataFrame:\n",
-    "    \"\"\"\n",
-    "    Adds a hash column using all DataFrame columns except excluded columns.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    validate_dataframe(dataframe)\n",
-    "\n",
-    "    excluded_columns = excluded_columns or []\n",
-    "\n",
-    "    hash_columns = [\n",
-    "        column\n",
-    "        for column in dataframe.columns\n",
-    "        if column not in excluded_columns\n",
-    "    ]\n",
-    "\n",
-    "    return add_hash(\n",
-    "        dataframe=dataframe,\n",
-    "        columns=hash_columns,\n",
-    "        hash_column=hash_column\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def add_key_hash(\n",
-    "    dataframe: DataFrame,\n",
-    "    key_columns: List[str],\n",
-    "    hash_column: str = \"aud_tx_hash_chave_negocio\",\n",
-    ") -> DataFrame:\n",
-    "    \"\"\"\n",
-    "    Adds a deterministic business key hash column to a DataFrame.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return add_hash(\n",
-    "        dataframe=dataframe,\n",
-    "        columns=key_columns,\n",
-    "        hash_column=hash_column\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_hash_columns(\n",
-    "    dataframe: DataFrame,\n",
-    "    excluded_columns: Optional[List[str]] = None,\n",
-    ") -> List[str]:\n",
-    "    \"\"\"\n",
-    "    Returns the list of columns eligible for hash generation.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    validate_dataframe(dataframe)\n",
-    "\n",
-    "    excluded_columns = excluded_columns or []\n",
-    "\n",
-    "    return [\n",
-    "        column\n",
-    "        for column in dataframe.columns\n",
-    "        if column not in excluded_columns\n",
-    "    ]\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def compare_hashes(\n",
-    "    source_dataframe: DataFrame,\n",
-    "    target_dataframe: DataFrame,\n",
-    "    hash_column: str = \"aud_tx_hash_registro\",\n",
-    ") -> DataFrame:\n",
-    "    \"\"\"\n",
-    "    Returns source records that are not present in target based on the hash column.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    validate_columns(source_dataframe, [hash_column])\n",
-    "    validate_columns(target_dataframe, [hash_column])\n",
-    "\n",
-    "    return (\n",
-    "        source_dataframe.alias(\"source\")\n",
-    "        .join(\n",
-    "            target_dataframe.select(hash_column).alias(\"target\"),\n",
-    "            on=hash_column,\n",
-    "            how=\"left_anti\"\n",
-    "        )\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "print(\"utils_hash loaded successfully.\")"
-   ]
-  }
- ],
- "metadata": {
-  "application/vnd.databricks.v1+notebook": {
-   "computePreferences": null,
-   "dashboards": [],
-   "environmentMetadata": {
-    "base_environment": "",
-    "environment_version": "5"
-   },
-   "inputWidgetPreferences": null,
-   "language": "python",
-   "notebookMetadata": {
-    "pythonIndentUnit": 4
-   },
-   "notebookName": "utils_hash",
-   "widgets": {}
-  },
-  "language_info": {
-   "name": "python"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 0
-}
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # Utils Layer — Hash Utilities
+# MAGIC
+# MAGIC **Notebook:** `utils_hash`  
+# MAGIC **Layer:** `Utils`  
+# MAGIC **Source/Endpoint:** `Spark DataFrames`  
+# MAGIC **Target:** `Reusable hash generation and comparison functions`
+# MAGIC
+# MAGIC Provides reusable hash utilities for record traceability,
+# MAGIC deduplication and incremental processing workflows.
+# MAGIC
+# MAGIC This notebook centralizes deterministic hash generation logic
+# MAGIC used across Bronze, Silver, Gold and Marts layers.
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Responsibilities
+# MAGIC
+# MAGIC - Generate deterministic row-level hashes
+# MAGIC - Validate hash input columns before execution
+# MAGIC - Normalize null values during hash generation
+# MAGIC - Support deduplication workflows
+# MAGIC - Support incremental and replay processing strategies
+# MAGIC - Compare records across pipeline executions
+# MAGIC - Improve traceability across Medallion layers
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Notes
+# MAGIC
+# MAGIC - Hash generation uses SHA2-256
+# MAGIC - Null values are normalized before hash generation
+# MAGIC - Supports business key and full-record hash strategies
+# MAGIC - Shared utility notebook across Medallion workflows
+# MAGIC
+# MAGIC For additional architectural and governance details, refer to:
+# MAGIC
+# MAGIC - `/docs/governance/data_lineage.md`
+# MAGIC - `/docs/standards/coding_standards.md`
+# MAGIC - `/docs/architecture/medallion_architecture.md`
+
+# COMMAND ----------
+
+# MAGIC %run ./utils_config
+
+# COMMAND ----------
+
+from typing import List, Optional
+from pyspark.sql import DataFrame, Column
+from pyspark.sql import functions as F
+
+# COMMAND ----------
+
+HASH_NULL_VALUE = "__NULL__"
+HASH_SEPARATOR = "||"
+HASH_BITS = 256
+
+# COMMAND ----------
+
+def validate_dataframe(dataframe: DataFrame) -> None:
+    """
+    Validates whether the input DataFrame is valid for hash operations.
+    """
+
+    if dataframe is None:
+        raise ValueError("Input DataFrame cannot be None.")
+
+    if not hasattr(dataframe, "columns"):
+        raise TypeError("Input object must be a Spark DataFrame.")
+
+    if len(dataframe.columns) == 0:
+        raise ValueError("Input DataFrame must contain at least one column.")
+
+# COMMAND ----------
+
+def validate_columns(
+    dataframe: DataFrame,
+    columns: List[str],
+) -> None:
+    """
+    Validates whether all requested columns exist in the DataFrame.
+    """
+
+    validate_dataframe(dataframe)
+
+    if columns is None or len(columns) == 0:
+        raise ValueError("Column list cannot be empty.")
+
+    missing_columns = [
+        column
+        for column in columns
+        if column not in dataframe.columns
+    ]
+
+    if missing_columns:
+        raise ValueError(
+            "The following columns do not exist in the DataFrame: "
+            f"{missing_columns}"
+        )
+
+# COMMAND ----------
+
+def normalize_column(column: str) -> Column:
+    """
+    Normalizes a column before hash generation.
+    """
+
+    return F.coalesce(
+        F.col(column).cast("string"),
+        F.lit(HASH_NULL_VALUE)
+    )
+
+# COMMAND ----------
+
+def generate_hash(columns: List[str]) -> Column:
+    """
+    Generates a SHA2-256 hash expression based on a list of columns.
+    """
+
+    if columns is None or len(columns) == 0:
+        raise ValueError("Column list cannot be empty.")
+
+    normalized_columns = [
+        normalize_column(column)
+        for column in columns
+    ]
+
+    return F.sha2(
+        F.concat_ws(HASH_SEPARATOR, *normalized_columns),
+        HASH_BITS
+    )
+
+# COMMAND ----------
+
+def add_hash(
+    dataframe: DataFrame,
+    columns: List[str],
+    hash_column: str = "aud_tx_hash_registro",
+) -> DataFrame:
+    """
+    Adds a deterministic record hash column to a DataFrame.
+    """
+
+    validate_columns(
+        dataframe=dataframe,
+        columns=columns
+    )
+
+    try:
+        return dataframe.withColumn(
+            hash_column,
+            generate_hash(columns)
+        )
+
+    except Exception as error:
+        raise RuntimeError(
+            f"Failed to add hash column '{hash_column}'. "
+            f"Original error: {str(error)}"
+        )
+
+# COMMAND ----------
+
+def add_all_hash(
+    dataframe: DataFrame,
+    hash_column: str = "aud_tx_hash_registro",
+    excluded_columns: Optional[List[str]] = None,
+) -> DataFrame:
+    """
+    Adds a hash column using all DataFrame columns except excluded columns.
+    """
+
+    validate_dataframe(dataframe)
+
+    excluded_columns = excluded_columns or []
+
+    hash_columns = [
+        column
+        for column in dataframe.columns
+        if column not in excluded_columns
+    ]
+
+    return add_hash(
+        dataframe=dataframe,
+        columns=hash_columns,
+        hash_column=hash_column
+    )
+
+# COMMAND ----------
+
+def add_key_hash(
+    dataframe: DataFrame,
+    key_columns: List[str],
+    hash_column: str = "aud_tx_hash_chave_negocio",
+) -> DataFrame:
+    """
+    Adds a deterministic business key hash column to a DataFrame.
+    """
+
+    return add_hash(
+        dataframe=dataframe,
+        columns=key_columns,
+        hash_column=hash_column
+    )
+
+# COMMAND ----------
+
+def get_hash_columns(
+    dataframe: DataFrame,
+    excluded_columns: Optional[List[str]] = None,
+) -> List[str]:
+    """
+    Returns the list of columns eligible for hash generation.
+    """
+
+    validate_dataframe(dataframe)
+
+    excluded_columns = excluded_columns or []
+
+    return [
+        column
+        for column in dataframe.columns
+        if column not in excluded_columns
+    ]
+
+# COMMAND ----------
+
+def compare_hashes(
+    source_dataframe: DataFrame,
+    target_dataframe: DataFrame,
+    hash_column: str = "aud_tx_hash_registro",
+) -> DataFrame:
+    """
+    Returns source records that are not present in target based on the hash column.
+    """
+
+    validate_columns(source_dataframe, [hash_column])
+    validate_columns(target_dataframe, [hash_column])
+
+    return (
+        source_dataframe.alias("source")
+        .join(
+            target_dataframe.select(hash_column).alias("target"),
+            on=hash_column,
+            how="left_anti"
+        )
+    )
+
+# COMMAND ----------
+
+print("utils_hash loaded successfully.")

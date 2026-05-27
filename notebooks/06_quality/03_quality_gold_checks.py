@@ -1,1275 +1,688 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "af71a457-fddb-4445-81ef-45ae02c606b0",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # Quality Layer — Gold Quality Checks
+# MAGIC
+# MAGIC **Notebook:** `03_quality_gold_checks`  
+# MAGIC **Layer:** `Quality`  
+# MAGIC **Source/Endpoint:** `Gold Delta Tables`  
+# MAGIC **Target:** `Gold quality validation results and audit logs`
+# MAGIC
+# MAGIC Executes data quality validations for Gold dimension and fact tables
+# MAGIC in the Brazil Legislative Analytics Medallion project.
+# MAGIC
+# MAGIC This notebook validates whether Gold analytical outputs are available,
+# MAGIC traceable and structurally consistent before Mart and consumption layer processing.
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Responsibilities
+# MAGIC
+# MAGIC - Validate Gold table existence
+# MAGIC - Validate minimum record availability
+# MAGIC - Validate required traceability columns
+# MAGIC - Validate dimension key availability
+# MAGIC - Validate fact key availability
+# MAGIC - Validate null values in analytical keys
+# MAGIC - Validate duplicated analytical keys
+# MAGIC - Persist quality validation results into audit tables
+# MAGIC - Generate Gold quality validation summary
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Notes
+# MAGIC
+# MAGIC - Validation results are persisted into audit quality logs
+# MAGIC - Supports controlled exception handling per entity
+# MAGIC - Failed validations may not block execution during early development
+# MAGIC - Pipeline blocking behavior is controlled by `FAIL_ON_ERROR`
+# MAGIC
+# MAGIC For additional architectural and governance details, refer to:
+# MAGIC
+# MAGIC - `/docs/governance/data_quality_rules.md`
+# MAGIC - `/docs/monitoring/quality_monitoring.md`
+# MAGIC - `/docs/architecture/medallion_architecture.md`
+
+# COMMAND ----------
+
+# MAGIC %run ../99_utils/utils_config
+
+# COMMAND ----------
+
+# MAGIC %run ../99_utils/utils_quality
+
+# COMMAND ----------
+
+from datetime import datetime
+from pyspark.sql import DataFrame
+from pyspark.sql import functions as F
+
+# COMMAND ----------
+
+print("=" * 90)
+print("BRAZIL LEGISLATIVE ANALYTICS MEDALLION")
+print("03 - QUALITY GOLD CHECKS")
+print("=" * 90)
+print(f"Execution Timestamp: {datetime.now()}")
+print(f"Catalog: {CATALOG_NAME}")
+print(f"Layer: {SCHEMA_GOLD}")
+print("=" * 90)
+
+# COMMAND ----------
+
+# ============================================================
+# QUALITY CONFIGURATION
+# ============================================================
+
+NOTEBOOK_NAME = "03_quality_gold_checks"
+LAYER_NAME = "gold"
+
+# During early development, Gold tables may not exist yet.
+# Set to True when Gold processing is active and quality checks
+# must block the pipeline.
+FAIL_ON_ERROR = False
+
+DATA_QUALITY_LOG_TABLE = (
+    f"{CATALOG_NAME}."
+    f"{SCHEMA_AUDIT}."
+    f"{AUD_TB_LOG_QUALIDADE_DADOS}"
+)
+
+GOLD_ENTITY_TABLES = {}
+
+for entity_name, table_name in GOLD_DIMENSION_TABLES.items():
+    GOLD_ENTITY_TABLES[f"dim_{entity_name}"] = {
+        "table_type": "dimension",
+        "table_name": table_name,
     }
-   },
-   "outputs": [],
-   "source": [
-    "%run ../99_utils/utils_config"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "5793d46c-0e6f-4a6d-94a6-031a561a9f8f",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
+
+for entity_name, table_name in GOLD_FACT_TABLES.items():
+    GOLD_ENTITY_TABLES[f"fact_{entity_name}"] = {
+        "table_type": "fact",
+        "table_name": table_name,
     }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "UTILS CONFIG LOADED SUCCESSFULLY\nPROJECT_NAME: brazil_legislative_analytics\nPROJECT_VERSION: v1.0.0\nPROJECT_ENVIRONMENT: dev\nCATALOG_NAME: brazil_legislative_analytics\nRUN_ID: 551f43ab-1b45-43a5-84d9-c5f91936ec3a\n"
-     ]
-    },
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "UTILS CONFIG LOADED SUCCESSFULLY\nPROJECT_NAME: brazil_legislative_analytics\nPROJECT_VERSION: v1.0.0\nPROJECT_ENVIRONMENT: dev\nCATALOG_NAME: brazil_legislative_analytics\nRUN_ID: 1c9a18df-454f-4bc4-8efc-49b7b860bbe8\n"
-     ]
-    }
-   ],
-   "source": [
-    "%run ../99_utils/utils_quality"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "83542350-a574-4556-be19-8fd0e937bc6e",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "==========================================================================================\nBRAZIL LEGISLATIVE ANALYTICS MEDALLION\n03 - QUALITY GOLD CHECKS\n==========================================================================================\nExecution Timestamp: 2026-05-20 03:16:55.778719\nCatalog: brazil_legislative_analytics\nLayer: gold\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.dm_deputado\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.dm_partido\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.dm_estado\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.dm_data\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.dm_orgao\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.dm_tipo_evento\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.dm_evento\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.dm_votacao\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.dm_tipo_votacao\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.dm_frente\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.dm_fornecedor\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.dm_cpi\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.ft_frentes_membros\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.ft_eventos_presencas\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.ft_resultados_votacoes\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.ft_despesas_ceap\n==========================================================================================\n==========================================================================================\nRunning Gold quality checks for: brazil_legislative_analytics.gold.ft_cpi_eventos\n==========================================================================================\nGold quality results persisted into: brazil_legislative_analytics.audit.aud_log_qualidade_dados\n"
-     ]
-    },
-    {
-     "output_type": "display_data",
-     "data": {
-      "text/html": [
-       "<style scoped>\n",
-       "  .table-result-container {\n",
-       "    max-height: 300px;\n",
-       "    overflow: auto;\n",
-       "  }\n",
-       "  table, th, td {\n",
-       "    border: 1px solid black;\n",
-       "    border-collapse: collapse;\n",
-       "  }\n",
-       "  th, td {\n",
-       "    padding: 5px;\n",
-       "  }\n",
-       "  th {\n",
-       "    text-align: left;\n",
-       "  }\n",
-       "</style><div class='table-result-container'><table class='table-result'><thead style='background-color: white'><tr><th>qlt_id_log</th><th>aud_id_execucao</th><th>aud_tx_nome_projeto</th><th>aud_tx_versao_pipeline</th><th>aud_tx_ambiente</th><th>aud_tx_nome_notebook</th><th>aud_tx_nome_camada</th><th>aud_tx_nome_entidade</th><th>aud_tx_tabela_destino</th><th>qlt_tx_nome_regra</th><th>qlt_tx_descricao_regra</th><th>qlt_tx_status_validacao</th><th>qlt_qt_total_registros</th><th>qlt_qt_registros_invalidos</th><th>qlt_pc_registros_invalidos</th><th>qlt_dh_validacao</th><th>qlt_tx_mensagem</th></tr></thead><tbody><tr><td>542eabe5-975f-4c12-810b-7706588dc2b7</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>dim_deputado</td><td>brazil_legislative_analytics.gold.dm_deputado</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr><tr><td>6671d577-9edd-4b62-9443-5a18f976630a</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>dim_partido</td><td>brazil_legislative_analytics.gold.dm_partido</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr><tr><td>9defea82-548a-4914-9e99-5399b0b2d2a1</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>dim_estado</td><td>brazil_legislative_analytics.gold.dm_estado</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr><tr><td>47cedd74-6ce1-4e9b-9b7d-53db5db88ea7</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>dim_data</td><td>brazil_legislative_analytics.gold.dm_data</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr><tr><td>bfdea46c-d9dc-415b-8f20-5653542f68e0</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>dim_orgao</td><td>brazil_legislative_analytics.gold.dm_orgao</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr><tr><td>8dbd1fdc-22c1-4c1c-b450-2f54f516747b</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>dim_tipo_evento</td><td>brazil_legislative_analytics.gold.dm_tipo_evento</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr><tr><td>9b36b14c-6883-4692-a731-1309ae85323f</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>dim_evento</td><td>brazil_legislative_analytics.gold.dm_evento</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr><tr><td>016434c8-ecd4-447c-9985-fd0cd6146e99</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>dim_votacao</td><td>brazil_legislative_analytics.gold.dm_votacao</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr><tr><td>c35305cd-9822-4edc-9e22-c1d36a596880</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>dim_tipo_votacao</td><td>brazil_legislative_analytics.gold.dm_tipo_votacao</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr><tr><td>2c9ed1f0-0319-42e4-ab0d-323358cf2346</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>dim_frente</td><td>brazil_legislative_analytics.gold.dm_frente</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr><tr><td>a2b75204-47ed-459b-bc33-a2383a1d1189</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>dim_fornecedor</td><td>brazil_legislative_analytics.gold.dm_fornecedor</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr><tr><td>a0aa53a7-8106-4a7d-b63c-2d229df04ff5</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>dim_cpi</td><td>brazil_legislative_analytics.gold.dm_cpi</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr><tr><td>bd21e32b-67d6-44ba-b840-43c878720b23</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>fact_frentes_membros</td><td>brazil_legislative_analytics.gold.ft_frentes_membros</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr><tr><td>e62ff554-5f0d-4982-82ff-d6b509dcd3c5</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>fact_eventos_presencas</td><td>brazil_legislative_analytics.gold.ft_eventos_presencas</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr><tr><td>9f1de2fa-6ad2-4681-a2bc-3e6e2feb8cdc</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>fact_resultados_votacoes</td><td>brazil_legislative_analytics.gold.ft_resultados_votacoes</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr><tr><td>7d657a75-534f-4fa6-ae98-169acd996d72</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>fact_despesas_ceap</td><td>brazil_legislative_analytics.gold.ft_despesas_ceap</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr><tr><td>5f52d271-fd51-41f4-be34-a951d769a115</td><td>1c9a18df-454f-4bc4-8efc-49b7b860bbe8</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>03_quality_gold_checks</td><td>gold</td><td>fact_cpi_eventos</td><td>brazil_legislative_analytics.gold.ft_cpi_eventos</td><td>gold_table_exists</td><td>Validates whether the Gold table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:17:01.391Z</td><td>Gold table does not exist.</td></tr></tbody></table></div>"
-      ]
-     },
-     "metadata": {
-      "application/vnd.databricks.v1+output": {
-       "addedWidgets": {},
-       "aggData": [],
-       "aggError": "",
-       "aggOverflow": false,
-       "aggSchema": [],
-       "aggSeriesLimitReached": false,
-       "aggType": "",
-       "arguments": {},
-       "columnCustomDisplayInfos": {},
-       "data": [
-        [
-         "542eabe5-975f-4c12-810b-7706588dc2b7",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "dim_deputado",
-         "brazil_legislative_analytics.gold.dm_deputado",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ],
-        [
-         "6671d577-9edd-4b62-9443-5a18f976630a",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "dim_partido",
-         "brazil_legislative_analytics.gold.dm_partido",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ],
-        [
-         "9defea82-548a-4914-9e99-5399b0b2d2a1",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "dim_estado",
-         "brazil_legislative_analytics.gold.dm_estado",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ],
-        [
-         "47cedd74-6ce1-4e9b-9b7d-53db5db88ea7",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "dim_data",
-         "brazil_legislative_analytics.gold.dm_data",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ],
-        [
-         "bfdea46c-d9dc-415b-8f20-5653542f68e0",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "dim_orgao",
-         "brazil_legislative_analytics.gold.dm_orgao",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ],
-        [
-         "8dbd1fdc-22c1-4c1c-b450-2f54f516747b",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "dim_tipo_evento",
-         "brazil_legislative_analytics.gold.dm_tipo_evento",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ],
-        [
-         "9b36b14c-6883-4692-a731-1309ae85323f",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "dim_evento",
-         "brazil_legislative_analytics.gold.dm_evento",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ],
-        [
-         "016434c8-ecd4-447c-9985-fd0cd6146e99",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "dim_votacao",
-         "brazil_legislative_analytics.gold.dm_votacao",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ],
-        [
-         "c35305cd-9822-4edc-9e22-c1d36a596880",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "dim_tipo_votacao",
-         "brazil_legislative_analytics.gold.dm_tipo_votacao",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ],
-        [
-         "2c9ed1f0-0319-42e4-ab0d-323358cf2346",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "dim_frente",
-         "brazil_legislative_analytics.gold.dm_frente",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ],
-        [
-         "a2b75204-47ed-459b-bc33-a2383a1d1189",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "dim_fornecedor",
-         "brazil_legislative_analytics.gold.dm_fornecedor",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ],
-        [
-         "a0aa53a7-8106-4a7d-b63c-2d229df04ff5",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "dim_cpi",
-         "brazil_legislative_analytics.gold.dm_cpi",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ],
-        [
-         "bd21e32b-67d6-44ba-b840-43c878720b23",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "fact_frentes_membros",
-         "brazil_legislative_analytics.gold.ft_frentes_membros",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ],
-        [
-         "e62ff554-5f0d-4982-82ff-d6b509dcd3c5",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "fact_eventos_presencas",
-         "brazil_legislative_analytics.gold.ft_eventos_presencas",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ],
-        [
-         "9f1de2fa-6ad2-4681-a2bc-3e6e2feb8cdc",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "fact_resultados_votacoes",
-         "brazil_legislative_analytics.gold.ft_resultados_votacoes",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ],
-        [
-         "7d657a75-534f-4fa6-ae98-169acd996d72",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "fact_despesas_ceap",
-         "brazil_legislative_analytics.gold.ft_despesas_ceap",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ],
-        [
-         "5f52d271-fd51-41f4-be34-a951d769a115",
-         "1c9a18df-454f-4bc4-8efc-49b7b860bbe8",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "03_quality_gold_checks",
-         "gold",
-         "fact_cpi_eventos",
-         "brazil_legislative_analytics.gold.ft_cpi_eventos",
-         "gold_table_exists",
-         "Validates whether the Gold table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:17:01.391Z",
-         "Gold table does not exist."
-        ]
-       ],
-       "datasetInfos": [],
-       "dbfsResultPath": null,
-       "isJsonSchema": true,
-       "metadata": {},
-       "overflow": false,
-       "plotOptions": {
-        "customPlotOptions": {},
-        "displayType": "table",
-        "pivotAggregation": null,
-        "pivotColumns": null,
-        "xColumns": null,
-        "yColumns": null
-       },
-       "removedWidgets": [],
-       "schema": [
-        {
-         "metadata": "{}",
-         "name": "qlt_id_log",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_id_execucao",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_nome_projeto",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_versao_pipeline",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_ambiente",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_nome_notebook",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_nome_camada",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_nome_entidade",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_tabela_destino",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_tx_nome_regra",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_tx_descricao_regra",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_tx_status_validacao",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_qt_total_registros",
-         "type": "\"long\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_qt_registros_invalidos",
-         "type": "\"long\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_pc_registros_invalidos",
-         "type": "\"double\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_dh_validacao",
-         "type": "\"timestamp\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_tx_mensagem",
-         "type": "\"string\""
-        }
-       ],
-       "type": "table"
-      }
-     },
-     "output_type": "display_data"
-    },
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "==========================================================================================\nGOLD QUALITY SUMMARY\n==========================================================================================\nPassed validations: 0\nWarning validations: 0\nFailed validations: 17\n==========================================================================================\nWARNING: Gold quality validation finished with 17 failed validation(s). This is expected if Gold tables have not been created yet.\nGOLD QUALITY CHECKS COMPLETED\n"
-     ]
-    },
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_quality loaded successfully.\n"
-     ]
-    }
-   ],
-   "source": [
-    "# Databricks notebook source\n",
-    "# MAGIC %md\n",
-    "# MAGIC # 03 Quality — Gold Checks\n",
-    "# MAGIC\n",
-    "# MAGIC Executes data quality validations for Gold dimension and fact tables in the Brazil Legislative Analytics Medallion project.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Purpose\n",
-    "# MAGIC This notebook validates whether Gold analytical outputs are available, structurally consistent and ready for Marts and consumption layers.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Scope\n",
-    "# MAGIC Gold quality checks focus on:\n",
-    "# MAGIC - table existence\n",
-    "# MAGIC - minimum record availability\n",
-    "# MAGIC - required traceability columns\n",
-    "# MAGIC - duplicated hash records\n",
-    "# MAGIC - dimension key availability\n",
-    "# MAGIC - fact key availability\n",
-    "# MAGIC - controlled exception handling per entity\n",
-    "# MAGIC\n",
-    "# MAGIC ## Persistence\n",
-    "# MAGIC Validation results are persisted into:\n",
-    "# MAGIC\n",
-    "# MAGIC ```text\n",
-    "# MAGIC audit.aud_log_qualidade_dados\n",
-    "# MAGIC ```\n",
-    "# MAGIC\n",
-    "# MAGIC ## Execution Policy\n",
-    "# MAGIC During early development, Gold tables may not exist yet.\n",
-    "# MAGIC In this case, validations are persisted as evidence, but the notebook does not block execution.\n",
-    "# MAGIC\n",
-    "# MAGIC Set `FAIL_ON_ERROR = True` when Gold processing is active and quality checks must block the pipeline.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Documentation Standard\n",
-    "# MAGIC - Python functions and variables are written in English.\n",
-    "# MAGIC - Table and field names follow Portuguese mnemonic standards.\n",
-    "# MAGIC - Comments and documentation are written in English.\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ../99_utils/utils_config\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ../99_utils/utils_quality\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "from datetime import datetime\n",
-    "from pyspark.sql import DataFrame\n",
-    "from pyspark.sql import functions as F\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "print(\"=\" * 90)\n",
-    "print(\"BRAZIL LEGISLATIVE ANALYTICS MEDALLION\")\n",
-    "print(\"03 - QUALITY GOLD CHECKS\")\n",
-    "print(\"=\" * 90)\n",
-    "print(f\"Execution Timestamp: {datetime.now()}\")\n",
-    "print(f\"Catalog: {CATALOG_NAME}\")\n",
-    "print(f\"Layer: {SCHEMA_GOLD}\")\n",
-    "print(\"=\" * 90)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# QUALITY CONFIGURATION\n",
-    "# ============================================================\n",
-    "\n",
-    "NOTEBOOK_NAME = \"03_quality_gold_checks\"\n",
-    "LAYER_NAME = \"gold\"\n",
-    "\n",
-    "# During early development, Gold tables may not exist yet.\n",
-    "# Set to True when Gold processing is active and quality checks\n",
-    "# must block the pipeline.\n",
-    "FAIL_ON_ERROR = False\n",
-    "\n",
-    "DATA_QUALITY_LOG_TABLE = (\n",
-    "    f\"{CATALOG_NAME}.\"\n",
-    "    f\"{SCHEMA_AUDIT}.\"\n",
-    "    f\"{AUD_TB_LOG_QUALIDADE_DADOS}\"\n",
-    ")\n",
-    "\n",
-    "GOLD_ENTITY_TABLES = {}\n",
-    "\n",
-    "for entity_name, table_name in GOLD_DIMENSION_TABLES.items():\n",
-    "    GOLD_ENTITY_TABLES[f\"dim_{entity_name}\"] = {\n",
-    "        \"table_type\": \"dimension\",\n",
-    "        \"table_name\": table_name,\n",
-    "    }\n",
-    "\n",
-    "for entity_name, table_name in GOLD_FACT_TABLES.items():\n",
-    "    GOLD_ENTITY_TABLES[f\"fact_{entity_name}\"] = {\n",
-    "        \"table_type\": \"fact\",\n",
-    "        \"table_name\": table_name,\n",
-    "    }\n",
-    "\n",
-    "GOLD_REQUIRED_COLUMNS = [\n",
-    "    \"aud_id_execucao\",\n",
-    "    \"aud_dh_processamento\",\n",
-    "    \"aud_tx_versao_pipeline\",\n",
-    "]\n",
-    "\n",
-    "GOLD_DIMENSION_KEYS = {\n",
-    "    \"dim_deputado\": [\"sk_deputado\"],\n",
-    "    \"dim_partido\": [\"sk_partido\"],\n",
-    "    \"dim_estado\": [\"sk_estado\"],\n",
-    "    \"dim_data\": [\"sk_data\"],\n",
-    "    \"dim_orgao\": [\"sk_orgao\"],\n",
-    "    \"dim_tipo_evento\": [\"sk_tipo_evento\"],\n",
-    "    \"dim_evento\": [\"sk_evento\"],\n",
-    "    \"dim_votacao\": [\"sk_votacao\"],\n",
-    "    \"dim_tipo_votacao\": [\"sk_tipo_votacao\"],\n",
-    "    \"dim_frente\": [\"sk_frente\"],\n",
-    "    \"dim_fornecedor\": [\"sk_fornecedor\"],\n",
-    "    \"dim_cpi\": [\"sk_cpi\"],\n",
-    "}\n",
-    "\n",
-    "GOLD_FACT_KEYS = {\n",
-    "    \"fact_frentes_membros\": [\"sk_frente\", \"sk_deputado\"],\n",
-    "    \"fact_eventos_presencas\": [\"sk_evento\", \"sk_deputado\"],\n",
-    "    \"fact_resultados_votacoes\": [\"sk_votacao\", \"sk_deputado\"],\n",
-    "    \"fact_despesas_ceap\": [\"sk_deputado\", \"sk_fornecedor\", \"sk_data\"],\n",
-    "    \"fact_cpi_eventos\": [\"sk_cpi\", \"sk_evento\"],\n",
-    "}\n",
-    "\n",
-    "quality_results = []\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# QUALITY HELPERS\n",
-    "# ============================================================\n",
-    "\n",
-    "def add_quality_result(\n",
-    "    rule_name: str,\n",
-    "    rule_description: str,\n",
-    "    validation_status: str,\n",
-    "    total_records: int,\n",
-    "    invalid_records: int,\n",
-    "    invalid_percentage: float,\n",
-    "    message: str,\n",
-    "    entity_name: str,\n",
-    "    target_table: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Adds a quality validation result to the in-memory result list.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    quality_results.append({\n",
-    "        \"nome_regra\": rule_name,\n",
-    "        \"descricao_regra\": rule_description,\n",
-    "        \"status_validacao\": validation_status,\n",
-    "        \"total_registros\": int(total_records) if total_records is not None else 0,\n",
-    "        \"registros_invalidos\": int(invalid_records) if invalid_records is not None else 0,\n",
-    "        \"percentual_invalidos\": float(invalid_percentage) if invalid_percentage is not None else 0.0,\n",
-    "        \"mensagem\": message,\n",
-    "        \"entity_name\": entity_name,\n",
-    "        \"target_table\": target_table,\n",
-    "    })\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def add_exception_result(\n",
-    "    entity_name: str,\n",
-    "    target_table: str,\n",
-    "    error: Exception,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Adds a controlled exception result to the quality result list.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=\"gold_quality_exception\",\n",
-    "        rule_description=\"Captures unexpected errors during Gold quality validation.\",\n",
-    "        validation_status=QUALITY_FAILED,\n",
-    "        total_records=1,\n",
-    "        invalid_records=1,\n",
-    "        invalid_percentage=100.0,\n",
-    "        message=f\"Unexpected error during Gold quality validation: {str(error)}\",\n",
-    "        entity_name=entity_name,\n",
-    "        target_table=target_table,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def table_exists(\n",
-    "    full_table_name: str,\n",
-    ") -> bool:\n",
-    "    \"\"\"\n",
-    "    Checks whether a fully qualified table exists.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    try:\n",
-    "        return spark.catalog.tableExists(full_table_name)\n",
-    "\n",
-    "    except Exception:\n",
-    "        return False\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_table_dataframe(\n",
-    "    full_table_name: str,\n",
-    ") -> DataFrame:\n",
-    "    \"\"\"\n",
-    "    Reads a table into a Spark DataFrame.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return spark.table(full_table_name)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def count_records(\n",
-    "    dataframe: DataFrame,\n",
-    ") -> int:\n",
-    "    \"\"\"\n",
-    "    Counts records from a Spark DataFrame.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return dataframe.count()\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_table_exists(\n",
-    "    entity_name: str,\n",
-    "    full_table_name: str,\n",
-    ") -> bool:\n",
-    "    \"\"\"\n",
-    "    Validates whether a Gold table exists.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    exists = table_exists(full_table_name)\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=\"gold_table_exists\",\n",
-    "        rule_description=\"Validates whether the Gold table exists.\",\n",
-    "        validation_status=QUALITY_PASSED if exists else QUALITY_FAILED,\n",
-    "        total_records=1,\n",
-    "        invalid_records=0 if exists else 1,\n",
-    "        invalid_percentage=0.0 if exists else 100.0,\n",
-    "        message=(\n",
-    "            \"Gold table exists.\"\n",
-    "            if exists\n",
-    "            else \"Gold table does not exist.\"\n",
-    "        ),\n",
-    "        entity_name=entity_name,\n",
-    "        target_table=full_table_name,\n",
-    "    )\n",
-    "\n",
-    "    return exists\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_minimum_records(\n",
-    "    dataframe: DataFrame,\n",
-    "    entity_name: str,\n",
-    "    full_table_name: str,\n",
-    ") -> int:\n",
-    "    \"\"\"\n",
-    "    Validates whether a Gold table contains at least one record.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    total_records = count_records(dataframe)\n",
-    "    invalid_records = 0 if total_records > 0 else 1\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=\"gold_minimum_records\",\n",
-    "        rule_description=\"Validates whether the Gold table contains at least one record.\",\n",
-    "        validation_status=QUALITY_PASSED if total_records > 0 else QUALITY_WARNING,\n",
-    "        total_records=total_records,\n",
-    "        invalid_records=invalid_records,\n",
-    "        invalid_percentage=0.0 if total_records > 0 else 100.0,\n",
-    "        message=f\"Gold table record count: {total_records}\",\n",
-    "        entity_name=entity_name,\n",
-    "        target_table=full_table_name,\n",
-    "    )\n",
-    "\n",
-    "    return total_records\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_traceability_columns(\n",
-    "    dataframe: DataFrame,\n",
-    "    entity_name: str,\n",
-    "    full_table_name: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Validates required Gold traceability columns.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    result = validate_required_columns(\n",
-    "        dataframe=dataframe,\n",
-    "        required_columns=GOLD_REQUIRED_COLUMNS,\n",
-    "    )\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=\"gold_required_traceability_columns\",\n",
-    "        rule_description=\"Validates required Gold traceability columns.\",\n",
-    "        validation_status=result[\"status_validacao\"],\n",
-    "        total_records=result[\"total_registros\"],\n",
-    "        invalid_records=result[\"registros_invalidos\"],\n",
-    "        invalid_percentage=result[\"percentual_invalidos\"],\n",
-    "        message=result[\"mensagem\"],\n",
-    "        entity_name=entity_name,\n",
-    "        target_table=full_table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_key_columns(\n",
-    "    dataframe: DataFrame,\n",
-    "    entity_name: str,\n",
-    "    full_table_name: str,\n",
-    "    table_type: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Validates whether expected Gold key columns exist.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if table_type == \"dimension\":\n",
-    "        key_columns = GOLD_DIMENSION_KEYS.get(entity_name, [])\n",
-    "        rule_name = \"gold_dimension_key_columns\"\n",
-    "        rule_description = \"Validates expected Gold dimension key columns.\"\n",
-    "\n",
-    "    else:\n",
-    "        key_columns = GOLD_FACT_KEYS.get(entity_name, [])\n",
-    "        rule_name = \"gold_fact_key_columns\"\n",
-    "        rule_description = \"Validates expected Gold fact key columns.\"\n",
-    "\n",
-    "    if not key_columns:\n",
-    "        add_quality_result(\n",
-    "            rule_name=\"gold_key_mapping\",\n",
-    "            rule_description=\"Validates whether the Gold entity has a configured key mapping.\",\n",
-    "            validation_status=QUALITY_WARNING,\n",
-    "            total_records=1,\n",
-    "            invalid_records=0,\n",
-    "            invalid_percentage=0.0,\n",
-    "            message=f\"No key mapping configured for entity: {entity_name}\",\n",
-    "            entity_name=entity_name,\n",
-    "            target_table=full_table_name,\n",
-    "        )\n",
-    "        return\n",
-    "\n",
-    "    result = validate_required_columns(\n",
-    "        dataframe=dataframe,\n",
-    "        required_columns=key_columns,\n",
-    "    )\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=rule_name,\n",
-    "        rule_description=rule_description,\n",
-    "        validation_status=result[\"status_validacao\"],\n",
-    "        total_records=result[\"total_registros\"],\n",
-    "        invalid_records=result[\"registros_invalidos\"],\n",
-    "        invalid_percentage=result[\"percentual_invalidos\"],\n",
-    "        message=result[\"mensagem\"],\n",
-    "        entity_name=entity_name,\n",
-    "        target_table=full_table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_key_nulls(\n",
-    "    dataframe: DataFrame,\n",
-    "    entity_name: str,\n",
-    "    full_table_name: str,\n",
-    "    table_type: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Validates null values in Gold key columns.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if table_type == \"dimension\":\n",
-    "        configured_keys = GOLD_DIMENSION_KEYS.get(entity_name, [])\n",
-    "\n",
-    "    else:\n",
-    "        configured_keys = GOLD_FACT_KEYS.get(entity_name, [])\n",
-    "\n",
-    "    key_columns = [\n",
-    "        column\n",
-    "        for column in configured_keys\n",
-    "        if column in dataframe.columns\n",
-    "    ]\n",
-    "\n",
-    "    if not key_columns:\n",
-    "        return\n",
-    "\n",
-    "    results = validate_nulls(\n",
-    "        dataframe=dataframe,\n",
-    "        columns=key_columns,\n",
-    "    )\n",
-    "\n",
-    "    for result in results:\n",
-    "        add_quality_result(\n",
-    "            rule_name=f\"gold_{result['nome_regra']}\",\n",
-    "            rule_description=result[\"descricao_regra\"],\n",
-    "            validation_status=result[\"status_validacao\"],\n",
-    "            total_records=result[\"total_registros\"],\n",
-    "            invalid_records=result[\"registros_invalidos\"],\n",
-    "            invalid_percentage=result[\"percentual_invalidos\"],\n",
-    "            message=result[\"mensagem\"],\n",
-    "            entity_name=entity_name,\n",
-    "            target_table=full_table_name,\n",
-    "        )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_key_duplicates(\n",
-    "    dataframe: DataFrame,\n",
-    "    entity_name: str,\n",
-    "    full_table_name: str,\n",
-    "    table_type: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Validates duplicated records based on configured Gold key columns.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if table_type == \"dimension\":\n",
-    "        key_columns = [\n",
-    "            column\n",
-    "            for column in GOLD_DIMENSION_KEYS.get(entity_name, [])\n",
-    "            if column in dataframe.columns\n",
-    "        ]\n",
-    "\n",
-    "    else:\n",
-    "        key_columns = [\n",
-    "            column\n",
-    "            for column in GOLD_FACT_KEYS.get(entity_name, [])\n",
-    "            if column in dataframe.columns\n",
-    "        ]\n",
-    "\n",
-    "    if not key_columns:\n",
-    "        return\n",
-    "\n",
-    "    result = validate_duplicates(\n",
-    "        dataframe=dataframe,\n",
-    "        key_columns=key_columns,\n",
-    "    )\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=\"gold_key_duplicate_check\",\n",
-    "        rule_description=\"Validates duplicated records based on configured Gold key columns.\",\n",
-    "        validation_status=result[\"status_validacao\"],\n",
-    "        total_records=result[\"total_registros\"],\n",
-    "        invalid_records=result[\"registros_invalidos\"],\n",
-    "        invalid_percentage=result[\"percentual_invalidos\"],\n",
-    "        message=result[\"mensagem\"],\n",
-    "        entity_name=entity_name,\n",
-    "        target_table=full_table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def run_entity_checks(\n",
-    "    entity_name: str,\n",
-    "    table_config: dict,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Executes all Gold quality checks for a single entity.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    table_name = table_config[\"table_name\"]\n",
-    "    table_type = table_config[\"table_type\"]\n",
-    "\n",
-    "    full_table_name = get_gold_table(table_name)\n",
-    "\n",
-    "    print(\"=\" * 90)\n",
-    "    print(f\"Running Gold quality checks for: {full_table_name}\")\n",
-    "    print(\"=\" * 90)\n",
-    "\n",
-    "    try:\n",
-    "\n",
-    "        if not validate_table_exists(\n",
-    "            entity_name=entity_name,\n",
-    "            full_table_name=full_table_name,\n",
-    "        ):\n",
-    "            return\n",
-    "\n",
-    "        dataframe = get_table_dataframe(full_table_name)\n",
-    "\n",
-    "        validate_minimum_records(\n",
-    "            dataframe=dataframe,\n",
-    "            entity_name=entity_name,\n",
-    "            full_table_name=full_table_name,\n",
-    "        )\n",
-    "\n",
-    "        validate_traceability_columns(\n",
-    "            dataframe=dataframe,\n",
-    "            entity_name=entity_name,\n",
-    "            full_table_name=full_table_name,\n",
-    "        )\n",
-    "\n",
-    "        validate_key_columns(\n",
-    "            dataframe=dataframe,\n",
-    "            entity_name=entity_name,\n",
-    "            full_table_name=full_table_name,\n",
-    "            table_type=table_type,\n",
-    "        )\n",
-    "\n",
-    "        validate_key_nulls(\n",
-    "            dataframe=dataframe,\n",
-    "            entity_name=entity_name,\n",
-    "            full_table_name=full_table_name,\n",
-    "            table_type=table_type,\n",
-    "        )\n",
-    "\n",
-    "        validate_key_duplicates(\n",
-    "            dataframe=dataframe,\n",
-    "            entity_name=entity_name,\n",
-    "            full_table_name=full_table_name,\n",
-    "            table_type=table_type,\n",
-    "        )\n",
-    "\n",
-    "    except Exception as error:\n",
-    "\n",
-    "        add_exception_result(\n",
-    "            entity_name=entity_name,\n",
-    "            target_table=full_table_name,\n",
-    "            error=error,\n",
-    "        )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def build_gold_quality_log() -> DataFrame:\n",
-    "    \"\"\"\n",
-    "    Builds the final Gold quality log DataFrame.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if not quality_results:\n",
-    "\n",
-    "        add_quality_result(\n",
-    "            rule_name=\"gold_quality_no_results\",\n",
-    "            rule_description=\"Validates whether Gold quality checks produced results.\",\n",
-    "            validation_status=QUALITY_WARNING,\n",
-    "            total_records=0,\n",
-    "            invalid_records=0,\n",
-    "            invalid_percentage=0.0,\n",
-    "            message=\"No Gold quality results were generated.\",\n",
-    "            entity_name=\"gold\",\n",
-    "            target_table=DATA_QUALITY_LOG_TABLE,\n",
-    "        )\n",
-    "\n",
-    "    quality_base_df = spark.createDataFrame(\n",
-    "        quality_results\n",
-    "    )\n",
-    "\n",
-    "    return (\n",
-    "        quality_base_df\n",
-    "        .withColumn(\"qlt_id_log\", F.expr(\"uuid()\"))\n",
-    "        .withColumn(\"aud_id_execucao\", F.lit(RUN_ID))\n",
-    "        .withColumn(\"aud_tx_nome_projeto\", F.lit(PROJECT_NAME))\n",
-    "        .withColumn(\"aud_tx_versao_pipeline\", F.lit(PROJECT_VERSION))\n",
-    "        .withColumn(\"aud_tx_ambiente\", F.lit(PROJECT_ENVIRONMENT))\n",
-    "        .withColumn(\"aud_tx_nome_notebook\", F.lit(NOTEBOOK_NAME))\n",
-    "        .withColumn(\"aud_tx_nome_camada\", F.lit(LAYER_NAME))\n",
-    "        .withColumn(\"aud_tx_nome_entidade\", F.col(\"entity_name\"))\n",
-    "        .withColumn(\"aud_tx_tabela_destino\", F.col(\"target_table\"))\n",
-    "        .withColumn(\"qlt_tx_nome_regra\", F.col(\"nome_regra\"))\n",
-    "        .withColumn(\"qlt_tx_descricao_regra\", F.col(\"descricao_regra\"))\n",
-    "        .withColumn(\"qlt_tx_status_validacao\", F.col(\"status_validacao\"))\n",
-    "        .withColumn(\"qlt_qt_total_registros\", F.col(\"total_registros\"))\n",
-    "        .withColumn(\"qlt_qt_registros_invalidos\", F.col(\"registros_invalidos\"))\n",
-    "        .withColumn(\"qlt_pc_registros_invalidos\", F.col(\"percentual_invalidos\"))\n",
-    "        .withColumn(\"qlt_dh_validacao\", F.current_timestamp())\n",
-    "        .withColumn(\"qlt_tx_mensagem\", F.col(\"mensagem\"))\n",
-    "        .select(\n",
-    "            \"qlt_id_log\",\n",
-    "            \"aud_id_execucao\",\n",
-    "            \"aud_tx_nome_projeto\",\n",
-    "            \"aud_tx_versao_pipeline\",\n",
-    "            \"aud_tx_ambiente\",\n",
-    "            \"aud_tx_nome_notebook\",\n",
-    "            \"aud_tx_nome_camada\",\n",
-    "            \"aud_tx_nome_entidade\",\n",
-    "            \"aud_tx_tabela_destino\",\n",
-    "            \"qlt_tx_nome_regra\",\n",
-    "            \"qlt_tx_descricao_regra\",\n",
-    "            \"qlt_tx_status_validacao\",\n",
-    "            \"qlt_qt_total_registros\",\n",
-    "            \"qlt_qt_registros_invalidos\",\n",
-    "            \"qlt_pc_registros_invalidos\",\n",
-    "            \"qlt_dh_validacao\",\n",
-    "            \"qlt_tx_mensagem\",\n",
-    "        )\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 1. Execute Gold Quality Checks\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "for entity_name, table_config in GOLD_ENTITY_TABLES.items():\n",
-    "\n",
-    "    run_entity_checks(\n",
-    "        entity_name=entity_name,\n",
-    "        table_config=table_config,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 2. Persist Quality Results\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "quality_log_df = build_gold_quality_log()\n",
-    "\n",
-    "quality_log_df.write.mode(\n",
-    "    \"append\"\n",
-    ").saveAsTable(DATA_QUALITY_LOG_TABLE)\n",
-    "\n",
-    "print(\n",
-    "    f\"Gold quality results persisted into: \"\n",
-    "    f\"{DATA_QUALITY_LOG_TABLE}\"\n",
-    ")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 3. Display Quality Results\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "display(quality_log_df)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 4. Quality Summary\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "failed_count = (\n",
-    "    quality_log_df\n",
-    "    .filter(\"qlt_tx_status_validacao = 'FAILED'\")\n",
-    "    .count()\n",
-    ")\n",
-    "\n",
-    "warning_count = (\n",
-    "    quality_log_df\n",
-    "    .filter(\"qlt_tx_status_validacao = 'WARNING'\")\n",
-    "    .count()\n",
-    ")\n",
-    "\n",
-    "passed_count = (\n",
-    "    quality_log_df\n",
-    "    .filter(\"qlt_tx_status_validacao = 'PASSED'\")\n",
-    "    .count()\n",
-    ")\n",
-    "\n",
-    "print(\"=\" * 90)\n",
-    "print(\"GOLD QUALITY SUMMARY\")\n",
-    "print(\"=\" * 90)\n",
-    "print(f\"Passed validations: {passed_count}\")\n",
-    "print(f\"Warning validations: {warning_count}\")\n",
-    "print(f\"Failed validations: {failed_count}\")\n",
-    "print(\"=\" * 90)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# QUALITY EXECUTION POLICY\n",
-    "# ============================================================\n",
-    "\n",
-    "if failed_count > 0 and FAIL_ON_ERROR:\n",
-    "\n",
-    "    raise Exception(\n",
-    "        f\"Gold quality validation failed with \"\n",
-    "        f\"{failed_count} failed validation(s).\"\n",
-    "    )\n",
-    "\n",
-    "if failed_count > 0:\n",
-    "\n",
-    "    print(\n",
-    "        f\"WARNING: Gold quality validation finished with \"\n",
-    "        f\"{failed_count} failed validation(s). \"\n",
-    "        \"This is expected if Gold tables have not been created yet.\"\n",
-    "    )\n",
-    "\n",
-    "print(\"GOLD QUALITY CHECKS COMPLETED\")"
-   ]
-  }
- ],
- "metadata": {
-  "application/vnd.databricks.v1+notebook": {
-   "computePreferences": null,
-   "dashboards": [],
-   "environmentMetadata": {
-    "base_environment": "",
-    "environment_version": "5"
-   },
-   "inputWidgetPreferences": null,
-   "language": "python",
-   "notebookMetadata": {
-    "pythonIndentUnit": 4
-   },
-   "notebookName": "03_quality_gold_checks",
-   "widgets": {}
-  },
-  "language_info": {
-   "name": "python"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 0
+
+GOLD_REQUIRED_COLUMNS = [
+    "aud_id_execucao",
+    "aud_dh_processamento",
+    "aud_tx_versao_pipeline",
+]
+
+GOLD_DIMENSION_KEYS = {
+    "dim_deputado": ["sk_deputado"],
+    "dim_partido": ["sk_partido"],
+    "dim_estado": ["sk_estado"],
+    "dim_data": ["sk_data"],
+    "dim_orgao": ["sk_orgao"],
+    "dim_tipo_evento": ["sk_tipo_evento"],
+    "dim_evento": ["sk_evento"],
+    "dim_votacao": ["sk_votacao"],
+    "dim_tipo_votacao": ["sk_tipo_votacao"],
+    "dim_frente": ["sk_frente"],
+    "dim_fornecedor": ["sk_fornecedor"],
+    "dim_cpi": ["sk_cpi"],
 }
+
+GOLD_FACT_KEYS = {
+    "fact_frentes_membros": ["sk_frente", "sk_deputado"],
+    "fact_eventos_presencas": ["sk_evento", "sk_deputado"],
+    "fact_resultados_votacoes": ["sk_votacao", "sk_deputado"],
+    "fact_despesas_ceap": ["sk_deputado", "sk_fornecedor", "sk_data"],
+    "fact_cpi_eventos": ["sk_cpi", "sk_evento"],
+}
+
+quality_results = []
+
+# COMMAND ----------
+
+# ============================================================
+# QUALITY HELPERS
+# ============================================================
+
+def add_quality_result(
+    rule_name: str,
+    rule_description: str,
+    validation_status: str,
+    total_records: int,
+    invalid_records: int,
+    invalid_percentage: float,
+    message: str,
+    entity_name: str,
+    target_table: str,
+) -> None:
+    """
+    Adds a quality validation result to the in-memory result list.
+    """
+
+    quality_results.append({
+        "nome_regra": rule_name,
+        "descricao_regra": rule_description,
+        "status_validacao": validation_status,
+        "total_registros": int(total_records) if total_records is not None else 0,
+        "registros_invalidos": int(invalid_records) if invalid_records is not None else 0,
+        "percentual_invalidos": float(invalid_percentage) if invalid_percentage is not None else 0.0,
+        "mensagem": message,
+        "entity_name": entity_name,
+        "target_table": target_table,
+    })
+
+# COMMAND ----------
+
+def add_exception_result(
+    entity_name: str,
+    target_table: str,
+    error: Exception,
+) -> None:
+    """
+    Adds a controlled exception result to the quality result list.
+    """
+
+    add_quality_result(
+        rule_name="gold_quality_exception",
+        rule_description="Captures unexpected errors during Gold quality validation.",
+        validation_status=QUALITY_FAILED,
+        total_records=1,
+        invalid_records=1,
+        invalid_percentage=100.0,
+        message=f"Unexpected error during Gold quality validation: {str(error)}",
+        entity_name=entity_name,
+        target_table=target_table,
+    )
+
+# COMMAND ----------
+
+def table_exists(
+    full_table_name: str,
+) -> bool:
+    """
+    Checks whether a fully qualified table exists.
+    """
+
+    try:
+        return spark.catalog.tableExists(full_table_name)
+
+    except Exception:
+        return False
+
+# COMMAND ----------
+
+def get_table_dataframe(
+    full_table_name: str,
+) -> DataFrame:
+    """
+    Reads a table into a Spark DataFrame.
+    """
+
+    return spark.table(full_table_name)
+
+# COMMAND ----------
+
+def count_records(
+    dataframe: DataFrame,
+) -> int:
+    """
+    Counts records from a Spark DataFrame.
+    """
+
+    return dataframe.count()
+
+# COMMAND ----------
+
+def validate_table_exists(
+    entity_name: str,
+    full_table_name: str,
+) -> bool:
+    """
+    Validates whether a Gold table exists.
+    """
+
+    exists = table_exists(full_table_name)
+
+    add_quality_result(
+        rule_name="gold_table_exists",
+        rule_description="Validates whether the Gold table exists.",
+        validation_status=QUALITY_PASSED if exists else QUALITY_FAILED,
+        total_records=1,
+        invalid_records=0 if exists else 1,
+        invalid_percentage=0.0 if exists else 100.0,
+        message=(
+            "Gold table exists."
+            if exists
+            else "Gold table does not exist."
+        ),
+        entity_name=entity_name,
+        target_table=full_table_name,
+    )
+
+    return exists
+
+# COMMAND ----------
+
+def validate_minimum_records(
+    dataframe: DataFrame,
+    entity_name: str,
+    full_table_name: str,
+) -> int:
+    """
+    Validates whether a Gold table contains at least one record.
+    """
+
+    total_records = count_records(dataframe)
+    invalid_records = 0 if total_records > 0 else 1
+
+    add_quality_result(
+        rule_name="gold_minimum_records",
+        rule_description="Validates whether the Gold table contains at least one record.",
+        validation_status=QUALITY_PASSED if total_records > 0 else QUALITY_WARNING,
+        total_records=total_records,
+        invalid_records=invalid_records,
+        invalid_percentage=0.0 if total_records > 0 else 100.0,
+        message=f"Gold table record count: {total_records}",
+        entity_name=entity_name,
+        target_table=full_table_name,
+    )
+
+    return total_records
+
+# COMMAND ----------
+
+def validate_traceability_columns(
+    dataframe: DataFrame,
+    entity_name: str,
+    full_table_name: str,
+) -> None:
+    """
+    Validates required Gold traceability columns.
+    """
+
+    result = validate_required_columns(
+        dataframe=dataframe,
+        required_columns=GOLD_REQUIRED_COLUMNS,
+    )
+
+    add_quality_result(
+        rule_name="gold_required_traceability_columns",
+        rule_description="Validates required Gold traceability columns.",
+        validation_status=result["status_validacao"],
+        total_records=result["total_registros"],
+        invalid_records=result["registros_invalidos"],
+        invalid_percentage=result["percentual_invalidos"],
+        message=result["mensagem"],
+        entity_name=entity_name,
+        target_table=full_table_name,
+    )
+
+# COMMAND ----------
+
+def validate_key_columns(
+    dataframe: DataFrame,
+    entity_name: str,
+    full_table_name: str,
+    table_type: str,
+) -> None:
+    """
+    Validates whether expected Gold key columns exist.
+    """
+
+    if table_type == "dimension":
+        key_columns = GOLD_DIMENSION_KEYS.get(entity_name, [])
+        rule_name = "gold_dimension_key_columns"
+        rule_description = "Validates expected Gold dimension key columns."
+
+    else:
+        key_columns = GOLD_FACT_KEYS.get(entity_name, [])
+        rule_name = "gold_fact_key_columns"
+        rule_description = "Validates expected Gold fact key columns."
+
+    if not key_columns:
+        add_quality_result(
+            rule_name="gold_key_mapping",
+            rule_description="Validates whether the Gold entity has a configured key mapping.",
+            validation_status=QUALITY_WARNING,
+            total_records=1,
+            invalid_records=0,
+            invalid_percentage=0.0,
+            message=f"No key mapping configured for entity: {entity_name}",
+            entity_name=entity_name,
+            target_table=full_table_name,
+        )
+        return
+
+    result = validate_required_columns(
+        dataframe=dataframe,
+        required_columns=key_columns,
+    )
+
+    add_quality_result(
+        rule_name=rule_name,
+        rule_description=rule_description,
+        validation_status=result["status_validacao"],
+        total_records=result["total_registros"],
+        invalid_records=result["registros_invalidos"],
+        invalid_percentage=result["percentual_invalidos"],
+        message=result["mensagem"],
+        entity_name=entity_name,
+        target_table=full_table_name,
+    )
+
+# COMMAND ----------
+
+def validate_key_nulls(
+    dataframe: DataFrame,
+    entity_name: str,
+    full_table_name: str,
+    table_type: str,
+) -> None:
+    """
+    Validates null values in Gold key columns.
+    """
+
+    if table_type == "dimension":
+        configured_keys = GOLD_DIMENSION_KEYS.get(entity_name, [])
+
+    else:
+        configured_keys = GOLD_FACT_KEYS.get(entity_name, [])
+
+    key_columns = [
+        column
+        for column in configured_keys
+        if column in dataframe.columns
+    ]
+
+    if not key_columns:
+        return
+
+    results = validate_nulls(
+        dataframe=dataframe,
+        columns=key_columns,
+    )
+
+    for result in results:
+        add_quality_result(
+            rule_name=f"gold_{result['nome_regra']}",
+            rule_description=result["descricao_regra"],
+            validation_status=result["status_validacao"],
+            total_records=result["total_registros"],
+            invalid_records=result["registros_invalidos"],
+            invalid_percentage=result["percentual_invalidos"],
+            message=result["mensagem"],
+            entity_name=entity_name,
+            target_table=full_table_name,
+        )
+
+# COMMAND ----------
+
+def validate_key_duplicates(
+    dataframe: DataFrame,
+    entity_name: str,
+    full_table_name: str,
+    table_type: str,
+) -> None:
+    """
+    Validates duplicated records based on configured Gold key columns.
+    """
+
+    if table_type == "dimension":
+        key_columns = [
+            column
+            for column in GOLD_DIMENSION_KEYS.get(entity_name, [])
+            if column in dataframe.columns
+        ]
+
+    else:
+        key_columns = [
+            column
+            for column in GOLD_FACT_KEYS.get(entity_name, [])
+            if column in dataframe.columns
+        ]
+
+    if not key_columns:
+        return
+
+    result = validate_duplicates(
+        dataframe=dataframe,
+        key_columns=key_columns,
+    )
+
+    add_quality_result(
+        rule_name="gold_key_duplicate_check",
+        rule_description="Validates duplicated records based on configured Gold key columns.",
+        validation_status=result["status_validacao"],
+        total_records=result["total_registros"],
+        invalid_records=result["registros_invalidos"],
+        invalid_percentage=result["percentual_invalidos"],
+        message=result["mensagem"],
+        entity_name=entity_name,
+        target_table=full_table_name,
+    )
+
+# COMMAND ----------
+
+def run_entity_checks(
+    entity_name: str,
+    table_config: dict,
+) -> None:
+    """
+    Executes all Gold quality checks for a single entity.
+    """
+
+    table_name = table_config["table_name"]
+    table_type = table_config["table_type"]
+
+    full_table_name = get_gold_table(table_name)
+
+    print("=" * 90)
+    print(f"Running Gold quality checks for: {full_table_name}")
+    print("=" * 90)
+
+    try:
+
+        if not validate_table_exists(
+            entity_name=entity_name,
+            full_table_name=full_table_name,
+        ):
+            return
+
+        dataframe = get_table_dataframe(full_table_name)
+
+        validate_minimum_records(
+            dataframe=dataframe,
+            entity_name=entity_name,
+            full_table_name=full_table_name,
+        )
+
+        validate_traceability_columns(
+            dataframe=dataframe,
+            entity_name=entity_name,
+            full_table_name=full_table_name,
+        )
+
+        validate_key_columns(
+            dataframe=dataframe,
+            entity_name=entity_name,
+            full_table_name=full_table_name,
+            table_type=table_type,
+        )
+
+        validate_key_nulls(
+            dataframe=dataframe,
+            entity_name=entity_name,
+            full_table_name=full_table_name,
+            table_type=table_type,
+        )
+
+        validate_key_duplicates(
+            dataframe=dataframe,
+            entity_name=entity_name,
+            full_table_name=full_table_name,
+            table_type=table_type,
+        )
+
+    except Exception as error:
+
+        add_exception_result(
+            entity_name=entity_name,
+            target_table=full_table_name,
+            error=error,
+        )
+
+# COMMAND ----------
+
+def build_gold_quality_log() -> DataFrame:
+    """
+    Builds the final Gold quality log DataFrame.
+    """
+
+    if not quality_results:
+
+        add_quality_result(
+            rule_name="gold_quality_no_results",
+            rule_description="Validates whether Gold quality checks produced results.",
+            validation_status=QUALITY_WARNING,
+            total_records=0,
+            invalid_records=0,
+            invalid_percentage=0.0,
+            message="No Gold quality results were generated.",
+            entity_name="gold",
+            target_table=DATA_QUALITY_LOG_TABLE,
+        )
+
+    quality_base_df = spark.createDataFrame(
+        quality_results
+    )
+
+    return (
+        quality_base_df
+        .withColumn("qlt_id_log", F.expr("uuid()"))
+        .withColumn("aud_id_execucao", F.lit(RUN_ID))
+        .withColumn("aud_tx_nome_projeto", F.lit(PROJECT_NAME))
+        .withColumn("aud_tx_versao_pipeline", F.lit(PROJECT_VERSION))
+        .withColumn("aud_tx_ambiente", F.lit(PROJECT_ENVIRONMENT))
+        .withColumn("aud_tx_nome_notebook", F.lit(NOTEBOOK_NAME))
+        .withColumn("aud_tx_nome_camada", F.lit(LAYER_NAME))
+        .withColumn("aud_tx_nome_entidade", F.col("entity_name"))
+        .withColumn("aud_tx_tabela_destino", F.col("target_table"))
+        .withColumn("qlt_tx_nome_regra", F.col("nome_regra"))
+        .withColumn("qlt_tx_descricao_regra", F.col("descricao_regra"))
+        .withColumn("qlt_tx_status_validacao", F.col("status_validacao"))
+        .withColumn("qlt_qt_total_registros", F.col("total_registros"))
+        .withColumn("qlt_qt_registros_invalidos", F.col("registros_invalidos"))
+        .withColumn("qlt_pc_registros_invalidos", F.col("percentual_invalidos"))
+        .withColumn("qlt_dh_validacao", F.current_timestamp())
+        .withColumn("qlt_tx_mensagem", F.col("mensagem"))
+        .select(
+            "qlt_id_log",
+            "aud_id_execucao",
+            "aud_tx_nome_projeto",
+            "aud_tx_versao_pipeline",
+            "aud_tx_ambiente",
+            "aud_tx_nome_notebook",
+            "aud_tx_nome_camada",
+            "aud_tx_nome_entidade",
+            "aud_tx_tabela_destino",
+            "qlt_tx_nome_regra",
+            "qlt_tx_descricao_regra",
+            "qlt_tx_status_validacao",
+            "qlt_qt_total_registros",
+            "qlt_qt_registros_invalidos",
+            "qlt_pc_registros_invalidos",
+            "qlt_dh_validacao",
+            "qlt_tx_mensagem",
+        )
+    )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 1. Execute Gold Quality Checks
+
+# COMMAND ----------
+
+for entity_name, table_config in GOLD_ENTITY_TABLES.items():
+
+    run_entity_checks(
+        entity_name=entity_name,
+        table_config=table_config,
+    )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 2. Persist Quality Results
+
+# COMMAND ----------
+
+quality_log_df = build_gold_quality_log()
+
+quality_log_df.write.mode(
+    "append"
+).saveAsTable(DATA_QUALITY_LOG_TABLE)
+
+print(
+    f"Gold quality results persisted into: "
+    f"{DATA_QUALITY_LOG_TABLE}"
+)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 3. Display Quality Results
+
+# COMMAND ----------
+
+display(quality_log_df)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 4. Quality Summary
+
+# COMMAND ----------
+
+failed_count = (
+    quality_log_df
+    .filter("qlt_tx_status_validacao = 'FAILED'")
+    .count()
+)
+
+warning_count = (
+    quality_log_df
+    .filter("qlt_tx_status_validacao = 'WARNING'")
+    .count()
+)
+
+passed_count = (
+    quality_log_df
+    .filter("qlt_tx_status_validacao = 'PASSED'")
+    .count()
+)
+
+print("=" * 90)
+print("GOLD QUALITY SUMMARY")
+print("=" * 90)
+print(f"Passed validations: {passed_count}")
+print(f"Warning validations: {warning_count}")
+print(f"Failed validations: {failed_count}")
+print("=" * 90)
+
+# COMMAND ----------
+
+# ============================================================
+# QUALITY EXECUTION POLICY
+# ============================================================
+
+if failed_count > 0 and FAIL_ON_ERROR:
+
+    raise Exception(
+        f"Gold quality validation failed with "
+        f"{failed_count} failed validation(s)."
+    )
+
+if failed_count > 0:
+
+    print(
+        f"WARNING: Gold quality validation finished with "
+        f"{failed_count} failed validation(s). "
+        "This is expected if Gold tables have not been created yet."
+    )
+
+print("GOLD QUALITY CHECKS COMPLETED")

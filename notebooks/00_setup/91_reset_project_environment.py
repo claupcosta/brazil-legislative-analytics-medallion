@@ -1,484 +1,290 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "21a66f90-f894-41c3-b38b-14d6538a1b57",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "==========================================================================================\nBRAZIL LEGISLATIVE ANALYTICS MEDALLION\n01 - PROJECT CONFIGURATION\n==========================================================================================\nCONFIG LOADED SUCCESSFULLY\nPROJECT_NAME: brazil_legislative_analytics\nPROJECT_VERSION: v1.0.0\nPROJECT_ENVIRONMENT: dev\nCATALOG_NAME: brazil_legislative_analytics\nCAMARA_API_BASE_URL: https://dadosabertos.camara.leg.br/api/v2\nRUN_ID: dcd1d698-0822-4797-9cbb-1e05378ff076\n==========================================================================================\nPROJECT CONFIGURATION LOADED SUCCESSFULLY\n"
-     ]
-    }
-   ],
-   "source": [
-    "%run ./01_project_config"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "3db2a165-120a-4b68-9504-e383af7b8787",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "==========================================================================================\nBRAZIL LEGISLATIVE ANALYTICS MEDALLION\n91 - RESET PROJECT ENVIRONMENT\n==========================================================================================\nExecution Timestamp: 2026-05-20 02:34:29.857940\nCatalog: brazil_legislative_analytics\nEnvironment: dev\n==========================================================================================\nTable removed: brazil_legislative_analytics.audit.aud_log_execucao_pipeline\nTable removed: brazil_legislative_analytics.audit.aud_log_erros_pipeline\nTable removed: brazil_legislative_analytics.audit.aud_log_qualidade_dados\nTable removed: brazil_legislative_analytics.bronze.br_deputados\nTable removed: brazil_legislative_analytics.bronze.br_frentes\nTable removed: brazil_legislative_analytics.bronze.br_frentes_membros\nTable removed: brazil_legislative_analytics.bronze.br_frentes_detalhes\nTable removed: brazil_legislative_analytics.bronze.br_eventos\nTable removed: brazil_legislative_analytics.bronze.br_votacoes\nTable removed: brazil_legislative_analytics.bronze.br_votos\nTable removed: brazil_legislative_analytics.bronze.br_despesas_ceap\nTable removed: brazil_legislative_analytics.bronze.br_cpis\nTable removed: brazil_legislative_analytics.bronze.br_cpi_eventos\nTable removed: brazil_legislative_analytics.bronze.br_proposicoes\nTable removed: brazil_legislative_analytics.silver.slv_deputados\nTable removed: brazil_legislative_analytics.silver.slv_partidos\nTable removed: brazil_legislative_analytics.silver.slv_estados\nTable removed: brazil_legislative_analytics.silver.slv_frentes\nTable removed: brazil_legislative_analytics.silver.slv_frentes_membros\nTable removed: brazil_legislative_analytics.silver.slv_eventos\nTable removed: brazil_legislative_analytics.silver.slv_votacoes\nTable removed: brazil_legislative_analytics.silver.slv_votos\nTable removed: brazil_legislative_analytics.silver.slv_despesas_ceap\nTable removed: brazil_legislative_analytics.silver.slv_fornecedores\nTable removed: brazil_legislative_analytics.silver.slv_cpis\nTable removed: brazil_legislative_analytics.silver.slv_cpi_eventos\nTable removed: brazil_legislative_analytics.silver.slv_proposicoes\nTable removed: brazil_legislative_analytics.gold.dm_deputado\nTable removed: brazil_legislative_analytics.gold.dm_partido\nTable removed: brazil_legislative_analytics.gold.dm_estado\nTable removed: brazil_legislative_analytics.gold.dm_data\nTable removed: brazil_legislative_analytics.gold.dm_orgao\nTable removed: brazil_legislative_analytics.gold.dm_tipo_evento\nTable removed: brazil_legislative_analytics.gold.dm_evento\nTable removed: brazil_legislative_analytics.gold.dm_votacao\nTable removed: brazil_legislative_analytics.gold.dm_tipo_votacao\nTable removed: brazil_legislative_analytics.gold.dm_frente\nTable removed: brazil_legislative_analytics.gold.dm_fornecedor\nTable removed: brazil_legislative_analytics.gold.dm_cpi\nTable removed: brazil_legislative_analytics.gold.ft_frentes_membros\nTable removed: brazil_legislative_analytics.gold.ft_eventos_presencas\nTable removed: brazil_legislative_analytics.gold.ft_resultados_votacoes\nTable removed: brazil_legislative_analytics.gold.ft_despesas_ceap\nTable removed: brazil_legislative_analytics.gold.ft_cpi_eventos\nTable removed: brazil_legislative_analytics.marts.am_atlas_frentes\nTable removed: brazil_legislative_analytics.marts.am_calendario_eventos\nTable removed: brazil_legislative_analytics.marts.am_correlacao_frentes_votacoes\nTable removed: brazil_legislative_analytics.marts.am_panorama_despesas_ceap\nTable removed: brazil_legislative_analytics.marts.am_auditoria_cpis\nTable removed: brazil_legislative_analytics.marts.am_monitor_presenca_absenteismo\n==========================================================================================\nSCHEMA REMOVAL DISABLED\n==========================================================================================\nSchemas were preserved.\nOnly tables were removed.\n"
-     ]
-    },
-    {
-     "output_type": "display_data",
-     "data": {
-      "text/html": [
-       "<style scoped>\n",
-       "  .table-result-container {\n",
-       "    max-height: 300px;\n",
-       "    overflow: auto;\n",
-       "  }\n",
-       "  table, th, td {\n",
-       "    border: 1px solid black;\n",
-       "    border-collapse: collapse;\n",
-       "  }\n",
-       "  th, td {\n",
-       "    padding: 5px;\n",
-       "  }\n",
-       "  th {\n",
-       "    text-align: left;\n",
-       "  }\n",
-       "</style><div class='table-result-container'><table class='table-result'><thead style='background-color: white'><tr><th>databaseName</th></tr></thead><tbody><tr><td>audit</td></tr><tr><td>bronze</td></tr><tr><td>gold</td></tr><tr><td>information_schema</td></tr><tr><td>marts</td></tr><tr><td>silver</td></tr></tbody></table></div>"
-      ]
-     },
-     "metadata": {
-      "application/vnd.databricks.v1+output": {
-       "addedWidgets": {},
-       "aggData": [],
-       "aggError": "",
-       "aggOverflow": false,
-       "aggSchema": [],
-       "aggSeriesLimitReached": false,
-       "aggType": "",
-       "arguments": {},
-       "columnCustomDisplayInfos": {},
-       "data": [
-        [
-         "audit"
-        ],
-        [
-         "bronze"
-        ],
-        [
-         "gold"
-        ],
-        [
-         "information_schema"
-        ],
-        [
-         "marts"
-        ],
-        [
-         "silver"
-        ]
-       ],
-       "datasetInfos": [],
-       "dbfsResultPath": null,
-       "isJsonSchema": true,
-       "metadata": {},
-       "overflow": false,
-       "plotOptions": {
-        "customPlotOptions": {},
-        "displayType": "table",
-        "pivotAggregation": null,
-        "pivotColumns": null,
-        "xColumns": null,
-        "yColumns": null
-       },
-       "removedWidgets": [],
-       "schema": [
-        {
-         "metadata": "{}",
-         "name": "databaseName",
-         "type": "\"string\""
-        }
-       ],
-       "type": "table"
-      }
-     },
-     "output_type": "display_data"
-    },
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "==========================================================================================\nRESET SUMMARY\n==========================================================================================\nCatalog: brazil_legislative_analytics\nDrop Schemas Enabled: False\n==========================================================================================\nRESETTED SCHEMAS\nbrazil_legislative_analytics.audit\nbrazil_legislative_analytics.bronze\nbrazil_legislative_analytics.silver\nbrazil_legislative_analytics.gold\nbrazil_legislative_analytics.marts\n==========================================================================================\nPROJECT ENVIRONMENT RESET COMPLETED\n==========================================================================================\n"
-     ]
-    }
-   ],
-   "source": [
-    "# Databricks notebook source\n",
-    "# MAGIC %md\n",
-    "# MAGIC # 91 Reset Project Environment\n",
-    "# MAGIC\n",
-    "# MAGIC Resets the Brazil Legislative Analytics Medallion environment by removing tables and schemas created during development and testing.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Purpose\n",
-    "# MAGIC This notebook supports environment cleanup during development iterations, architecture changes and integration tests.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Architecture\n",
-    "# MAGIC The project uses a simplified Medallion Architecture:\n",
-    "# MAGIC\n",
-    "# MAGIC Bronze → Silver → Gold → Marts\n",
-    "# MAGIC\n",
-    "# MAGIC ## Actions Performed\n",
-    "# MAGIC - Drops audit tables\n",
-    "# MAGIC - Drops Bronze tables\n",
-    "# MAGIC - Drops Silver tables\n",
-    "# MAGIC - Drops Gold tables\n",
-    "# MAGIC - Drops Mart tables\n",
-    "# MAGIC - Optionally removes schemas\n",
-    "# MAGIC\n",
-    "# MAGIC ## Important Notes\n",
-    "# MAGIC - This notebook is intended for development environments only.\n",
-    "# MAGIC - This notebook permanently removes project objects.\n",
-    "# MAGIC - Execute with caution.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Documentation Standard\n",
-    "# MAGIC - Python functions and variables are written in English.\n",
-    "# MAGIC - Table and field names follow Portuguese mnemonic standards.\n",
-    "# MAGIC - Comments and documentation are written in English.\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ./01_project_config\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "from datetime import datetime\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "print(\"=\" * 90)\n",
-    "print(\"BRAZIL LEGISLATIVE ANALYTICS MEDALLION\")\n",
-    "print(\"91 - RESET PROJECT ENVIRONMENT\")\n",
-    "print(\"=\" * 90)\n",
-    "print(f\"Execution Timestamp: {datetime.now()}\")\n",
-    "print(f\"Catalog: {CATALOG_NAME}\")\n",
-    "print(f\"Environment: {PROJECT_ENVIRONMENT}\")\n",
-    "print(\"=\" * 90)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# RESET CONFIGURATION\n",
-    "# ============================================================\n",
-    "#\n",
-    "# True  -> remove schemas after dropping tables\n",
-    "# False -> keep schemas and remove only tables\n",
-    "#\n",
-    "# ============================================================\n",
-    "\n",
-    "DROP_SCHEMAS = False\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# SCHEMAS\n",
-    "# ============================================================\n",
-    "\n",
-    "SCHEMAS_TO_RESET = [\n",
-    "    SCHEMA_AUDIT,\n",
-    "    SCHEMA_BRONZE,\n",
-    "    SCHEMA_SILVER,\n",
-    "    SCHEMA_GOLD,\n",
-    "    SCHEMA_MARTS,\n",
-    "]\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# TABLE COLLECTIONS\n",
-    "# ============================================================\n",
-    "\n",
-    "AUDIT_TABLES = [\n",
-    "    AUD_TB_LOG_EXECUCAO_PIPELINE,\n",
-    "    AUD_TB_LOG_ERROS_PIPELINE,\n",
-    "    AUD_TB_LOG_QUALIDADE_DADOS,\n",
-    "]\n",
-    "\n",
-    "BRONZE_TABLE_LIST = list(BRONZE_TABLES.values())\n",
-    "SILVER_TABLE_LIST = list(SILVER_TABLES.values())\n",
-    "GOLD_DIMENSION_TABLE_LIST = list(GOLD_DIMENSION_TABLES.values())\n",
-    "GOLD_FACT_TABLE_LIST = list(GOLD_FACT_TABLES.values())\n",
-    "MART_TABLE_LIST = list(MART_TABLES.values())\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# HELPER FUNCTIONS\n",
-    "# ============================================================\n",
-    "\n",
-    "def drop_table(\n",
-    "    schema_name: str,\n",
-    "    table_name: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Drops a table if it exists.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    full_table_name = (\n",
-    "        f\"{CATALOG_NAME}.\"\n",
-    "        f\"{schema_name}.\"\n",
-    "        f\"{table_name}\"\n",
-    "    )\n",
-    "\n",
-    "    spark.sql(f\"\"\"\n",
-    "    DROP TABLE IF EXISTS {full_table_name}\n",
-    "    \"\"\")\n",
-    "\n",
-    "    print(f\"Table removed: {full_table_name}\")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def drop_schema(\n",
-    "    schema_name: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Drops a schema if it exists.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    full_schema_name = (\n",
-    "        f\"{CATALOG_NAME}.\"\n",
-    "        f\"{schema_name}\"\n",
-    "    )\n",
-    "\n",
-    "    spark.sql(f\"\"\"\n",
-    "    DROP SCHEMA IF EXISTS {full_schema_name}\n",
-    "    \"\"\")\n",
-    "\n",
-    "    print(f\"Schema removed: {full_schema_name}\")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 1. Remove Audit Tables\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "for table_name in AUDIT_TABLES:\n",
-    "    drop_table(\n",
-    "        schema_name=SCHEMA_AUDIT,\n",
-    "        table_name=table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 2. Remove Bronze Tables\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "for table_name in BRONZE_TABLE_LIST:\n",
-    "    drop_table(\n",
-    "        schema_name=SCHEMA_BRONZE,\n",
-    "        table_name=table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 3. Remove Silver Tables\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "for table_name in SILVER_TABLE_LIST:\n",
-    "    drop_table(\n",
-    "        schema_name=SCHEMA_SILVER,\n",
-    "        table_name=table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 4. Remove Gold Dimension Tables\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "for table_name in GOLD_DIMENSION_TABLE_LIST:\n",
-    "    drop_table(\n",
-    "        schema_name=SCHEMA_GOLD,\n",
-    "        table_name=table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 5. Remove Gold Fact Tables\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "for table_name in GOLD_FACT_TABLE_LIST:\n",
-    "    drop_table(\n",
-    "        schema_name=SCHEMA_GOLD,\n",
-    "        table_name=table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 6. Remove Analytical Mart Tables\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "for table_name in MART_TABLE_LIST:\n",
-    "    drop_table(\n",
-    "        schema_name=SCHEMA_MARTS,\n",
-    "        table_name=table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 7. Optional Schema Removal\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "if DROP_SCHEMAS:\n",
-    "\n",
-    "    print(\"=\" * 90)\n",
-    "    print(\"REMOVING SCHEMAS\")\n",
-    "    print(\"=\" * 90)\n",
-    "\n",
-    "    for schema_name in SCHEMAS_TO_RESET:\n",
-    "        drop_schema(\n",
-    "            schema_name=schema_name,\n",
-    "        )\n",
-    "\n",
-    "else:\n",
-    "\n",
-    "    print(\"=\" * 90)\n",
-    "    print(\"SCHEMA REMOVAL DISABLED\")\n",
-    "    print(\"=\" * 90)\n",
-    "    print(\"Schemas were preserved.\")\n",
-    "    print(\"Only tables were removed.\")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 8. Validate Remaining Structures\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "remaining_schemas_df = spark.sql(f\"\"\"\n",
-    "SHOW SCHEMAS IN {CATALOG_NAME}\n",
-    "\"\"\")\n",
-    "\n",
-    "display(remaining_schemas_df)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# RESET SUMMARY\n",
-    "# ============================================================\n",
-    "\n",
-    "print(\"=\" * 90)\n",
-    "print(\"RESET SUMMARY\")\n",
-    "print(\"=\" * 90)\n",
-    "print(f\"Catalog: {CATALOG_NAME}\")\n",
-    "print(f\"Drop Schemas Enabled: {DROP_SCHEMAS}\")\n",
-    "\n",
-    "print(\"=\" * 90)\n",
-    "print(\"RESETTED SCHEMAS\")\n",
-    "\n",
-    "for schema_name in SCHEMAS_TO_RESET:\n",
-    "    print(f\"{CATALOG_NAME}.{schema_name}\")\n",
-    "\n",
-    "print(\"=\" * 90)\n",
-    "print(\"PROJECT ENVIRONMENT RESET COMPLETED\")\n",
-    "print(\"=\" * 90)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## Governance Notes\n",
-    "# MAGIC\n",
-    "# MAGIC This notebook supports environment cleanup for:\n",
-    "# MAGIC\n",
-    "# MAGIC - architecture refactoring\n",
-    "# MAGIC - integration testing\n",
-    "# MAGIC - development iterations\n",
-    "# MAGIC - Medallion restructuring\n",
-    "# MAGIC\n",
-    "# MAGIC ## Safety Recommendation\n",
-    "# MAGIC\n",
-    "# MAGIC Recommended configuration:\n",
-    "# MAGIC\n",
-    "# MAGIC ```python\n",
-    "# MAGIC DROP_SCHEMAS = False\n",
-    "# MAGIC ```\n",
-    "# MAGIC\n",
-    "# MAGIC This preserves governance structures while removing only tables.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Next Step\n",
-    "# MAGIC Recreate the environment by executing:\n",
-    "# MAGIC\n",
-    "# MAGIC ```text\n",
-    "# MAGIC 00_create_catalog_schemas\n",
-    "# MAGIC 01_project_config\n",
-    "# MAGIC 02_audit_tables\n",
-    "# MAGIC 90_validate_project_setup\n",
-    "# MAGIC ```"
-   ]
-  }
- ],
- "metadata": {
-  "application/vnd.databricks.v1+notebook": {
-   "computePreferences": null,
-   "dashboards": [],
-   "environmentMetadata": {
-    "base_environment": "",
-    "environment_version": "5"
-   },
-   "inputWidgetPreferences": null,
-   "language": "python",
-   "notebookMetadata": {
-    "pythonIndentUnit": 4
-   },
-   "notebookName": "91_reset_project_environment",
-   "widgets": {}
-  },
-  "language_info": {
-   "name": "python"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 0
-}
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # Setup Layer — Project Environment Reset
+# MAGIC
+# MAGIC **Notebook:** `91_reset_project_environment`  
+# MAGIC **Layer:** `Setup`  
+# MAGIC **Source/Endpoint:** `Internal Spark SQL Commands`  
+# MAGIC **Target:** `Project tables and optional schema cleanup`
+# MAGIC
+# MAGIC Resets the Brazil Legislative Analytics Medallion environment by removing
+# MAGIC tables and optional schemas created during development and testing workflows.
+# MAGIC
+# MAGIC This notebook supports environment cleanup operations required for
+# MAGIC development iterations, integration testing and architecture refactoring.
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Responsibilities
+# MAGIC
+# MAGIC - Remove audit tables
+# MAGIC - Remove Bronze tables
+# MAGIC - Remove Silver tables
+# MAGIC - Remove Gold tables
+# MAGIC - Remove Mart tables
+# MAGIC - Optionally remove project schemas
+# MAGIC - Validate remaining project structures
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Notes
+# MAGIC
+# MAGIC - Intended for development environments only
+# MAGIC - Permanently removes project objects
+# MAGIC - Schema removal is optional and controlled by configuration
+# MAGIC - Recommended to preserve schemas during standard reset operations
+# MAGIC
+# MAGIC For additional architectural and governance details, refer to:
+# MAGIC
+# MAGIC - `/docs/architecture/medallion_architecture.md`
+# MAGIC - `/docs/governance/data_governance.md`
+# MAGIC - `/docs/operations/environment_reset.md`
+
+# COMMAND ----------
+
+# MAGIC %run ./01_project_config
+
+# COMMAND ----------
+
+from datetime import datetime
+
+# COMMAND ----------
+
+print("=" * 90)
+print("BRAZIL LEGISLATIVE ANALYTICS MEDALLION")
+print("91 - RESET PROJECT ENVIRONMENT")
+print("=" * 90)
+print(f"Execution Timestamp: {datetime.now()}")
+print(f"Catalog: {CATALOG_NAME}")
+print(f"Environment: {PROJECT_ENVIRONMENT}")
+print("=" * 90)
+
+# COMMAND ----------
+
+# ============================================================
+# RESET CONFIGURATION
+# ============================================================
+#
+# True  -> remove schemas after dropping tables
+# False -> keep schemas and remove only tables
+#
+# ============================================================
+
+DROP_SCHEMAS = False
+
+# COMMAND ----------
+
+# ============================================================
+# SCHEMAS
+# ============================================================
+
+SCHEMAS_TO_RESET = [
+    SCHEMA_AUDIT,
+    SCHEMA_BRONZE,
+    SCHEMA_SILVER,
+    SCHEMA_GOLD,
+    SCHEMA_MARTS,
+]
+
+# COMMAND ----------
+
+# ============================================================
+# TABLE COLLECTIONS
+# ============================================================
+
+AUDIT_TABLES = [
+    AUD_TB_LOG_EXECUCAO_PIPELINE,
+    AUD_TB_LOG_ERROS_PIPELINE,
+    AUD_TB_LOG_QUALIDADE_DADOS,
+]
+
+BRONZE_TABLE_LIST = list(BRONZE_TABLES.values())
+SILVER_TABLE_LIST = list(SILVER_TABLES.values())
+GOLD_DIMENSION_TABLE_LIST = list(GOLD_DIMENSION_TABLES.values())
+GOLD_FACT_TABLE_LIST = list(GOLD_FACT_TABLES.values())
+MART_TABLE_LIST = list(MART_TABLES.values())
+
+# COMMAND ----------
+
+# ============================================================
+# HELPER FUNCTIONS
+# ============================================================
+
+def drop_table(
+    schema_name: str,
+    table_name: str,
+) -> None:
+    """
+    Drops a table if it exists.
+    """
+
+    full_table_name = (
+        f"{CATALOG_NAME}."
+        f"{schema_name}."
+        f"{table_name}"
+    )
+
+    spark.sql(f"""
+    DROP TABLE IF EXISTS {full_table_name}
+    """)
+
+    print(f"Table removed: {full_table_name}")
+
+# COMMAND ----------
+
+def drop_schema(
+    schema_name: str,
+) -> None:
+    """
+    Drops a schema if it exists.
+    """
+
+    full_schema_name = (
+        f"{CATALOG_NAME}."
+        f"{schema_name}"
+    )
+
+    spark.sql(f"""
+    DROP SCHEMA IF EXISTS {full_schema_name}
+    """)
+
+    print(f"Schema removed: {full_schema_name}")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 1. Remove Audit Tables
+
+# COMMAND ----------
+
+for table_name in AUDIT_TABLES:
+    drop_table(
+        schema_name=SCHEMA_AUDIT,
+        table_name=table_name,
+    )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 2. Remove Bronze Tables
+
+# COMMAND ----------
+
+for table_name in BRONZE_TABLE_LIST:
+    drop_table(
+        schema_name=SCHEMA_BRONZE,
+        table_name=table_name,
+    )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 3. Remove Silver Tables
+
+# COMMAND ----------
+
+for table_name in SILVER_TABLE_LIST:
+    drop_table(
+        schema_name=SCHEMA_SILVER,
+        table_name=table_name,
+    )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 4. Remove Gold Dimension Tables
+
+# COMMAND ----------
+
+for table_name in GOLD_DIMENSION_TABLE_LIST:
+    drop_table(
+        schema_name=SCHEMA_GOLD,
+        table_name=table_name,
+    )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 5. Remove Gold Fact Tables
+
+# COMMAND ----------
+
+for table_name in GOLD_FACT_TABLE_LIST:
+    drop_table(
+        schema_name=SCHEMA_GOLD,
+        table_name=table_name,
+    )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 6. Remove Analytical Mart Tables
+
+# COMMAND ----------
+
+for table_name in MART_TABLE_LIST:
+    drop_table(
+        schema_name=SCHEMA_MARTS,
+        table_name=table_name,
+    )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 7. Optional Schema Removal
+
+# COMMAND ----------
+
+if DROP_SCHEMAS:
+
+    print("=" * 90)
+    print("REMOVING SCHEMAS")
+    print("=" * 90)
+
+    for schema_name in SCHEMAS_TO_RESET:
+        drop_schema(
+            schema_name=schema_name,
+        )
+
+else:
+
+    print("=" * 90)
+    print("SCHEMA REMOVAL DISABLED")
+    print("=" * 90)
+    print("Schemas were preserved.")
+    print("Only tables were removed.")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 8. Validate Remaining Structures
+
+# COMMAND ----------
+
+remaining_schemas_df = spark.sql(f"""
+SHOW SCHEMAS IN {CATALOG_NAME}
+""")
+
+display(remaining_schemas_df)
+
+# COMMAND ----------
+
+# ============================================================
+# RESET SUMMARY
+# ============================================================
+
+print("=" * 90)
+print("RESET SUMMARY")
+print("=" * 90)
+print(f"Catalog: {CATALOG_NAME}")
+print(f"Drop Schemas Enabled: {DROP_SCHEMAS}")
+
+print("=" * 90)
+print("RESETTED SCHEMAS")
+
+for schema_name in SCHEMAS_TO_RESET:
+    print(f"{CATALOG_NAME}.{schema_name}")
+
+print("=" * 90)
+print("PROJECT ENVIRONMENT RESET COMPLETED")
+print("=" * 90)

@@ -1,335 +1,162 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "8700a1da-f3ad-4467-ae23-2222dfbe47d7",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "================================================================================\nBRAZIL LEGISLATIVE ANALYTICS MEDALLION\n00 - CREATE CATALOG AND SCHEMAS\n================================================================================\nExecution timestamp: 2026-05-20 02:12:47.533489\nTarget catalog: brazil_legislative_analytics\n================================================================================\nCatalog validated: brazil_legislative_analytics\nSchema validated: brazil_legislative_analytics.audit\nSchema validated: brazil_legislative_analytics.bronze\nSchema validated: brazil_legislative_analytics.silver\nSchema validated: brazil_legislative_analytics.gold\nSchema validated: brazil_legislative_analytics.marts\nActive catalog set to: brazil_legislative_analytics\n"
-     ]
-    },
-    {
-     "output_type": "display_data",
-     "data": {
-      "text/html": [
-       "<style scoped>\n",
-       "  .table-result-container {\n",
-       "    max-height: 300px;\n",
-       "    overflow: auto;\n",
-       "  }\n",
-       "  table, th, td {\n",
-       "    border: 1px solid black;\n",
-       "    border-collapse: collapse;\n",
-       "  }\n",
-       "  th, td {\n",
-       "    padding: 5px;\n",
-       "  }\n",
-       "  th {\n",
-       "    text-align: left;\n",
-       "  }\n",
-       "</style><div class='table-result-container'><table class='table-result'><thead style='background-color: white'><tr><th>databaseName</th></tr></thead><tbody><tr><td>audit</td></tr><tr><td>bronze</td></tr><tr><td>gold</td></tr><tr><td>information_schema</td></tr><tr><td>marts</td></tr><tr><td>silver</td></tr></tbody></table></div>"
-      ]
-     },
-     "metadata": {
-      "application/vnd.databricks.v1+output": {
-       "addedWidgets": {},
-       "aggData": [],
-       "aggError": "",
-       "aggOverflow": false,
-       "aggSchema": [],
-       "aggSeriesLimitReached": false,
-       "aggType": "",
-       "arguments": {},
-       "columnCustomDisplayInfos": {},
-       "data": [
-        [
-         "audit"
-        ],
-        [
-         "bronze"
-        ],
-        [
-         "gold"
-        ],
-        [
-         "information_schema"
-        ],
-        [
-         "marts"
-        ],
-        [
-         "silver"
-        ]
-       ],
-       "datasetInfos": [],
-       "dbfsResultPath": null,
-       "isJsonSchema": true,
-       "metadata": {},
-       "overflow": false,
-       "plotOptions": {
-        "customPlotOptions": {},
-        "displayType": "table",
-        "pivotAggregation": null,
-        "pivotColumns": null,
-        "xColumns": null,
-        "yColumns": null
-       },
-       "removedWidgets": [],
-       "schema": [
-        {
-         "metadata": "{}",
-         "name": "databaseName",
-         "type": "\"string\""
-        }
-       ],
-       "type": "table"
-      }
-     },
-     "output_type": "display_data"
-    },
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "================================================================================\nSETUP VALIDATION SUMMARY\n================================================================================\nCatalog: brazil_legislative_analytics\nSchema: audit\nSchema: bronze\nSchema: silver\nSchema: gold\nSchema: marts\n================================================================================\nCATALOG AND SCHEMAS CREATED SUCCESSFULLY\n================================================================================\n"
-     ]
-    }
-   ],
-   "source": [
-    "# Databricks notebook source\n",
-    "# MAGIC %md\n",
-    "# MAGIC # 00 Create Catalog and Schemas\n",
-    "# MAGIC\n",
-    "# MAGIC Creates the main catalog and schemas used by the Brazil Legislative Analytics Medallion project.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Layer\n",
-    "# MAGIC Setup\n",
-    "# MAGIC\n",
-    "# MAGIC ## Architecture\n",
-    "# MAGIC The project uses a simplified Medallion Architecture:\n",
-    "# MAGIC\n",
-    "# MAGIC Bronze → Silver → Gold → Marts\n",
-    "# MAGIC\n",
-    "# MAGIC ## Outputs\n",
-    "# MAGIC\n",
-    "# MAGIC Catalog:\n",
-    "# MAGIC - `brazil_legislative_analytics`\n",
-    "# MAGIC\n",
-    "# MAGIC Schemas:\n",
-    "# MAGIC - `audit`\n",
-    "# MAGIC - `bronze`\n",
-    "# MAGIC - `silver`\n",
-    "# MAGIC - `gold`\n",
-    "# MAGIC - `marts`\n",
-    "# MAGIC\n",
-    "# MAGIC ## Documentation Standard\n",
-    "# MAGIC - Python variables are written in English.\n",
-    "# MAGIC - Schema names follow technical Medallion standards.\n",
-    "# MAGIC - Schema comments are written in English.\n",
-    "# MAGIC - Schema comments support governance, traceability and technical documentation.\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "from datetime import datetime\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "CATALOG_NAME = \"brazil_legislative_analytics\"\n",
-    "\n",
-    "REQUIRED_SCHEMAS = {\n",
-    "    \"audit\": \"Governance schema containing audit logs, error logs and data quality validation logs.\",\n",
-    "    \"bronze\": \"Raw ingestion layer containing data extracted from source APIs or CSV fallback files with minimal transformation.\",\n",
-    "    \"silver\": \"Unified curation layer responsible for cleansing, typing, standardization, deduplication, validation and enrichment.\",\n",
-    "    \"gold\": \"Dimensional analytical layer containing dimensions and fact tables following the Star Schema model.\",\n",
-    "    \"marts\": \"Analytical consumption layer containing business-oriented marts and final analytical outputs.\",\n",
-    "}\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "execution_timestamp = datetime.now()\n",
-    "\n",
-    "print(\"=\" * 80)\n",
-    "print(\"BRAZIL LEGISLATIVE ANALYTICS MEDALLION\")\n",
-    "print(\"00 - CREATE CATALOG AND SCHEMAS\")\n",
-    "print(\"=\" * 80)\n",
-    "print(f\"Execution timestamp: {execution_timestamp}\")\n",
-    "print(f\"Target catalog: {CATALOG_NAME}\")\n",
-    "print(\"=\" * 80)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# CREATE PROJECT CATALOG\n",
-    "# ============================================================\n",
-    "\n",
-    "spark.sql(f\"\"\"\n",
-    "CREATE CATALOG IF NOT EXISTS {CATALOG_NAME}\n",
-    "\"\"\")\n",
-    "\n",
-    "print(f\"Catalog validated: {CATALOG_NAME}\")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# CREATE MEDALLION AND GOVERNANCE SCHEMAS\n",
-    "# ============================================================\n",
-    "\n",
-    "for schema_name, schema_comment in REQUIRED_SCHEMAS.items():\n",
-    "    full_schema_name = f\"{CATALOG_NAME}.{schema_name}\"\n",
-    "\n",
-    "    spark.sql(f\"\"\"\n",
-    "    CREATE SCHEMA IF NOT EXISTS {full_schema_name}\n",
-    "    \"\"\")\n",
-    "\n",
-    "    spark.sql(f\"\"\"\n",
-    "    COMMENT ON SCHEMA {full_schema_name}\n",
-    "    IS '{schema_comment}'\n",
-    "    \"\"\")\n",
-    "\n",
-    "    print(f\"Schema validated: {full_schema_name}\")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# SET ACTIVE CATALOG\n",
-    "# ============================================================\n",
-    "#\n",
-    "# The active catalog is explicitly set to avoid accidental\n",
-    "# table creation in the default workspace catalog.\n",
-    "#\n",
-    "# ============================================================\n",
-    "\n",
-    "spark.sql(f\"USE CATALOG {CATALOG_NAME}\")\n",
-    "\n",
-    "print(f\"Active catalog set to: {CATALOG_NAME}\")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# VALIDATE CREATED SCHEMAS\n",
-    "# ============================================================\n",
-    "\n",
-    "schemas_df = spark.sql(f\"\"\"\n",
-    "SHOW SCHEMAS IN {CATALOG_NAME}\n",
-    "\"\"\")\n",
-    "\n",
-    "display(schemas_df)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# SETUP VALIDATION SUMMARY\n",
-    "# ============================================================\n",
-    "\n",
-    "existing_schemas = [\n",
-    "    row[\"databaseName\"]\n",
-    "    for row in schemas_df.collect()\n",
-    "]\n",
-    "\n",
-    "missing_schemas = [\n",
-    "    schema_name\n",
-    "    for schema_name in REQUIRED_SCHEMAS.keys()\n",
-    "    if schema_name not in existing_schemas\n",
-    "]\n",
-    "\n",
-    "print(\"=\" * 80)\n",
-    "print(\"SETUP VALIDATION SUMMARY\")\n",
-    "print(\"=\" * 80)\n",
-    "print(f\"Catalog: {CATALOG_NAME}\")\n",
-    "\n",
-    "for schema_name in REQUIRED_SCHEMAS.keys():\n",
-    "    print(f\"Schema: {schema_name}\")\n",
-    "\n",
-    "if missing_schemas:\n",
-    "    raise Exception(\n",
-    "        f\"Catalog/schema setup validation failed. \"\n",
-    "        f\"Missing schemas: {missing_schemas}\"\n",
-    "    )\n",
-    "\n",
-    "print(\"=\" * 80)\n",
-    "print(\"CATALOG AND SCHEMAS CREATED SUCCESSFULLY\")\n",
-    "print(\"=\" * 80)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## Created Structures\n",
-    "# MAGIC\n",
-    "# MAGIC ### Catalog\n",
-    "# MAGIC - `brazil_legislative_analytics`\n",
-    "# MAGIC\n",
-    "# MAGIC ### Schemas\n",
-    "# MAGIC - `audit`\n",
-    "# MAGIC - `bronze`\n",
-    "# MAGIC - `silver`\n",
-    "# MAGIC - `gold`\n",
-    "# MAGIC - `marts`\n",
-    "# MAGIC\n",
-    "# MAGIC ## Governance Notes\n",
-    "# MAGIC\n",
-    "# MAGIC - All schemas include comments for documentation and governance.\n",
-    "# MAGIC - The active catalog is explicitly set to avoid accidental table creation in the default schema.\n",
-    "# MAGIC - The Silver layer is unified and replaces the previous `silver_base` and `silver_curated` split.\n",
-    "# MAGIC - Future notebooks must always write tables using the fully qualified name:\n",
-    "# MAGIC\n",
-    "# MAGIC ```text\n",
-    "# MAGIC catalog.schema.table_name\n",
-    "# MAGIC ```\n",
-    "# MAGIC\n",
-    "# MAGIC Example:\n",
-    "# MAGIC\n",
-    "# MAGIC ```text\n",
-    "# MAGIC brazil_legislative_analytics.bronze.br_deputados\n",
-    "# MAGIC brazil_legislative_analytics.silver.slv_deputados\n",
-    "# MAGIC brazil_legislative_analytics.gold.dm_deputado\n",
-    "# MAGIC brazil_legislative_analytics.marts.am_atlas_frentes\n",
-    "# MAGIC ```\n",
-    "# MAGIC\n",
-    "# MAGIC ## Next Step\n",
-    "# MAGIC Execute:\n",
-    "# MAGIC\n",
-    "# MAGIC `01_project_config`"
-   ]
-  }
- ],
- "metadata": {
-  "application/vnd.databricks.v1+notebook": {
-   "computePreferences": null,
-   "dashboards": [],
-   "environmentMetadata": {
-    "base_environment": "",
-    "environment_version": "5"
-   },
-   "inputWidgetPreferences": null,
-   "language": "python",
-   "notebookMetadata": {
-    "pythonIndentUnit": 4
-   },
-   "notebookName": "00_create_catalog_schemas",
-   "widgets": {}
-  },
-  "language_info": {
-   "name": "python"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 0
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # Setup Layer — Catalog and Schema Initialization
+# MAGIC
+# MAGIC **Notebook:** `00_create_catalog_schemas`  
+# MAGIC **Layer:** `Setup`  
+# MAGIC **Source/Endpoint:** `Internal Spark SQL Commands`  
+# MAGIC **Target:** `brazil_legislative_analytics catalog and Medallion schemas`
+# MAGIC
+# MAGIC Creates the main catalog and schemas used by the Brazil Legislative Analytics Medallion project.
+# MAGIC
+# MAGIC This notebook initializes the project governance structure,
+# MAGIC creating the required schemas for data ingestion, curation,
+# MAGIC analytics and monitoring workflows.
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Responsibilities
+# MAGIC
+# MAGIC - Create the project catalog
+# MAGIC - Create Medallion architecture schemas
+# MAGIC - Apply governance comments to schemas
+# MAGIC - Set the active catalog context
+# MAGIC - Validate schema creation results
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Notes
+# MAGIC
+# MAGIC - Idempotent setup execution
+# MAGIC - Uses Spark SQL DDL statements
+# MAGIC - Schema comments support governance and traceability
+# MAGIC - Silver layer uses a unified architecture model
+# MAGIC
+# MAGIC For additional architectural and governance details, refer to:
+# MAGIC
+# MAGIC - `/docs/architecture/medallion_architecture.md`
+# MAGIC - `/docs/governance/data_governance.md`
+# MAGIC - `/docs/standards/notebook_standards.md`
+
+# COMMAND ----------
+
+from datetime import datetime
+
+# COMMAND ----------
+
+CATALOG_NAME = "brazil_legislative_analytics"
+
+REQUIRED_SCHEMAS = {
+    "audit": "Governance schema containing audit logs, error logs and data quality validation logs.",
+    "bronze": "Raw ingestion layer containing data extracted from source APIs or CSV fallback files with minimal transformation.",
+    "silver": "Unified curation layer responsible for cleansing, typing, standardization, deduplication, validation and enrichment.",
+    "gold": "Dimensional analytical layer containing dimensions and fact tables following the Star Schema model.",
+    "marts": "Analytical consumption layer containing business-oriented marts and final analytical outputs.",
 }
+
+# COMMAND ----------
+
+execution_timestamp = datetime.now()
+
+print("=" * 80)
+print("BRAZIL LEGISLATIVE ANALYTICS MEDALLION")
+print("00 - CREATE CATALOG AND SCHEMAS")
+print("=" * 80)
+print(f"Execution timestamp: {execution_timestamp}")
+print(f"Target catalog: {CATALOG_NAME}")
+print("=" * 80)
+
+# COMMAND ----------
+
+# ============================================================
+# CREATE PROJECT CATALOG
+# ============================================================
+
+spark.sql(f"""
+CREATE CATALOG IF NOT EXISTS {CATALOG_NAME}
+""")
+
+print(f"Catalog validated: {CATALOG_NAME}")
+
+# COMMAND ----------
+
+# ============================================================
+# CREATE MEDALLION AND GOVERNANCE SCHEMAS
+# ============================================================
+
+for schema_name, schema_comment in REQUIRED_SCHEMAS.items():
+    full_schema_name = f"{CATALOG_NAME}.{schema_name}"
+
+    spark.sql(f"""
+    CREATE SCHEMA IF NOT EXISTS {full_schema_name}
+    """)
+
+    spark.sql(f"""
+    COMMENT ON SCHEMA {full_schema_name}
+    IS '{schema_comment}'
+    """)
+
+    print(f"Schema validated: {full_schema_name}")
+
+# COMMAND ----------
+
+# ============================================================
+# SET ACTIVE CATALOG
+# ============================================================
+#
+# The active catalog is explicitly set to avoid accidental
+# table creation in the default workspace catalog.
+#
+# ============================================================
+
+spark.sql(f"USE CATALOG {CATALOG_NAME}")
+
+print(f"Active catalog set to: {CATALOG_NAME}")
+
+# COMMAND ----------
+
+# ============================================================
+# VALIDATE CREATED SCHEMAS
+# ============================================================
+
+schemas_df = spark.sql(f"""
+SHOW SCHEMAS IN {CATALOG_NAME}
+""")
+
+display(schemas_df)
+
+# COMMAND ----------
+
+# ============================================================
+# SETUP VALIDATION SUMMARY
+# ============================================================
+
+existing_schemas = [
+    row["databaseName"]
+    for row in schemas_df.collect()
+]
+
+missing_schemas = [
+    schema_name
+    for schema_name in REQUIRED_SCHEMAS.keys()
+    if schema_name not in existing_schemas
+]
+
+print("=" * 80)
+print("SETUP VALIDATION SUMMARY")
+print("=" * 80)
+print(f"Catalog: {CATALOG_NAME}")
+
+for schema_name in REQUIRED_SCHEMAS.keys():
+    print(f"Schema: {schema_name}")
+
+if missing_schemas:
+    raise Exception(
+        f"Catalog/schema setup validation failed. "
+        f"Missing schemas: {missing_schemas}"
+    )
+
+print("=" * 80)
+print("CATALOG AND SCHEMAS CREATED SUCCESSFULLY")
+print("=" * 80)
+

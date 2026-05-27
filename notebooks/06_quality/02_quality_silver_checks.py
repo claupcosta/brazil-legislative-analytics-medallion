@@ -1,1200 +1,689 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "f1e6a39a-f474-402c-a6ae-24e1517c9ef2",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "UTILS CONFIG LOADED SUCCESSFULLY\nPROJECT_NAME: brazil_legislative_analytics\nPROJECT_VERSION: v1.0.0\nPROJECT_ENVIRONMENT: dev\nCATALOG_NAME: brazil_legislative_analytics\nRUN_ID: af765285-a358-4482-ae02-868fd033809a\n"
-     ]
-    }
-   ],
-   "source": [
-    "%run ../99_utils/utils_config"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "90eb30f6-bdea-4830-82f9-379bf3763983",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "UTILS CONFIG LOADED SUCCESSFULLY\nPROJECT_NAME: brazil_legislative_analytics\nPROJECT_VERSION: v1.0.0\nPROJECT_ENVIRONMENT: dev\nCATALOG_NAME: brazil_legislative_analytics\nRUN_ID: 5f33f785-5a92-460f-8a40-7e42a44b8bdf\n"
-     ]
-    },
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_quality loaded successfully.\n"
-     ]
-    }
-   ],
-   "source": [
-    "%run ../99_utils/utils_quality"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "fbfb3fd1-8aa8-4158-84b0-a9f09eda89ac",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "==========================================================================================\nBRAZIL LEGISLATIVE ANALYTICS MEDALLION\n02 - QUALITY SILVER CHECKS\n==========================================================================================\nExecution Timestamp: 2026-05-20 03:13:39.704105\nCatalog: brazil_legislative_analytics\nLayer: silver\n==========================================================================================\n==========================================================================================\nRunning Silver quality checks for: brazil_legislative_analytics.silver.slv_deputados\n==========================================================================================\n==========================================================================================\nRunning Silver quality checks for: brazil_legislative_analytics.silver.slv_partidos\n==========================================================================================\n==========================================================================================\nRunning Silver quality checks for: brazil_legislative_analytics.silver.slv_estados\n==========================================================================================\n==========================================================================================\nRunning Silver quality checks for: brazil_legislative_analytics.silver.slv_frentes\n==========================================================================================\n==========================================================================================\nRunning Silver quality checks for: brazil_legislative_analytics.silver.slv_frentes_membros\n==========================================================================================\n==========================================================================================\nRunning Silver quality checks for: brazil_legislative_analytics.silver.slv_eventos\n==========================================================================================\n==========================================================================================\nRunning Silver quality checks for: brazil_legislative_analytics.silver.slv_votacoes\n==========================================================================================\n==========================================================================================\nRunning Silver quality checks for: brazil_legislative_analytics.silver.slv_votos\n==========================================================================================\n==========================================================================================\nRunning Silver quality checks for: brazil_legislative_analytics.silver.slv_despesas_ceap\n==========================================================================================\n==========================================================================================\nRunning Silver quality checks for: brazil_legislative_analytics.silver.slv_fornecedores\n==========================================================================================\n==========================================================================================\nRunning Silver quality checks for: brazil_legislative_analytics.silver.slv_cpis\n==========================================================================================\n==========================================================================================\nRunning Silver quality checks for: brazil_legislative_analytics.silver.slv_cpi_eventos\n==========================================================================================\n==========================================================================================\nRunning Silver quality checks for: brazil_legislative_analytics.silver.slv_proposicoes\n==========================================================================================\nSilver quality results persisted into: brazil_legislative_analytics.audit.aud_log_qualidade_dados\n"
-     ]
-    },
-    {
-     "output_type": "display_data",
-     "data": {
-      "text/html": [
-       "<style scoped>\n",
-       "  .table-result-container {\n",
-       "    max-height: 300px;\n",
-       "    overflow: auto;\n",
-       "  }\n",
-       "  table, th, td {\n",
-       "    border: 1px solid black;\n",
-       "    border-collapse: collapse;\n",
-       "  }\n",
-       "  th, td {\n",
-       "    padding: 5px;\n",
-       "  }\n",
-       "  th {\n",
-       "    text-align: left;\n",
-       "  }\n",
-       "</style><div class='table-result-container'><table class='table-result'><thead style='background-color: white'><tr><th>qlt_id_log</th><th>aud_id_execucao</th><th>aud_tx_nome_projeto</th><th>aud_tx_versao_pipeline</th><th>aud_tx_ambiente</th><th>aud_tx_nome_notebook</th><th>aud_tx_nome_camada</th><th>aud_tx_nome_entidade</th><th>aud_tx_tabela_destino</th><th>qlt_tx_nome_regra</th><th>qlt_tx_descricao_regra</th><th>qlt_tx_status_validacao</th><th>qlt_qt_total_registros</th><th>qlt_qt_registros_invalidos</th><th>qlt_pc_registros_invalidos</th><th>qlt_dh_validacao</th><th>qlt_tx_mensagem</th></tr></thead><tbody><tr><td>a6330904-f258-4890-b1a2-019fef7986d2</td><td>5f33f785-5a92-460f-8a40-7e42a44b8bdf</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>02_quality_silver_checks</td><td>silver</td><td>deputados</td><td>brazil_legislative_analytics.silver.slv_deputados</td><td>silver_table_exists</td><td>Validates whether the Silver table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:13:44.248Z</td><td>Silver table does not exist.</td></tr><tr><td>89ff9a8a-a699-4c97-acf6-4f5524231e4a</td><td>5f33f785-5a92-460f-8a40-7e42a44b8bdf</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>02_quality_silver_checks</td><td>silver</td><td>partidos</td><td>brazil_legislative_analytics.silver.slv_partidos</td><td>silver_table_exists</td><td>Validates whether the Silver table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:13:44.248Z</td><td>Silver table does not exist.</td></tr><tr><td>736fc51e-6aae-42d9-bc8e-762ea0afd530</td><td>5f33f785-5a92-460f-8a40-7e42a44b8bdf</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>02_quality_silver_checks</td><td>silver</td><td>estados</td><td>brazil_legislative_analytics.silver.slv_estados</td><td>silver_table_exists</td><td>Validates whether the Silver table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:13:44.248Z</td><td>Silver table does not exist.</td></tr><tr><td>3301d911-2704-4876-be91-36b296e3f0ce</td><td>5f33f785-5a92-460f-8a40-7e42a44b8bdf</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>02_quality_silver_checks</td><td>silver</td><td>frentes</td><td>brazil_legislative_analytics.silver.slv_frentes</td><td>silver_table_exists</td><td>Validates whether the Silver table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:13:44.248Z</td><td>Silver table does not exist.</td></tr><tr><td>2e78da1b-99a2-4631-a78e-19b60c7a8331</td><td>5f33f785-5a92-460f-8a40-7e42a44b8bdf</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>02_quality_silver_checks</td><td>silver</td><td>frentes_membros</td><td>brazil_legislative_analytics.silver.slv_frentes_membros</td><td>silver_table_exists</td><td>Validates whether the Silver table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:13:44.248Z</td><td>Silver table does not exist.</td></tr><tr><td>d7d0f031-6c74-4d99-8294-6eefae784ee2</td><td>5f33f785-5a92-460f-8a40-7e42a44b8bdf</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>02_quality_silver_checks</td><td>silver</td><td>eventos</td><td>brazil_legislative_analytics.silver.slv_eventos</td><td>silver_table_exists</td><td>Validates whether the Silver table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:13:44.248Z</td><td>Silver table does not exist.</td></tr><tr><td>8b1eec80-ed06-4ce7-abb9-52b8133b90eb</td><td>5f33f785-5a92-460f-8a40-7e42a44b8bdf</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>02_quality_silver_checks</td><td>silver</td><td>votacoes</td><td>brazil_legislative_analytics.silver.slv_votacoes</td><td>silver_table_exists</td><td>Validates whether the Silver table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:13:44.248Z</td><td>Silver table does not exist.</td></tr><tr><td>83580961-fc93-4e6b-8b12-3a0d55bad822</td><td>5f33f785-5a92-460f-8a40-7e42a44b8bdf</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>02_quality_silver_checks</td><td>silver</td><td>votos</td><td>brazil_legislative_analytics.silver.slv_votos</td><td>silver_table_exists</td><td>Validates whether the Silver table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:13:44.248Z</td><td>Silver table does not exist.</td></tr><tr><td>a7bf7481-ce3d-4b16-8791-27f6250e64f5</td><td>5f33f785-5a92-460f-8a40-7e42a44b8bdf</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>02_quality_silver_checks</td><td>silver</td><td>despesas_ceap</td><td>brazil_legislative_analytics.silver.slv_despesas_ceap</td><td>silver_table_exists</td><td>Validates whether the Silver table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:13:44.248Z</td><td>Silver table does not exist.</td></tr><tr><td>828f37cf-de03-4c97-984f-db2f5fb8fe43</td><td>5f33f785-5a92-460f-8a40-7e42a44b8bdf</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>02_quality_silver_checks</td><td>silver</td><td>fornecedores</td><td>brazil_legislative_analytics.silver.slv_fornecedores</td><td>silver_table_exists</td><td>Validates whether the Silver table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:13:44.248Z</td><td>Silver table does not exist.</td></tr><tr><td>2a44482b-9206-4ce0-9afc-03e11b349ea0</td><td>5f33f785-5a92-460f-8a40-7e42a44b8bdf</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>02_quality_silver_checks</td><td>silver</td><td>cpis</td><td>brazil_legislative_analytics.silver.slv_cpis</td><td>silver_table_exists</td><td>Validates whether the Silver table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:13:44.248Z</td><td>Silver table does not exist.</td></tr><tr><td>86149a2d-4b69-4f97-a97b-4755156d37a6</td><td>5f33f785-5a92-460f-8a40-7e42a44b8bdf</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>02_quality_silver_checks</td><td>silver</td><td>cpi_eventos</td><td>brazil_legislative_analytics.silver.slv_cpi_eventos</td><td>silver_table_exists</td><td>Validates whether the Silver table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:13:44.248Z</td><td>Silver table does not exist.</td></tr><tr><td>7e662a13-9f84-474b-bcaf-af0156b3f5c2</td><td>5f33f785-5a92-460f-8a40-7e42a44b8bdf</td><td>brazil_legislative_analytics</td><td>v1.0.0</td><td>dev</td><td>02_quality_silver_checks</td><td>silver</td><td>proposicoes</td><td>brazil_legislative_analytics.silver.slv_proposicoes</td><td>silver_table_exists</td><td>Validates whether the Silver table exists.</td><td>FAILED</td><td>1</td><td>1</td><td>100.0</td><td>2026-05-20T03:13:44.248Z</td><td>Silver table does not exist.</td></tr></tbody></table></div>"
-      ]
-     },
-     "metadata": {
-      "application/vnd.databricks.v1+output": {
-       "addedWidgets": {},
-       "aggData": [],
-       "aggError": "",
-       "aggOverflow": false,
-       "aggSchema": [],
-       "aggSeriesLimitReached": false,
-       "aggType": "",
-       "arguments": {},
-       "columnCustomDisplayInfos": {},
-       "data": [
-        [
-         "a6330904-f258-4890-b1a2-019fef7986d2",
-         "5f33f785-5a92-460f-8a40-7e42a44b8bdf",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "02_quality_silver_checks",
-         "silver",
-         "deputados",
-         "brazil_legislative_analytics.silver.slv_deputados",
-         "silver_table_exists",
-         "Validates whether the Silver table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:13:44.248Z",
-         "Silver table does not exist."
-        ],
-        [
-         "89ff9a8a-a699-4c97-acf6-4f5524231e4a",
-         "5f33f785-5a92-460f-8a40-7e42a44b8bdf",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "02_quality_silver_checks",
-         "silver",
-         "partidos",
-         "brazil_legislative_analytics.silver.slv_partidos",
-         "silver_table_exists",
-         "Validates whether the Silver table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:13:44.248Z",
-         "Silver table does not exist."
-        ],
-        [
-         "736fc51e-6aae-42d9-bc8e-762ea0afd530",
-         "5f33f785-5a92-460f-8a40-7e42a44b8bdf",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "02_quality_silver_checks",
-         "silver",
-         "estados",
-         "brazil_legislative_analytics.silver.slv_estados",
-         "silver_table_exists",
-         "Validates whether the Silver table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:13:44.248Z",
-         "Silver table does not exist."
-        ],
-        [
-         "3301d911-2704-4876-be91-36b296e3f0ce",
-         "5f33f785-5a92-460f-8a40-7e42a44b8bdf",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "02_quality_silver_checks",
-         "silver",
-         "frentes",
-         "brazil_legislative_analytics.silver.slv_frentes",
-         "silver_table_exists",
-         "Validates whether the Silver table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:13:44.248Z",
-         "Silver table does not exist."
-        ],
-        [
-         "2e78da1b-99a2-4631-a78e-19b60c7a8331",
-         "5f33f785-5a92-460f-8a40-7e42a44b8bdf",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "02_quality_silver_checks",
-         "silver",
-         "frentes_membros",
-         "brazil_legislative_analytics.silver.slv_frentes_membros",
-         "silver_table_exists",
-         "Validates whether the Silver table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:13:44.248Z",
-         "Silver table does not exist."
-        ],
-        [
-         "d7d0f031-6c74-4d99-8294-6eefae784ee2",
-         "5f33f785-5a92-460f-8a40-7e42a44b8bdf",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "02_quality_silver_checks",
-         "silver",
-         "eventos",
-         "brazil_legislative_analytics.silver.slv_eventos",
-         "silver_table_exists",
-         "Validates whether the Silver table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:13:44.248Z",
-         "Silver table does not exist."
-        ],
-        [
-         "8b1eec80-ed06-4ce7-abb9-52b8133b90eb",
-         "5f33f785-5a92-460f-8a40-7e42a44b8bdf",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "02_quality_silver_checks",
-         "silver",
-         "votacoes",
-         "brazil_legislative_analytics.silver.slv_votacoes",
-         "silver_table_exists",
-         "Validates whether the Silver table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:13:44.248Z",
-         "Silver table does not exist."
-        ],
-        [
-         "83580961-fc93-4e6b-8b12-3a0d55bad822",
-         "5f33f785-5a92-460f-8a40-7e42a44b8bdf",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "02_quality_silver_checks",
-         "silver",
-         "votos",
-         "brazil_legislative_analytics.silver.slv_votos",
-         "silver_table_exists",
-         "Validates whether the Silver table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:13:44.248Z",
-         "Silver table does not exist."
-        ],
-        [
-         "a7bf7481-ce3d-4b16-8791-27f6250e64f5",
-         "5f33f785-5a92-460f-8a40-7e42a44b8bdf",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "02_quality_silver_checks",
-         "silver",
-         "despesas_ceap",
-         "brazil_legislative_analytics.silver.slv_despesas_ceap",
-         "silver_table_exists",
-         "Validates whether the Silver table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:13:44.248Z",
-         "Silver table does not exist."
-        ],
-        [
-         "828f37cf-de03-4c97-984f-db2f5fb8fe43",
-         "5f33f785-5a92-460f-8a40-7e42a44b8bdf",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "02_quality_silver_checks",
-         "silver",
-         "fornecedores",
-         "brazil_legislative_analytics.silver.slv_fornecedores",
-         "silver_table_exists",
-         "Validates whether the Silver table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:13:44.248Z",
-         "Silver table does not exist."
-        ],
-        [
-         "2a44482b-9206-4ce0-9afc-03e11b349ea0",
-         "5f33f785-5a92-460f-8a40-7e42a44b8bdf",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "02_quality_silver_checks",
-         "silver",
-         "cpis",
-         "brazil_legislative_analytics.silver.slv_cpis",
-         "silver_table_exists",
-         "Validates whether the Silver table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:13:44.248Z",
-         "Silver table does not exist."
-        ],
-        [
-         "86149a2d-4b69-4f97-a97b-4755156d37a6",
-         "5f33f785-5a92-460f-8a40-7e42a44b8bdf",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "02_quality_silver_checks",
-         "silver",
-         "cpi_eventos",
-         "brazil_legislative_analytics.silver.slv_cpi_eventos",
-         "silver_table_exists",
-         "Validates whether the Silver table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:13:44.248Z",
-         "Silver table does not exist."
-        ],
-        [
-         "7e662a13-9f84-474b-bcaf-af0156b3f5c2",
-         "5f33f785-5a92-460f-8a40-7e42a44b8bdf",
-         "brazil_legislative_analytics",
-         "v1.0.0",
-         "dev",
-         "02_quality_silver_checks",
-         "silver",
-         "proposicoes",
-         "brazil_legislative_analytics.silver.slv_proposicoes",
-         "silver_table_exists",
-         "Validates whether the Silver table exists.",
-         "FAILED",
-         1,
-         1,
-         100.0,
-         "2026-05-20T03:13:44.248Z",
-         "Silver table does not exist."
-        ]
-       ],
-       "datasetInfos": [],
-       "dbfsResultPath": null,
-       "isJsonSchema": true,
-       "metadata": {},
-       "overflow": false,
-       "plotOptions": {
-        "customPlotOptions": {},
-        "displayType": "table",
-        "pivotAggregation": null,
-        "pivotColumns": null,
-        "xColumns": null,
-        "yColumns": null
-       },
-       "removedWidgets": [],
-       "schema": [
-        {
-         "metadata": "{}",
-         "name": "qlt_id_log",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_id_execucao",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_nome_projeto",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_versao_pipeline",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_ambiente",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_nome_notebook",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_nome_camada",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_nome_entidade",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "aud_tx_tabela_destino",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_tx_nome_regra",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_tx_descricao_regra",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_tx_status_validacao",
-         "type": "\"string\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_qt_total_registros",
-         "type": "\"long\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_qt_registros_invalidos",
-         "type": "\"long\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_pc_registros_invalidos",
-         "type": "\"double\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_dh_validacao",
-         "type": "\"timestamp\""
-        },
-        {
-         "metadata": "{}",
-         "name": "qlt_tx_mensagem",
-         "type": "\"string\""
-        }
-       ],
-       "type": "table"
-      }
-     },
-     "output_type": "display_data"
-    },
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "==========================================================================================\nSILVER QUALITY SUMMARY\n==========================================================================================\nPassed validations: 0\nWarning validations: 0\nFailed validations: 13\n==========================================================================================\nWARNING: Silver quality validation finished with 13 failed validation(s). This is expected if Silver tables have not been created yet.\nSILVER QUALITY CHECKS COMPLETED\n"
-     ]
-    }
-   ],
-   "source": [
-    "# Databricks notebook source\n",
-    "# MAGIC %md\n",
-    "# MAGIC # 02 Quality — Silver Checks\n",
-    "# MAGIC\n",
-    "# MAGIC Executes data quality validations for Silver tables in the Brazil Legislative Analytics Medallion project.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Purpose\n",
-    "# MAGIC This notebook validates whether Silver curated outputs are available, structurally consistent and ready for Gold dimensional modeling.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Scope\n",
-    "# MAGIC Silver quality checks focus on:\n",
-    "# MAGIC - table existence\n",
-    "# MAGIC - required traceability columns\n",
-    "# MAGIC - minimum record availability\n",
-    "# MAGIC - duplicated hash records\n",
-    "# MAGIC - business key availability\n",
-    "# MAGIC - controlled exception handling per entity\n",
-    "# MAGIC\n",
-    "# MAGIC ## Persistence\n",
-    "# MAGIC Validation results are persisted into:\n",
-    "# MAGIC\n",
-    "# MAGIC ```text\n",
-    "# MAGIC audit.aud_log_qualidade_dados\n",
-    "# MAGIC ```\n",
-    "# MAGIC\n",
-    "# MAGIC ## Execution Policy\n",
-    "# MAGIC During early development, Silver tables may not exist yet.\n",
-    "# MAGIC In this case, validations are persisted as evidence, but the notebook does not block execution.\n",
-    "# MAGIC\n",
-    "# MAGIC Set `FAIL_ON_ERROR = True` when Silver processing is active and quality checks must block the pipeline.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Documentation Standard\n",
-    "# MAGIC - Python functions and variables are written in English.\n",
-    "# MAGIC - Table and field names follow Portuguese mnemonic standards.\n",
-    "# MAGIC - Comments and documentation are written in English.\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ../99_utils/utils_config\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ../99_utils/utils_quality\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "from datetime import datetime\n",
-    "from pyspark.sql import DataFrame\n",
-    "from pyspark.sql import functions as F\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "print(\"=\" * 90)\n",
-    "print(\"BRAZIL LEGISLATIVE ANALYTICS MEDALLION\")\n",
-    "print(\"02 - QUALITY SILVER CHECKS\")\n",
-    "print(\"=\" * 90)\n",
-    "print(f\"Execution Timestamp: {datetime.now()}\")\n",
-    "print(f\"Catalog: {CATALOG_NAME}\")\n",
-    "print(f\"Layer: {SCHEMA_SILVER}\")\n",
-    "print(\"=\" * 90)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# QUALITY CONFIGURATION\n",
-    "# ============================================================\n",
-    "\n",
-    "NOTEBOOK_NAME = \"02_quality_silver_checks\"\n",
-    "LAYER_NAME = \"silver\"\n",
-    "\n",
-    "# During early development, Silver tables may not exist yet.\n",
-    "# Set to True when Silver processing is active and quality checks\n",
-    "# must block the pipeline.\n",
-    "FAIL_ON_ERROR = False\n",
-    "\n",
-    "DATA_QUALITY_LOG_TABLE = (\n",
-    "    f\"{CATALOG_NAME}.\"\n",
-    "    f\"{SCHEMA_AUDIT}.\"\n",
-    "    f\"{AUD_TB_LOG_QUALIDADE_DADOS}\"\n",
-    ")\n",
-    "\n",
-    "SILVER_ENTITY_TABLES = SILVER_TABLES\n",
-    "\n",
-    "SILVER_REQUIRED_COLUMNS = [\n",
-    "    \"aud_id_execucao\",\n",
-    "    \"aud_dh_processamento\",\n",
-    "    \"aud_tx_versao_pipeline\",\n",
-    "    \"aud_tx_hash_registro\",\n",
-    "]\n",
-    "\n",
-    "SILVER_BUSINESS_KEYS = {\n",
-    "    \"deputados\": [\"id_deputado\"],\n",
-    "    \"partidos\": [\"id_partido\"],\n",
-    "    \"estados\": [\"sigla_uf\"],\n",
-    "    \"frentes\": [\"id_frente\"],\n",
-    "    \"frentes_membros\": [\"id_frente\", \"id_deputado\"],\n",
-    "    \"eventos\": [\"id_evento\"],\n",
-    "    \"votacoes\": [\"id_votacao\"],\n",
-    "    \"votos\": [\"id_votacao\", \"id_deputado\"],\n",
-    "    \"despesas_ceap\": [\"id_deputado\", \"id_documento\"],\n",
-    "    \"fornecedores\": [\"cnpj_cpf_fornecedor\"],\n",
-    "    \"cpis\": [\"id_cpi\"],\n",
-    "    \"cpi_eventos\": [\"id_cpi\", \"id_evento\"],\n",
-    "    \"proposicoes\": [\"id_proposicao\"],\n",
-    "}\n",
-    "\n",
-    "quality_results = []\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# QUALITY HELPERS\n",
-    "# ============================================================\n",
-    "\n",
-    "def add_quality_result(\n",
-    "    rule_name: str,\n",
-    "    rule_description: str,\n",
-    "    validation_status: str,\n",
-    "    total_records: int,\n",
-    "    invalid_records: int,\n",
-    "    invalid_percentage: float,\n",
-    "    message: str,\n",
-    "    entity_name: str,\n",
-    "    target_table: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Adds a quality validation result to the in-memory result list.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    quality_results.append({\n",
-    "        \"nome_regra\": rule_name,\n",
-    "        \"descricao_regra\": rule_description,\n",
-    "        \"status_validacao\": validation_status,\n",
-    "        \"total_registros\": int(total_records) if total_records is not None else 0,\n",
-    "        \"registros_invalidos\": int(invalid_records) if invalid_records is not None else 0,\n",
-    "        \"percentual_invalidos\": float(invalid_percentage) if invalid_percentage is not None else 0.0,\n",
-    "        \"mensagem\": message,\n",
-    "        \"entity_name\": entity_name,\n",
-    "        \"target_table\": target_table,\n",
-    "    })\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def add_exception_result(\n",
-    "    entity_name: str,\n",
-    "    target_table: str,\n",
-    "    error: Exception,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Adds a controlled exception result to the quality result list.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=\"silver_quality_exception\",\n",
-    "        rule_description=\"Captures unexpected errors during Silver quality validation.\",\n",
-    "        validation_status=QUALITY_FAILED,\n",
-    "        total_records=1,\n",
-    "        invalid_records=1,\n",
-    "        invalid_percentage=100.0,\n",
-    "        message=f\"Unexpected error during Silver quality validation: {str(error)}\",\n",
-    "        entity_name=entity_name,\n",
-    "        target_table=target_table,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def table_exists(\n",
-    "    full_table_name: str,\n",
-    ") -> bool:\n",
-    "    \"\"\"\n",
-    "    Checks whether a fully qualified table exists.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    try:\n",
-    "        return spark.catalog.tableExists(full_table_name)\n",
-    "\n",
-    "    except Exception:\n",
-    "        return False\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_table_dataframe(\n",
-    "    full_table_name: str,\n",
-    ") -> DataFrame:\n",
-    "    \"\"\"\n",
-    "    Reads a table into a Spark DataFrame.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return spark.table(full_table_name)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def count_records(\n",
-    "    dataframe: DataFrame,\n",
-    ") -> int:\n",
-    "    \"\"\"\n",
-    "    Counts records from a Spark DataFrame.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return dataframe.count()\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_table_exists(\n",
-    "    entity_name: str,\n",
-    "    full_table_name: str,\n",
-    ") -> bool:\n",
-    "    \"\"\"\n",
-    "    Validates whether a Silver table exists.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    exists = table_exists(full_table_name)\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=\"silver_table_exists\",\n",
-    "        rule_description=\"Validates whether the Silver table exists.\",\n",
-    "        validation_status=QUALITY_PASSED if exists else QUALITY_FAILED,\n",
-    "        total_records=1,\n",
-    "        invalid_records=0 if exists else 1,\n",
-    "        invalid_percentage=0.0 if exists else 100.0,\n",
-    "        message=(\n",
-    "            \"Silver table exists.\"\n",
-    "            if exists\n",
-    "            else \"Silver table does not exist.\"\n",
-    "        ),\n",
-    "        entity_name=entity_name,\n",
-    "        target_table=full_table_name,\n",
-    "    )\n",
-    "\n",
-    "    return exists\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_minimum_records(\n",
-    "    dataframe: DataFrame,\n",
-    "    entity_name: str,\n",
-    "    full_table_name: str,\n",
-    ") -> int:\n",
-    "    \"\"\"\n",
-    "    Validates whether a Silver table contains at least one record.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    total_records = count_records(dataframe)\n",
-    "    invalid_records = 0 if total_records > 0 else 1\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=\"silver_minimum_records\",\n",
-    "        rule_description=\"Validates whether the Silver table contains at least one record.\",\n",
-    "        validation_status=QUALITY_PASSED if total_records > 0 else QUALITY_WARNING,\n",
-    "        total_records=total_records,\n",
-    "        invalid_records=invalid_records,\n",
-    "        invalid_percentage=0.0 if total_records > 0 else 100.0,\n",
-    "        message=f\"Silver table record count: {total_records}\",\n",
-    "        entity_name=entity_name,\n",
-    "        target_table=full_table_name,\n",
-    "    )\n",
-    "\n",
-    "    return total_records\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_traceability_columns(\n",
-    "    dataframe: DataFrame,\n",
-    "    entity_name: str,\n",
-    "    full_table_name: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Validates required Silver traceability columns.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    result = validate_required_columns(\n",
-    "        dataframe=dataframe,\n",
-    "        required_columns=SILVER_REQUIRED_COLUMNS,\n",
-    "    )\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=\"silver_required_traceability_columns\",\n",
-    "        rule_description=\"Validates required Silver traceability columns.\",\n",
-    "        validation_status=result[\"status_validacao\"],\n",
-    "        total_records=result[\"total_registros\"],\n",
-    "        invalid_records=result[\"registros_invalidos\"],\n",
-    "        invalid_percentage=result[\"percentual_invalidos\"],\n",
-    "        message=result[\"mensagem\"],\n",
-    "        entity_name=entity_name,\n",
-    "        target_table=full_table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_business_key_columns(\n",
-    "    dataframe: DataFrame,\n",
-    "    entity_name: str,\n",
-    "    full_table_name: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Validates whether expected business key columns exist.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    key_columns = SILVER_BUSINESS_KEYS.get(entity_name, [])\n",
-    "\n",
-    "    if not key_columns:\n",
-    "        add_quality_result(\n",
-    "            rule_name=\"silver_business_key_mapping\",\n",
-    "            rule_description=\"Validates whether the Silver entity has a configured business key.\",\n",
-    "            validation_status=QUALITY_WARNING,\n",
-    "            total_records=1,\n",
-    "            invalid_records=0,\n",
-    "            invalid_percentage=0.0,\n",
-    "            message=f\"No business key mapping configured for entity: {entity_name}\",\n",
-    "            entity_name=entity_name,\n",
-    "            target_table=full_table_name,\n",
-    "        )\n",
-    "        return\n",
-    "\n",
-    "    result = validate_required_columns(\n",
-    "        dataframe=dataframe,\n",
-    "        required_columns=key_columns,\n",
-    "    )\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=\"silver_business_key_columns\",\n",
-    "        rule_description=\"Validates expected Silver business key columns.\",\n",
-    "        validation_status=result[\"status_validacao\"],\n",
-    "        total_records=result[\"total_registros\"],\n",
-    "        invalid_records=result[\"registros_invalidos\"],\n",
-    "        invalid_percentage=result[\"percentual_invalidos\"],\n",
-    "        message=result[\"mensagem\"],\n",
-    "        entity_name=entity_name,\n",
-    "        target_table=full_table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_business_key_nulls(\n",
-    "    dataframe: DataFrame,\n",
-    "    entity_name: str,\n",
-    "    full_table_name: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Validates null values in business key columns.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    key_columns = [\n",
-    "        column\n",
-    "        for column in SILVER_BUSINESS_KEYS.get(entity_name, [])\n",
-    "        if column in dataframe.columns\n",
-    "    ]\n",
-    "\n",
-    "    if not key_columns:\n",
-    "        return\n",
-    "\n",
-    "    results = validate_nulls(\n",
-    "        dataframe=dataframe,\n",
-    "        columns=key_columns,\n",
-    "    )\n",
-    "\n",
-    "    for result in results:\n",
-    "        add_quality_result(\n",
-    "            rule_name=f\"silver_{result['nome_regra']}\",\n",
-    "            rule_description=result[\"descricao_regra\"],\n",
-    "            validation_status=result[\"status_validacao\"],\n",
-    "            total_records=result[\"total_registros\"],\n",
-    "            invalid_records=result[\"registros_invalidos\"],\n",
-    "            invalid_percentage=result[\"percentual_invalidos\"],\n",
-    "            message=result[\"mensagem\"],\n",
-    "            entity_name=entity_name,\n",
-    "            target_table=full_table_name,\n",
-    "        )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_hash_duplicates(\n",
-    "    dataframe: DataFrame,\n",
-    "    entity_name: str,\n",
-    "    full_table_name: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Validates duplicated records based on the Silver record hash.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if \"aud_tx_hash_registro\" not in dataframe.columns:\n",
-    "\n",
-    "        add_quality_result(\n",
-    "            rule_name=\"silver_hash_duplicate_check\",\n",
-    "            rule_description=\"Validates duplicated records based on the Silver record hash.\",\n",
-    "            validation_status=QUALITY_FAILED,\n",
-    "            total_records=1,\n",
-    "            invalid_records=1,\n",
-    "            invalid_percentage=100.0,\n",
-    "            message=\"Column aud_tx_hash_registro does not exist.\",\n",
-    "            entity_name=entity_name,\n",
-    "            target_table=full_table_name,\n",
-    "        )\n",
-    "\n",
-    "        return\n",
-    "\n",
-    "    result = validate_duplicates(\n",
-    "        dataframe=dataframe,\n",
-    "        key_columns=[\"aud_tx_hash_registro\"],\n",
-    "    )\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=\"silver_hash_duplicate_check\",\n",
-    "        rule_description=\"Validates duplicated records based on the Silver record hash.\",\n",
-    "        validation_status=result[\"status_validacao\"],\n",
-    "        total_records=result[\"total_registros\"],\n",
-    "        invalid_records=result[\"registros_invalidos\"],\n",
-    "        invalid_percentage=result[\"percentual_invalidos\"],\n",
-    "        message=result[\"mensagem\"],\n",
-    "        entity_name=entity_name,\n",
-    "        target_table=full_table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def validate_business_key_duplicates(\n",
-    "    dataframe: DataFrame,\n",
-    "    entity_name: str,\n",
-    "    full_table_name: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Validates duplicated records based on configured business key columns.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    key_columns = [\n",
-    "        column\n",
-    "        for column in SILVER_BUSINESS_KEYS.get(entity_name, [])\n",
-    "        if column in dataframe.columns\n",
-    "    ]\n",
-    "\n",
-    "    if not key_columns:\n",
-    "        return\n",
-    "\n",
-    "    result = validate_duplicates(\n",
-    "        dataframe=dataframe,\n",
-    "        key_columns=key_columns,\n",
-    "    )\n",
-    "\n",
-    "    add_quality_result(\n",
-    "        rule_name=\"silver_business_key_duplicate_check\",\n",
-    "        rule_description=\"Validates duplicated records based on configured business key columns.\",\n",
-    "        validation_status=result[\"status_validacao\"],\n",
-    "        total_records=result[\"total_registros\"],\n",
-    "        invalid_records=result[\"registros_invalidos\"],\n",
-    "        invalid_percentage=result[\"percentual_invalidos\"],\n",
-    "        message=result[\"mensagem\"],\n",
-    "        entity_name=entity_name,\n",
-    "        target_table=full_table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def run_entity_checks(\n",
-    "    entity_name: str,\n",
-    "    table_name: str,\n",
-    ") -> None:\n",
-    "    \"\"\"\n",
-    "    Executes all Silver quality checks for a single entity.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    full_table_name = get_silver_table(table_name)\n",
-    "\n",
-    "    print(\"=\" * 90)\n",
-    "    print(f\"Running Silver quality checks for: {full_table_name}\")\n",
-    "    print(\"=\" * 90)\n",
-    "\n",
-    "    try:\n",
-    "\n",
-    "        if not validate_table_exists(\n",
-    "            entity_name=entity_name,\n",
-    "            full_table_name=full_table_name,\n",
-    "        ):\n",
-    "            return\n",
-    "\n",
-    "        dataframe = get_table_dataframe(full_table_name)\n",
-    "\n",
-    "        validate_minimum_records(\n",
-    "            dataframe=dataframe,\n",
-    "            entity_name=entity_name,\n",
-    "            full_table_name=full_table_name,\n",
-    "        )\n",
-    "\n",
-    "        validate_traceability_columns(\n",
-    "            dataframe=dataframe,\n",
-    "            entity_name=entity_name,\n",
-    "            full_table_name=full_table_name,\n",
-    "        )\n",
-    "\n",
-    "        validate_business_key_columns(\n",
-    "            dataframe=dataframe,\n",
-    "            entity_name=entity_name,\n",
-    "            full_table_name=full_table_name,\n",
-    "        )\n",
-    "\n",
-    "        validate_business_key_nulls(\n",
-    "            dataframe=dataframe,\n",
-    "            entity_name=entity_name,\n",
-    "            full_table_name=full_table_name,\n",
-    "        )\n",
-    "\n",
-    "        validate_hash_duplicates(\n",
-    "            dataframe=dataframe,\n",
-    "            entity_name=entity_name,\n",
-    "            full_table_name=full_table_name,\n",
-    "        )\n",
-    "\n",
-    "        validate_business_key_duplicates(\n",
-    "            dataframe=dataframe,\n",
-    "            entity_name=entity_name,\n",
-    "            full_table_name=full_table_name,\n",
-    "        )\n",
-    "\n",
-    "    except Exception as error:\n",
-    "\n",
-    "        add_exception_result(\n",
-    "            entity_name=entity_name,\n",
-    "            target_table=full_table_name,\n",
-    "            error=error,\n",
-    "        )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def build_silver_quality_log() -> DataFrame:\n",
-    "    \"\"\"\n",
-    "    Builds the final Silver quality log DataFrame.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if not quality_results:\n",
-    "\n",
-    "        add_quality_result(\n",
-    "            rule_name=\"silver_quality_no_results\",\n",
-    "            rule_description=\"Validates whether Silver quality checks produced results.\",\n",
-    "            validation_status=QUALITY_WARNING,\n",
-    "            total_records=0,\n",
-    "            invalid_records=0,\n",
-    "            invalid_percentage=0.0,\n",
-    "            message=\"No Silver quality results were generated.\",\n",
-    "            entity_name=\"silver\",\n",
-    "            target_table=DATA_QUALITY_LOG_TABLE,\n",
-    "        )\n",
-    "\n",
-    "    quality_base_df = spark.createDataFrame(\n",
-    "        quality_results\n",
-    "    )\n",
-    "\n",
-    "    return (\n",
-    "        quality_base_df\n",
-    "        .withColumn(\"qlt_id_log\", F.expr(\"uuid()\"))\n",
-    "        .withColumn(\"aud_id_execucao\", F.lit(RUN_ID))\n",
-    "        .withColumn(\"aud_tx_nome_projeto\", F.lit(PROJECT_NAME))\n",
-    "        .withColumn(\"aud_tx_versao_pipeline\", F.lit(PROJECT_VERSION))\n",
-    "        .withColumn(\"aud_tx_ambiente\", F.lit(PROJECT_ENVIRONMENT))\n",
-    "        .withColumn(\"aud_tx_nome_notebook\", F.lit(NOTEBOOK_NAME))\n",
-    "        .withColumn(\"aud_tx_nome_camada\", F.lit(LAYER_NAME))\n",
-    "        .withColumn(\"aud_tx_nome_entidade\", F.col(\"entity_name\"))\n",
-    "        .withColumn(\"aud_tx_tabela_destino\", F.col(\"target_table\"))\n",
-    "        .withColumn(\"qlt_tx_nome_regra\", F.col(\"nome_regra\"))\n",
-    "        .withColumn(\"qlt_tx_descricao_regra\", F.col(\"descricao_regra\"))\n",
-    "        .withColumn(\"qlt_tx_status_validacao\", F.col(\"status_validacao\"))\n",
-    "        .withColumn(\"qlt_qt_total_registros\", F.col(\"total_registros\"))\n",
-    "        .withColumn(\"qlt_qt_registros_invalidos\", F.col(\"registros_invalidos\"))\n",
-    "        .withColumn(\"qlt_pc_registros_invalidos\", F.col(\"percentual_invalidos\"))\n",
-    "        .withColumn(\"qlt_dh_validacao\", F.current_timestamp())\n",
-    "        .withColumn(\"qlt_tx_mensagem\", F.col(\"mensagem\"))\n",
-    "        .select(\n",
-    "            \"qlt_id_log\",\n",
-    "            \"aud_id_execucao\",\n",
-    "            \"aud_tx_nome_projeto\",\n",
-    "            \"aud_tx_versao_pipeline\",\n",
-    "            \"aud_tx_ambiente\",\n",
-    "            \"aud_tx_nome_notebook\",\n",
-    "            \"aud_tx_nome_camada\",\n",
-    "            \"aud_tx_nome_entidade\",\n",
-    "            \"aud_tx_tabela_destino\",\n",
-    "            \"qlt_tx_nome_regra\",\n",
-    "            \"qlt_tx_descricao_regra\",\n",
-    "            \"qlt_tx_status_validacao\",\n",
-    "            \"qlt_qt_total_registros\",\n",
-    "            \"qlt_qt_registros_invalidos\",\n",
-    "            \"qlt_pc_registros_invalidos\",\n",
-    "            \"qlt_dh_validacao\",\n",
-    "            \"qlt_tx_mensagem\",\n",
-    "        )\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 1. Execute Silver Quality Checks\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "for entity_name, table_name in SILVER_ENTITY_TABLES.items():\n",
-    "\n",
-    "    run_entity_checks(\n",
-    "        entity_name=entity_name,\n",
-    "        table_name=table_name,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 2. Persist Quality Results\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "quality_log_df = build_silver_quality_log()\n",
-    "\n",
-    "quality_log_df.write.mode(\n",
-    "    \"append\"\n",
-    ").saveAsTable(DATA_QUALITY_LOG_TABLE)\n",
-    "\n",
-    "print(\n",
-    "    f\"Silver quality results persisted into: \"\n",
-    "    f\"{DATA_QUALITY_LOG_TABLE}\"\n",
-    ")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 3. Display Quality Results\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "display(quality_log_df)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 4. Quality Summary\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "failed_count = (\n",
-    "    quality_log_df\n",
-    "    .filter(\"qlt_tx_status_validacao = 'FAILED'\")\n",
-    "    .count()\n",
-    ")\n",
-    "\n",
-    "warning_count = (\n",
-    "    quality_log_df\n",
-    "    .filter(\"qlt_tx_status_validacao = 'WARNING'\")\n",
-    "    .count()\n",
-    ")\n",
-    "\n",
-    "passed_count = (\n",
-    "    quality_log_df\n",
-    "    .filter(\"qlt_tx_status_validacao = 'PASSED'\")\n",
-    "    .count()\n",
-    ")\n",
-    "\n",
-    "print(\"=\" * 90)\n",
-    "print(\"SILVER QUALITY SUMMARY\")\n",
-    "print(\"=\" * 90)\n",
-    "print(f\"Passed validations: {passed_count}\")\n",
-    "print(f\"Warning validations: {warning_count}\")\n",
-    "print(f\"Failed validations: {failed_count}\")\n",
-    "print(\"=\" * 90)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# QUALITY EXECUTION POLICY\n",
-    "# ============================================================\n",
-    "\n",
-    "if failed_count > 0 and FAIL_ON_ERROR:\n",
-    "\n",
-    "    raise Exception(\n",
-    "        f\"Silver quality validation failed with \"\n",
-    "        f\"{failed_count} failed validation(s).\"\n",
-    "    )\n",
-    "\n",
-    "if failed_count > 0:\n",
-    "\n",
-    "    print(\n",
-    "        f\"WARNING: Silver quality validation finished with \"\n",
-    "        f\"{failed_count} failed validation(s). \"\n",
-    "        \"This is expected if Silver tables have not been created yet.\"\n",
-    "    )\n",
-    "\n",
-    "print(\"SILVER QUALITY CHECKS COMPLETED\")"
-   ]
-  }
- ],
- "metadata": {
-  "application/vnd.databricks.v1+notebook": {
-   "computePreferences": null,
-   "dashboards": [],
-   "environmentMetadata": {
-    "base_environment": "",
-    "environment_version": "5"
-   },
-   "inputWidgetPreferences": null,
-   "language": "python",
-   "notebookMetadata": {
-    "pythonIndentUnit": 4
-   },
-   "notebookName": "02_quality_silver_checks",
-   "widgets": {}
-  },
-  "language_info": {
-   "name": "python"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 0
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # Quality Layer — Silver Quality Checks
+# MAGIC
+# MAGIC **Notebook:** `02_quality_silver_checks`  
+# MAGIC **Layer:** `Quality`  
+# MAGIC **Source/Endpoint:** `Silver Delta Tables`  
+# MAGIC **Target:** `Silver quality validation results and audit logs`
+# MAGIC
+# MAGIC Executes data quality validations for Silver tables in the
+# MAGIC Brazil Legislative Analytics Medallion project.
+# MAGIC
+# MAGIC This notebook validates whether Silver curated outputs are
+# MAGIC available, traceable and structurally consistent before Gold dimensional modeling.
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Responsibilities
+# MAGIC
+# MAGIC - Validate Silver table existence
+# MAGIC - Validate minimum record availability
+# MAGIC - Validate required traceability columns
+# MAGIC - Validate business key availability
+# MAGIC - Validate null values in business keys
+# MAGIC - Validate duplicated hash records
+# MAGIC - Validate duplicated business keys
+# MAGIC - Persist quality validation results into audit tables
+# MAGIC - Generate Silver quality validation summary
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Notes
+# MAGIC
+# MAGIC - Validation results are persisted into audit quality logs
+# MAGIC - Supports controlled exception handling per entity
+# MAGIC - Failed validations may not block execution during early development
+# MAGIC - Pipeline blocking behavior is controlled by `FAIL_ON_ERROR`
+# MAGIC
+# MAGIC For additional architectural and governance details, refer to:
+# MAGIC
+# MAGIC - `/docs/governance/data_quality_rules.md`
+# MAGIC - `/docs/monitoring/quality_monitoring.md`
+# MAGIC - `/docs/architecture/medallion_architecture.md`
+
+# COMMAND ----------
+
+# MAGIC %run ../99_utils/utils_config
+
+# COMMAND ----------
+
+# MAGIC %run ../99_utils/utils_quality
+
+# COMMAND ----------
+
+from datetime import datetime
+from pyspark.sql import DataFrame
+from pyspark.sql import functions as F
+
+# COMMAND ----------
+
+print("=" * 90)
+print("BRAZIL LEGISLATIVE ANALYTICS MEDALLION")
+print("02 - QUALITY SILVER CHECKS")
+print("=" * 90)
+print(f"Execution Timestamp: {datetime.now()}")
+print(f"Catalog: {CATALOG_NAME}")
+print(f"Layer: {SCHEMA_SILVER}")
+print("=" * 90)
+
+# COMMAND ----------
+
+# ============================================================
+# QUALITY CONFIGURATION
+# ============================================================
+
+NOTEBOOK_NAME = "02_quality_silver_checks"
+LAYER_NAME = "silver"
+
+# During early development, Silver tables may not exist yet.
+# Set to True when Silver processing is active and quality checks
+# must block the pipeline.
+FAIL_ON_ERROR = False
+
+DATA_QUALITY_LOG_TABLE = (
+    f"{CATALOG_NAME}."
+    f"{SCHEMA_AUDIT}."
+    f"{AUD_TB_LOG_QUALIDADE_DADOS}"
+)
+
+SILVER_ENTITY_TABLES = SILVER_TABLES
+
+SILVER_REQUIRED_COLUMNS = [
+    "aud_id_execucao",
+    "aud_dh_processamento",
+    "aud_tx_versao_pipeline",
+    "aud_tx_hash_registro",
+]
+
+SILVER_BUSINESS_KEYS = {
+    "deputados": ["id_deputado"],
+    "partidos": ["id_partido"],
+    "estados": ["sigla_uf"],
+    "frentes": ["id_frente"],
+    "frentes_membros": ["id_frente", "id_deputado"],
+    "eventos": ["id_evento"],
+    "votacoes": ["id_votacao"],
+    "votos": ["id_votacao", "id_deputado"],
+    "despesas_ceap": ["id_deputado", "id_documento"],
+    "fornecedores": ["cnpj_cpf_fornecedor"],
+    "cpis": ["id_cpi"],
+    "cpi_eventos": ["id_cpi", "id_evento"],
+    "proposicoes": ["id_proposicao"],
 }
+
+quality_results = []
+
+# COMMAND ----------
+
+# ============================================================
+# QUALITY HELPERS
+# ============================================================
+
+def add_quality_result(
+    rule_name: str,
+    rule_description: str,
+    validation_status: str,
+    total_records: int,
+    invalid_records: int,
+    invalid_percentage: float,
+    message: str,
+    entity_name: str,
+    target_table: str,
+) -> None:
+    """
+    Adds a quality validation result to the in-memory result list.
+    """
+
+    quality_results.append({
+        "nome_regra": rule_name,
+        "descricao_regra": rule_description,
+        "status_validacao": validation_status,
+        "total_registros": int(total_records) if total_records is not None else 0,
+        "registros_invalidos": int(invalid_records) if invalid_records is not None else 0,
+        "percentual_invalidos": float(invalid_percentage) if invalid_percentage is not None else 0.0,
+        "mensagem": message,
+        "entity_name": entity_name,
+        "target_table": target_table,
+    })
+
+# COMMAND ----------
+
+def add_exception_result(
+    entity_name: str,
+    target_table: str,
+    error: Exception,
+) -> None:
+    """
+    Adds a controlled exception result to the quality result list.
+    """
+
+    add_quality_result(
+        rule_name="silver_quality_exception",
+        rule_description="Captures unexpected errors during Silver quality validation.",
+        validation_status=QUALITY_FAILED,
+        total_records=1,
+        invalid_records=1,
+        invalid_percentage=100.0,
+        message=f"Unexpected error during Silver quality validation: {str(error)}",
+        entity_name=entity_name,
+        target_table=target_table,
+    )
+
+# COMMAND ----------
+
+def table_exists(
+    full_table_name: str,
+) -> bool:
+    """
+    Checks whether a fully qualified table exists.
+    """
+
+    try:
+        return spark.catalog.tableExists(full_table_name)
+
+    except Exception:
+        return False
+
+# COMMAND ----------
+
+def get_table_dataframe(
+    full_table_name: str,
+) -> DataFrame:
+    """
+    Reads a table into a Spark DataFrame.
+    """
+
+    return spark.table(full_table_name)
+
+# COMMAND ----------
+
+def count_records(
+    dataframe: DataFrame,
+) -> int:
+    """
+    Counts records from a Spark DataFrame.
+    """
+
+    return dataframe.count()
+
+# COMMAND ----------
+
+def validate_table_exists(
+    entity_name: str,
+    full_table_name: str,
+) -> bool:
+    """
+    Validates whether a Silver table exists.
+    """
+
+    exists = table_exists(full_table_name)
+
+    add_quality_result(
+        rule_name="silver_table_exists",
+        rule_description="Validates whether the Silver table exists.",
+        validation_status=QUALITY_PASSED if exists else QUALITY_FAILED,
+        total_records=1,
+        invalid_records=0 if exists else 1,
+        invalid_percentage=0.0 if exists else 100.0,
+        message=(
+            "Silver table exists."
+            if exists
+            else "Silver table does not exist."
+        ),
+        entity_name=entity_name,
+        target_table=full_table_name,
+    )
+
+    return exists
+
+# COMMAND ----------
+
+def validate_minimum_records(
+    dataframe: DataFrame,
+    entity_name: str,
+    full_table_name: str,
+) -> int:
+    """
+    Validates whether a Silver table contains at least one record.
+    """
+
+    total_records = count_records(dataframe)
+    invalid_records = 0 if total_records > 0 else 1
+
+    add_quality_result(
+        rule_name="silver_minimum_records",
+        rule_description="Validates whether the Silver table contains at least one record.",
+        validation_status=QUALITY_PASSED if total_records > 0 else QUALITY_WARNING,
+        total_records=total_records,
+        invalid_records=invalid_records,
+        invalid_percentage=0.0 if total_records > 0 else 100.0,
+        message=f"Silver table record count: {total_records}",
+        entity_name=entity_name,
+        target_table=full_table_name,
+    )
+
+    return total_records
+
+# COMMAND ----------
+
+def validate_traceability_columns(
+    dataframe: DataFrame,
+    entity_name: str,
+    full_table_name: str,
+) -> None:
+    """
+    Validates required Silver traceability columns.
+    """
+
+    result = validate_required_columns(
+        dataframe=dataframe,
+        required_columns=SILVER_REQUIRED_COLUMNS,
+    )
+
+    add_quality_result(
+        rule_name="silver_required_traceability_columns",
+        rule_description="Validates required Silver traceability columns.",
+        validation_status=result["status_validacao"],
+        total_records=result["total_registros"],
+        invalid_records=result["registros_invalidos"],
+        invalid_percentage=result["percentual_invalidos"],
+        message=result["mensagem"],
+        entity_name=entity_name,
+        target_table=full_table_name,
+    )
+
+# COMMAND ----------
+
+def validate_business_key_columns(
+    dataframe: DataFrame,
+    entity_name: str,
+    full_table_name: str,
+) -> None:
+    """
+    Validates whether expected business key columns exist.
+    """
+
+    key_columns = SILVER_BUSINESS_KEYS.get(entity_name, [])
+
+    if not key_columns:
+        add_quality_result(
+            rule_name="silver_business_key_mapping",
+            rule_description="Validates whether the Silver entity has a configured business key.",
+            validation_status=QUALITY_WARNING,
+            total_records=1,
+            invalid_records=0,
+            invalid_percentage=0.0,
+            message=f"No business key mapping configured for entity: {entity_name}",
+            entity_name=entity_name,
+            target_table=full_table_name,
+        )
+        return
+
+    result = validate_required_columns(
+        dataframe=dataframe,
+        required_columns=key_columns,
+    )
+
+    add_quality_result(
+        rule_name="silver_business_key_columns",
+        rule_description="Validates expected Silver business key columns.",
+        validation_status=result["status_validacao"],
+        total_records=result["total_registros"],
+        invalid_records=result["registros_invalidos"],
+        invalid_percentage=result["percentual_invalidos"],
+        message=result["mensagem"],
+        entity_name=entity_name,
+        target_table=full_table_name,
+    )
+
+# COMMAND ----------
+
+def validate_business_key_nulls(
+    dataframe: DataFrame,
+    entity_name: str,
+    full_table_name: str,
+) -> None:
+    """
+    Validates null values in business key columns.
+    """
+
+    key_columns = [
+        column
+        for column in SILVER_BUSINESS_KEYS.get(entity_name, [])
+        if column in dataframe.columns
+    ]
+
+    if not key_columns:
+        return
+
+    results = validate_nulls(
+        dataframe=dataframe,
+        columns=key_columns,
+    )
+
+    for result in results:
+        add_quality_result(
+            rule_name=f"silver_{result['nome_regra']}",
+            rule_description=result["descricao_regra"],
+            validation_status=result["status_validacao"],
+            total_records=result["total_registros"],
+            invalid_records=result["registros_invalidos"],
+            invalid_percentage=result["percentual_invalidos"],
+            message=result["mensagem"],
+            entity_name=entity_name,
+            target_table=full_table_name,
+        )
+
+# COMMAND ----------
+
+def validate_hash_duplicates(
+    dataframe: DataFrame,
+    entity_name: str,
+    full_table_name: str,
+) -> None:
+    """
+    Validates duplicated records based on the Silver record hash.
+    """
+
+    if "aud_tx_hash_registro" not in dataframe.columns:
+
+        add_quality_result(
+            rule_name="silver_hash_duplicate_check",
+            rule_description="Validates duplicated records based on the Silver record hash.",
+            validation_status=QUALITY_FAILED,
+            total_records=1,
+            invalid_records=1,
+            invalid_percentage=100.0,
+            message="Column aud_tx_hash_registro does not exist.",
+            entity_name=entity_name,
+            target_table=full_table_name,
+        )
+
+        return
+
+    result = validate_duplicates(
+        dataframe=dataframe,
+        key_columns=["aud_tx_hash_registro"],
+    )
+
+    add_quality_result(
+        rule_name="silver_hash_duplicate_check",
+        rule_description="Validates duplicated records based on the Silver record hash.",
+        validation_status=result["status_validacao"],
+        total_records=result["total_registros"],
+        invalid_records=result["registros_invalidos"],
+        invalid_percentage=result["percentual_invalidos"],
+        message=result["mensagem"],
+        entity_name=entity_name,
+        target_table=full_table_name,
+    )
+
+# COMMAND ----------
+
+def validate_business_key_duplicates(
+    dataframe: DataFrame,
+    entity_name: str,
+    full_table_name: str,
+) -> None:
+    """
+    Validates duplicated records based on configured business key columns.
+    """
+
+    key_columns = [
+        column
+        for column in SILVER_BUSINESS_KEYS.get(entity_name, [])
+        if column in dataframe.columns
+    ]
+
+    if not key_columns:
+        return
+
+    result = validate_duplicates(
+        dataframe=dataframe,
+        key_columns=key_columns,
+    )
+
+    add_quality_result(
+        rule_name="silver_business_key_duplicate_check",
+        rule_description="Validates duplicated records based on configured business key columns.",
+        validation_status=result["status_validacao"],
+        total_records=result["total_registros"],
+        invalid_records=result["registros_invalidos"],
+        invalid_percentage=result["percentual_invalidos"],
+        message=result["mensagem"],
+        entity_name=entity_name,
+        target_table=full_table_name,
+    )
+
+# COMMAND ----------
+
+def run_entity_checks(
+    entity_name: str,
+    table_name: str,
+) -> None:
+    """
+    Executes all Silver quality checks for a single entity.
+    """
+
+    full_table_name = get_silver_table(table_name)
+
+    print("=" * 90)
+    print(f"Running Silver quality checks for: {full_table_name}")
+    print("=" * 90)
+
+    try:
+
+        if not validate_table_exists(
+            entity_name=entity_name,
+            full_table_name=full_table_name,
+        ):
+            return
+
+        dataframe = get_table_dataframe(full_table_name)
+
+        validate_minimum_records(
+            dataframe=dataframe,
+            entity_name=entity_name,
+            full_table_name=full_table_name,
+        )
+
+        validate_traceability_columns(
+            dataframe=dataframe,
+            entity_name=entity_name,
+            full_table_name=full_table_name,
+        )
+
+        validate_business_key_columns(
+            dataframe=dataframe,
+            entity_name=entity_name,
+            full_table_name=full_table_name,
+        )
+
+        validate_business_key_nulls(
+            dataframe=dataframe,
+            entity_name=entity_name,
+            full_table_name=full_table_name,
+        )
+
+        validate_hash_duplicates(
+            dataframe=dataframe,
+            entity_name=entity_name,
+            full_table_name=full_table_name,
+        )
+
+        validate_business_key_duplicates(
+            dataframe=dataframe,
+            entity_name=entity_name,
+            full_table_name=full_table_name,
+        )
+
+    except Exception as error:
+
+        add_exception_result(
+            entity_name=entity_name,
+            target_table=full_table_name,
+            error=error,
+        )
+
+# COMMAND ----------
+
+def build_silver_quality_log() -> DataFrame:
+    """
+    Builds the final Silver quality log DataFrame.
+    """
+
+    if not quality_results:
+
+        add_quality_result(
+            rule_name="silver_quality_no_results",
+            rule_description="Validates whether Silver quality checks produced results.",
+            validation_status=QUALITY_WARNING,
+            total_records=0,
+            invalid_records=0,
+            invalid_percentage=0.0,
+            message="No Silver quality results were generated.",
+            entity_name="silver",
+            target_table=DATA_QUALITY_LOG_TABLE,
+        )
+
+    quality_base_df = spark.createDataFrame(
+        quality_results
+    )
+
+    return (
+        quality_base_df
+        .withColumn("qlt_id_log", F.expr("uuid()"))
+        .withColumn("aud_id_execucao", F.lit(RUN_ID))
+        .withColumn("aud_tx_nome_projeto", F.lit(PROJECT_NAME))
+        .withColumn("aud_tx_versao_pipeline", F.lit(PROJECT_VERSION))
+        .withColumn("aud_tx_ambiente", F.lit(PROJECT_ENVIRONMENT))
+        .withColumn("aud_tx_nome_notebook", F.lit(NOTEBOOK_NAME))
+        .withColumn("aud_tx_nome_camada", F.lit(LAYER_NAME))
+        .withColumn("aud_tx_nome_entidade", F.col("entity_name"))
+        .withColumn("aud_tx_tabela_destino", F.col("target_table"))
+        .withColumn("qlt_tx_nome_regra", F.col("nome_regra"))
+        .withColumn("qlt_tx_descricao_regra", F.col("descricao_regra"))
+        .withColumn("qlt_tx_status_validacao", F.col("status_validacao"))
+        .withColumn("qlt_qt_total_registros", F.col("total_registros"))
+        .withColumn("qlt_qt_registros_invalidos", F.col("registros_invalidos"))
+        .withColumn("qlt_pc_registros_invalidos", F.col("percentual_invalidos"))
+        .withColumn("qlt_dh_validacao", F.current_timestamp())
+        .withColumn("qlt_tx_mensagem", F.col("mensagem"))
+        .select(
+            "qlt_id_log",
+            "aud_id_execucao",
+            "aud_tx_nome_projeto",
+            "aud_tx_versao_pipeline",
+            "aud_tx_ambiente",
+            "aud_tx_nome_notebook",
+            "aud_tx_nome_camada",
+            "aud_tx_nome_entidade",
+            "aud_tx_tabela_destino",
+            "qlt_tx_nome_regra",
+            "qlt_tx_descricao_regra",
+            "qlt_tx_status_validacao",
+            "qlt_qt_total_registros",
+            "qlt_qt_registros_invalidos",
+            "qlt_pc_registros_invalidos",
+            "qlt_dh_validacao",
+            "qlt_tx_mensagem",
+        )
+    )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 1. Execute Silver Quality Checks
+
+# COMMAND ----------
+
+for entity_name, table_name in SILVER_ENTITY_TABLES.items():
+
+    run_entity_checks(
+        entity_name=entity_name,
+        table_name=table_name,
+    )
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 2. Persist Quality Results
+
+# COMMAND ----------
+
+quality_log_df = build_silver_quality_log()
+
+quality_log_df.write.mode(
+    "append"
+).saveAsTable(DATA_QUALITY_LOG_TABLE)
+
+print(
+    f"Silver quality results persisted into: "
+    f"{DATA_QUALITY_LOG_TABLE}"
+)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 3. Display Quality Results
+
+# COMMAND ----------
+
+display(quality_log_df)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 4. Quality Summary
+
+# COMMAND ----------
+
+failed_count = (
+    quality_log_df
+    .filter("qlt_tx_status_validacao = 'FAILED'")
+    .count()
+)
+
+warning_count = (
+    quality_log_df
+    .filter("qlt_tx_status_validacao = 'WARNING'")
+    .count()
+)
+
+passed_count = (
+    quality_log_df
+    .filter("qlt_tx_status_validacao = 'PASSED'")
+    .count()
+)
+
+print("=" * 90)
+print("SILVER QUALITY SUMMARY")
+print("=" * 90)
+print(f"Passed validations: {passed_count}")
+print(f"Warning validations: {warning_count}")
+print(f"Failed validations: {failed_count}")
+print("=" * 90)
+
+# COMMAND ----------
+
+# ============================================================
+# QUALITY EXECUTION POLICY
+# ============================================================
+
+if failed_count > 0 and FAIL_ON_ERROR:
+
+    raise Exception(
+        f"Silver quality validation failed with "
+        f"{failed_count} failed validation(s)."
+    )
+
+if failed_count > 0:
+
+    print(
+        f"WARNING: Silver quality validation finished with "
+        f"{failed_count} failed validation(s). "
+        "This is expected if Silver tables have not been created yet."
+    )
+
+print("SILVER QUALITY CHECKS COMPLETED")

@@ -1,419 +1,354 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "ed4d04ff-4bb8-4a18-ab53-205c837b1f85",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Project configuration loaded successfully.\nProject: brazil_legislative_analytics\nCatalog: brazil_legislative_analytics\nEnvironment: dev\nDefault legislatures: [56, 57]\nAnalysis years: [2022, 2023, 2024, 2025, 2026]\n"
-     ]
-    }
-   ],
-   "source": [
-    "%run ./utils_config"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "78bc4852-0bd5-4df4-8afd-905e8a90bc62",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_legislature loaded successfully.\n"
-     ]
-    }
-   ],
-   "source": [
-    "# Databricks notebook source\n",
-    "# MAGIC %md\n",
-    "# MAGIC # 99 Utils — Legislative Utilities\n",
-    "# MAGIC\n",
-    "# MAGIC **Notebook:** `utils_legislature`\n",
-    "# MAGIC\n",
-    "# MAGIC Provides reusable helper functions for legislative periods, party acronyms, Brazilian states and Câmara dos Deputados domain standardization.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Responsibilities\n",
-    "# MAGIC - Normalize party acronyms\n",
-    "# MAGIC - Normalize Brazilian state acronyms\n",
-    "# MAGIC - Validate legislature identifiers\n",
-    "# MAGIC - Map years to legislative periods\n",
-    "# MAGIC - Support Bronze, Silver, Gold and Marts transformations\n",
-    "# MAGIC\n",
-    "# MAGIC ## Technical Notes\n",
-    "# MAGIC - Python functions and variables are written in English.\n",
-    "# MAGIC - Table and field names follow Portuguese mnemonic standards.\n",
-    "# MAGIC - Comments and documentation are written in English.\n",
-    "# MAGIC - This notebook does not persist data.\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ./utils_config\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "from typing import Optional, Dict, List\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# LEGISLATURE PERIODS\n",
-    "# ============================================================\n",
-    "\n",
-    "LEGISLATURE_PERIODS = {\n",
-    "    56: {\n",
-    "        \"start_year\": 2019,\n",
-    "        \"end_year\": 2023,\n",
-    "        \"description\": \"56th Legislature - 2019 to 2023\",\n",
-    "    },\n",
-    "    57: {\n",
-    "        \"start_year\": 2023,\n",
-    "        \"end_year\": 2027,\n",
-    "        \"description\": \"57th Legislature - 2023 to 2027\",\n",
-    "    },\n",
-    "}\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# BRAZILIAN STATE ACRONYMS\n",
-    "# ============================================================\n",
-    "\n",
-    "VALID_STATE_ACRONYMS = [\n",
-    "    \"AC\", \"AL\", \"AP\", \"AM\", \"BA\", \"CE\", \"DF\",\n",
-    "    \"ES\", \"GO\", \"MA\", \"MT\", \"MS\", \"MG\", \"PA\",\n",
-    "    \"PB\", \"PR\", \"PE\", \"PI\", \"RJ\", \"RN\", \"RS\",\n",
-    "    \"RO\", \"RR\", \"SC\", \"SP\", \"SE\", \"TO\",\n",
-    "]\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# COMMON PARTY ACRONYMS\n",
-    "# ============================================================\n",
-    "\n",
-    "VALID_PARTY_ACRONYMS = [\n",
-    "    \"AGIR\",\n",
-    "    \"AVANTE\",\n",
-    "    \"CIDADANIA\",\n",
-    "    \"DC\",\n",
-    "    \"MDB\",\n",
-    "    \"NOVO\",\n",
-    "    \"PCDOB\",\n",
-    "    \"PDT\",\n",
-    "    \"PL\",\n",
-    "    \"PMB\",\n",
-    "    \"PODE\",\n",
-    "    \"PP\",\n",
-    "    \"PRD\",\n",
-    "    \"PRTB\",\n",
-    "    \"PSB\",\n",
-    "    \"PSC\",\n",
-    "    \"PSD\",\n",
-    "    \"PSDB\",\n",
-    "    \"PSOL\",\n",
-    "    \"PSTU\",\n",
-    "    \"PT\",\n",
-    "    \"PV\",\n",
-    "    \"REDE\",\n",
-    "    \"REPUBLICANOS\",\n",
-    "    \"SOLIDARIEDADE\",\n",
-    "    \"UNIÃO\",\n",
-    "    \"UP\",\n",
-    "]\n",
-    "\n",
-    "PARTY_NORMALIZATION_MAP = {\n",
-    "    \"UNIAO\": \"UNIÃO\",\n",
-    "    \"UNIÃO BRASIL\": \"UNIÃO\",\n",
-    "    \"UNIAO BRASIL\": \"UNIÃO\",\n",
-    "    \"PC DO B\": \"PCDOB\",\n",
-    "    \"PCdoB\": \"PCDOB\",\n",
-    "    \"REPUBLICANO\": \"REPUBLICANOS\",\n",
-    "}\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def normalize_text(value: Optional[str]) -> Optional[str]:\n",
-    "    \"\"\"\n",
-    "    Normalizes a text value by trimming spaces and converting it to uppercase.\n",
-    "\n",
-    "    Parameters\n",
-    "    ----------\n",
-    "    value : str, optional\n",
-    "        Input text value.\n",
-    "\n",
-    "    Returns\n",
-    "    -------\n",
-    "    str or None\n",
-    "        Normalized text value.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if value is None:\n",
-    "        return None\n",
-    "\n",
-    "    normalized_value = str(value).strip()\n",
-    "\n",
-    "    if normalized_value == \"\":\n",
-    "        return None\n",
-    "\n",
-    "    return normalized_value.upper()\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def normalize_state(value: Optional[str]) -> Optional[str]:\n",
-    "    \"\"\"\n",
-    "    Normalizes and validates a Brazilian state acronym.\n",
-    "\n",
-    "    Parameters\n",
-    "    ----------\n",
-    "    value : str, optional\n",
-    "        State acronym.\n",
-    "\n",
-    "    Returns\n",
-    "    -------\n",
-    "    str or None\n",
-    "        Normalized state acronym when valid, otherwise None.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    normalized_value = normalize_text(value)\n",
-    "\n",
-    "    if normalized_value in VALID_STATE_ACRONYMS:\n",
-    "        return normalized_value\n",
-    "\n",
-    "    return None\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def normalize_party(value: Optional[str]) -> Optional[str]:\n",
-    "    \"\"\"\n",
-    "    Normalizes a political party acronym.\n",
-    "\n",
-    "    Parameters\n",
-    "    ----------\n",
-    "    value : str, optional\n",
-    "        Party acronym.\n",
-    "\n",
-    "    Returns\n",
-    "    -------\n",
-    "    str or None\n",
-    "        Normalized party acronym.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    normalized_value = normalize_text(value)\n",
-    "\n",
-    "    if normalized_value is None:\n",
-    "        return None\n",
-    "\n",
-    "    if normalized_value in PARTY_NORMALIZATION_MAP:\n",
-    "        return PARTY_NORMALIZATION_MAP[normalized_value]\n",
-    "\n",
-    "    return normalized_value\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def is_valid_state(value: Optional[str]) -> bool:\n",
-    "    \"\"\"\n",
-    "    Checks whether a value is a valid Brazilian state acronym.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return normalize_state(value) is not None\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def is_valid_party(value: Optional[str]) -> bool:\n",
-    "    \"\"\"\n",
-    "    Checks whether a value is a known party acronym.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    normalized_value = normalize_party(value)\n",
-    "\n",
-    "    if normalized_value is None:\n",
-    "        return False\n",
-    "\n",
-    "    return normalized_value in VALID_PARTY_ACRONYMS\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def is_valid_legislature(legislature_id: Optional[int]) -> bool:\n",
-    "    \"\"\"\n",
-    "    Checks whether a legislature identifier is supported by the project scope.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if legislature_id is None:\n",
-    "        return False\n",
-    "\n",
-    "    try:\n",
-    "        return int(legislature_id) in LEGISLATURE_PERIODS\n",
-    "\n",
-    "    except Exception:\n",
-    "        return False\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_legislature_period(legislature_id: int) -> Optional[Dict[str, int]]:\n",
-    "    \"\"\"\n",
-    "    Returns the configured period for a legislature identifier.\n",
-    "\n",
-    "    Parameters\n",
-    "    ----------\n",
-    "    legislature_id : int\n",
-    "        Legislature identifier.\n",
-    "\n",
-    "    Returns\n",
-    "    -------\n",
-    "    dict or None\n",
-    "        Legislature period metadata.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    try:\n",
-    "        return LEGISLATURE_PERIODS.get(int(legislature_id))\n",
-    "\n",
-    "    except Exception:\n",
-    "        return None\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_legislature_from_year(year: int) -> Optional[int]:\n",
-    "    \"\"\"\n",
-    "    Returns the legislature identifier associated with a year.\n",
-    "\n",
-    "    Parameters\n",
-    "    ----------\n",
-    "    year : int\n",
-    "        Calendar year.\n",
-    "\n",
-    "    Returns\n",
-    "    -------\n",
-    "    int or None\n",
-    "        Legislature identifier when found.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if year is None:\n",
-    "        return None\n",
-    "\n",
-    "    try:\n",
-    "        year = int(year)\n",
-    "\n",
-    "    except Exception:\n",
-    "        return None\n",
-    "\n",
-    "    for legislature_id, period in LEGISLATURE_PERIODS.items():\n",
-    "        if period[\"start_year\"] <= year <= period[\"end_year\"]:\n",
-    "            return legislature_id\n",
-    "\n",
-    "    return None\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_year_from_date(value) -> Optional[int]:\n",
-    "    \"\"\"\n",
-    "    Extracts the year from a date-like value.\n",
-    "\n",
-    "    Parameters\n",
-    "    ----------\n",
-    "    value : object\n",
-    "        Date, timestamp or string value.\n",
-    "\n",
-    "    Returns\n",
-    "    -------\n",
-    "    int or None\n",
-    "        Extracted year when available.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if value is None:\n",
-    "        return None\n",
-    "\n",
-    "    try:\n",
-    "        return int(str(value)[:4])\n",
-    "\n",
-    "    except Exception:\n",
-    "        return None\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_supported_legislatures() -> List[int]:\n",
-    "    \"\"\"\n",
-    "    Returns the list of legislature identifiers supported by the project.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return list(LEGISLATURE_PERIODS.keys())\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_valid_states() -> List[str]:\n",
-    "    \"\"\"\n",
-    "    Returns the list of valid Brazilian state acronyms.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return VALID_STATE_ACRONYMS\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def get_valid_parties() -> List[str]:\n",
-    "    \"\"\"\n",
-    "    Returns the list of known political party acronyms.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    return VALID_PARTY_ACRONYMS\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "print(\"utils_legislature loaded successfully.\")"
-   ]
-  }
- ],
- "metadata": {
-  "application/vnd.databricks.v1+notebook": {
-   "computePreferences": null,
-   "dashboards": [],
-   "environmentMetadata": {
-    "base_environment": "",
-    "environment_version": "5"
-   },
-   "inputWidgetPreferences": null,
-   "language": "python",
-   "notebookMetadata": {
-    "pythonIndentUnit": 4
-   },
-   "notebookName": "utils_legislature",
-   "widgets": {}
-  },
-  "language_info": {
-   "name": "python"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 0
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # Utils Layer — Legislative Utilities
+# MAGIC
+# MAGIC **Notebook:** `utils_legislature`  
+# MAGIC **Layer:** `Utils`  
+# MAGIC **Source/Endpoint:** `Legislative Domain Reference Data`  
+# MAGIC **Target:** `Reusable legislative normalization and validation functions`
+# MAGIC
+# MAGIC Provides reusable helper functions for legislative periods,
+# MAGIC party acronyms, Brazilian states and Câmara dos Deputados domain standardization.
+# MAGIC
+# MAGIC This notebook centralizes legislative normalization and validation logic
+# MAGIC used across Bronze, Silver, Gold and Marts transformations.
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Responsibilities
+# MAGIC
+# MAGIC - Normalize political party acronyms
+# MAGIC - Normalize Brazilian state acronyms
+# MAGIC - Validate legislature identifiers
+# MAGIC - Map years to legislative periods
+# MAGIC - Validate supported legislative reference values
+# MAGIC - Support reusable domain standardization workflows
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Notes
+# MAGIC
+# MAGIC - Shared utility notebook across Medallion layers
+# MAGIC - Does not persist data
+# MAGIC - Supports domain consistency and standardization
+# MAGIC - Centralizes legislative reference rules used throughout the project
+# MAGIC
+# MAGIC For additional architectural and governance details, refer to:
+# MAGIC
+# MAGIC - `/docs/governance/domain_standardization.md`
+# MAGIC - `/docs/standards/coding_standards.md`
+# MAGIC - `/docs/architecture/medallion_architecture.md`
+
+# COMMAND ----------
+
+# MAGIC %run ./utils_config
+
+# COMMAND ----------
+
+from typing import Optional, Dict, List
+
+# COMMAND ----------
+
+# ============================================================
+# LEGISLATURE PERIODS
+# ============================================================
+
+LEGISLATURE_PERIODS = {
+    56: {
+        "start_year": 2019,
+        "end_year": 2023,
+        "description": "56th Legislature - 2019 to 2023",
+    },
+    57: {
+        "start_year": 2023,
+        "end_year": 2027,
+        "description": "57th Legislature - 2023 to 2027",
+    },
 }
+
+# COMMAND ----------
+
+# ============================================================
+# BRAZILIAN STATE ACRONYMS
+# ============================================================
+
+VALID_STATE_ACRONYMS = [
+    "AC", "AL", "AP", "AM", "BA", "CE", "DF",
+    "ES", "GO", "MA", "MT", "MS", "MG", "PA",
+    "PB", "PR", "PE", "PI", "RJ", "RN", "RS",
+    "RO", "RR", "SC", "SP", "SE", "TO",
+]
+
+# COMMAND ----------
+
+# ============================================================
+# COMMON PARTY ACRONYMS
+# ============================================================
+
+VALID_PARTY_ACRONYMS = [
+    "AGIR",
+    "AVANTE",
+    "CIDADANIA",
+    "DC",
+    "MDB",
+    "NOVO",
+    "PCDOB",
+    "PDT",
+    "PL",
+    "PMB",
+    "PODE",
+    "PP",
+    "PRD",
+    "PRTB",
+    "PSB",
+    "PSC",
+    "PSD",
+    "PSDB",
+    "PSOL",
+    "PSTU",
+    "PT",
+    "PV",
+    "REDE",
+    "REPUBLICANOS",
+    "SOLIDARIEDADE",
+    "UNIÃO",
+    "UP",
+]
+
+PARTY_NORMALIZATION_MAP = {
+    "UNIAO": "UNIÃO",
+    "UNIÃO BRASIL": "UNIÃO",
+    "UNIAO BRASIL": "UNIÃO",
+    "PC DO B": "PCDOB",
+    "PCdoB": "PCDOB",
+    "REPUBLICANO": "REPUBLICANOS",
+}
+
+# COMMAND ----------
+
+def normalize_text(value: Optional[str]) -> Optional[str]:
+    """
+    Normalizes a text value by trimming spaces and converting it to uppercase.
+
+    Parameters
+    ----------
+    value : str, optional
+        Input text value.
+
+    Returns
+    -------
+    str or None
+        Normalized text value.
+    """
+
+    if value is None:
+        return None
+
+    normalized_value = str(value).strip()
+
+    if normalized_value == "":
+        return None
+
+    return normalized_value.upper()
+
+# COMMAND ----------
+
+def normalize_state(value: Optional[str]) -> Optional[str]:
+    """
+    Normalizes and validates a Brazilian state acronym.
+
+    Parameters
+    ----------
+    value : str, optional
+        State acronym.
+
+    Returns
+    -------
+    str or None
+        Normalized state acronym when valid, otherwise None.
+    """
+
+    normalized_value = normalize_text(value)
+
+    if normalized_value in VALID_STATE_ACRONYMS:
+        return normalized_value
+
+    return None
+
+# COMMAND ----------
+
+def normalize_party(value: Optional[str]) -> Optional[str]:
+    """
+    Normalizes a political party acronym.
+
+    Parameters
+    ----------
+    value : str, optional
+        Party acronym.
+
+    Returns
+    -------
+    str or None
+        Normalized party acronym.
+    """
+
+    normalized_value = normalize_text(value)
+
+    if normalized_value is None:
+        return None
+
+    if normalized_value in PARTY_NORMALIZATION_MAP:
+        return PARTY_NORMALIZATION_MAP[normalized_value]
+
+    return normalized_value
+
+# COMMAND ----------
+
+def is_valid_state(value: Optional[str]) -> bool:
+    """
+    Checks whether a value is a valid Brazilian state acronym.
+    """
+
+    return normalize_state(value) is not None
+
+# COMMAND ----------
+
+def is_valid_party(value: Optional[str]) -> bool:
+    """
+    Checks whether a value is a known party acronym.
+    """
+
+    normalized_value = normalize_party(value)
+
+    if normalized_value is None:
+        return False
+
+    return normalized_value in VALID_PARTY_ACRONYMS
+
+# COMMAND ----------
+
+def is_valid_legislature(legislature_id: Optional[int]) -> bool:
+    """
+    Checks whether a legislature identifier is supported by the project scope.
+    """
+
+    if legislature_id is None:
+        return False
+
+    try:
+        return int(legislature_id) in LEGISLATURE_PERIODS
+
+    except Exception:
+        return False
+
+# COMMAND ----------
+
+def get_legislature_period(legislature_id: int) -> Optional[Dict[str, int]]:
+    """
+    Returns the configured period for a legislature identifier.
+
+    Parameters
+    ----------
+    legislature_id : int
+        Legislature identifier.
+
+    Returns
+    -------
+    dict or None
+        Legislature period metadata.
+    """
+
+    try:
+        return LEGISLATURE_PERIODS.get(int(legislature_id))
+
+    except Exception:
+        return None
+
+# COMMAND ----------
+
+def get_legislature_from_year(year: int) -> Optional[int]:
+    """
+    Returns the legislature identifier associated with a year.
+
+    Parameters
+    ----------
+    year : int
+        Calendar year.
+
+    Returns
+    -------
+    int or None
+        Legislature identifier when found.
+    """
+
+    if year is None:
+        return None
+
+    try:
+        year = int(year)
+
+    except Exception:
+        return None
+
+    for legislature_id, period in LEGISLATURE_PERIODS.items():
+        if period["start_year"] <= year <= period["end_year"]:
+            return legislature_id
+
+    return None
+
+# COMMAND ----------
+
+def get_year_from_date(value) -> Optional[int]:
+    """
+    Extracts the year from a date-like value.
+
+    Parameters
+    ----------
+    value : object
+        Date, timestamp or string value.
+
+    Returns
+    -------
+    int or None
+        Extracted year when available.
+    """
+
+    if value is None:
+        return None
+
+    try:
+        return int(str(value)[:4])
+
+    except Exception:
+        return None
+
+# COMMAND ----------
+
+def get_supported_legislatures() -> List[int]:
+    """
+    Returns the list of legislature identifiers supported by the project.
+    """
+
+    return list(LEGISLATURE_PERIODS.keys())
+
+# COMMAND ----------
+
+def get_valid_states() -> List[str]:
+    """
+    Returns the list of valid Brazilian state acronyms.
+    """
+
+    return VALID_STATE_ACRONYMS
+
+# COMMAND ----------
+
+def get_valid_parties() -> List[str]:
+    """
+    Returns the list of known political party acronyms.
+    """
+
+    return VALID_PARTY_ACRONYMS
+
+# COMMAND ----------
+
+print("utils_legislature loaded successfully.")

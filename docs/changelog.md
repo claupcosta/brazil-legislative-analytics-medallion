@@ -1,7 +1,70 @@
 # Changelog
 
 
-## v0.2.0 - Foundation Stabilization and Quality Framework
+## v1.3.0 — Bronze Layer Stabilization and Operational Resilience
+
+### Added
+
+- Added complete Bronze ingestion notebooks for:
+  - deputados
+  - frentes
+  - eventos
+  - votacoes
+  - votos
+  - despesas CEAP
+  - orgaos
+  - orgaos membros
+  - proposicoes
+
+- Added CSV fallback ingestion notebooks for high-volume or unstable sources:
+  - 04a_bronze_votacoes_csv_fallback
+  - 05a_bronze_votos_csv_fallback
+  - 06a_bronze_despesas_ceap_csv_fallback
+  - 07a_bronze_orgaos_csv_fallback
+  - 08a_bronze_orgaos_membros_csv_fallback
+  - 09a_bronze_proposicoes_csv_fallback
+
+- Added operational documentation:
+  - docs/operations/pipeline_orchestration.md
+  - docs/architecture/README.md updates
+
+### Changed
+
+- Updated project configuration with centralized Volume paths for CSV fallback ingestion.
+- Updated API client utility to preserve backward compatibility with pagination utilities.
+- Updated full pipeline job to prioritize CSV fallback ingestion for unstable API endpoints.
+- Updated Bronze notebooks with standardized headers, logging and governance comments.
+- Updated API limitation documentation to reflect endpoint instability and timeout behavior.
+
+### Improved
+
+- Improved Bronze execution stability in Databricks Free Edition.
+- Improved fallback strategy for unstable Câmara API endpoints.
+- Improved traceability through source file lineage and ingestion metadata.
+- Improved pipeline resilience by separating API validation from operational fallback ingestion.
+- Improved consistency across Bronze notebooks and utility functions.
+
+### Fixed
+
+- Fixed missing compatibility functions in `utils_api_client`.
+- Fixed `fetch_camara_api_data` compatibility for `utils_pagination`.
+- Fixed missing `extract_response_records` function required by paginated API ingestion.
+- Fixed setup validation issue related to audit error table creation.
+- Fixed orchestration path for `br_orgaos` by using CSV fallback as the operational source.
+
+### Notes
+
+This release consolidates the Bronze layer and operational foundation of the
+Brazil Legislative Analytics Medallion project.
+
+The project is now ready to move forward to the Silver layer implementation,
+where normalized, deduplicated and analytically prepared datasets will be created.
+
+Future release:
+
+- v2.0.0 — Silver Layer Implementation and Analytical Standardization
+
+## v1.2.0 - Foundation Stabilization and Quality Framework
 
 ### Added
 - Pipeline utilities framework.
@@ -48,7 +111,7 @@
 - Project structure aligned with enterprise Medallion architecture standards.
 
 
-## v0.1.0 - Setup and Governance Foundation
+## v1.1.0 - Setup and Governance Foundation
 
 ### Added
 - Initial Databricks project structure.

@@ -1,689 +1,570 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "collapsed": true,
-     "inputWidgets": {},
-     "nuid": "8681ff94-379c-48b9-8fc1-d7a199f96177",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [],
-   "source": [
-    "%run ../99_utils/utils_config"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "collapsed": true,
-     "inputWidgets": {},
-     "nuid": "bd231196-3eac-4a31-bac7-b0cbc474b13c",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [],
-   "source": [
-    "%run ../99_utils/utils_logger"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "collapsed": true,
-     "inputWidgets": {},
-     "nuid": "4fdb7c44-8d89-4720-a951-8bcdf43e78ee",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # Jobs Layer — Incremental CEAP Pipeline
+# MAGIC
+# MAGIC **Notebook:** `02_run_incremental_expenses_ceap`  
+# MAGIC **Layer:** `Jobs`  
+# MAGIC **Source/Endpoint:** `CEAP Medallion Pipeline Notebooks`  
+# MAGIC **Target:** `Incremental CEAP pipeline orchestration and audit logs`
+# MAGIC
+# MAGIC Orchestrates the incremental execution flow for CEAP expenses in the
+# MAGIC Brazil Legislative Analytics Medallion project.
+# MAGIC
+# MAGIC This notebook manages incremental CEAP ingestion, transformation,
+# MAGIC analytical modeling and quality validation workflows across Medallion layers.
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Responsibilities
+# MAGIC
+# MAGIC - Execute incremental CEAP pipeline notebooks
+# MAGIC - Control execution flow by configured run modes
+# MAGIC - Support API and CSV fallback ingestion strategies
+# MAGIC - Register execution logs and pipeline status
+# MAGIC - Handle step-level failures and warnings
+# MAGIC - Generate incremental pipeline execution summary
+# MAGIC - Support validation-only execution scenarios
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Notes
+# MAGIC
+# MAGIC - Optimized for Databricks Free Edition execution
+# MAGIC - CSV fallback is the recommended operational ingestion strategy
+# MAGIC - API ingestion notebooks are preserved for compatibility and validation
+# MAGIC - Pipeline interruption behavior is controlled by `FAIL_ON_STEP_ERROR`
+# MAGIC
+# MAGIC For additional architectural and governance details, refer to:
+# MAGIC
+# MAGIC - `/docs/architecture/medallion_architecture.md`
+# MAGIC - `/docs/operations/pipeline_orchestration.md`
+# MAGIC - `/docs/operations/ceap_incremental_processing.md`
+
+# COMMAND ----------
+
+# MAGIC %run ../00_setup/01_project_config
+
+# COMMAND ----------
+
+# MAGIC %run ../99_utils/utils_logger
+
+# COMMAND ----------
+
+# MAGIC %run ../99_utils/utils_table_logger
+
+# COMMAND ----------
+
+from datetime import datetime
+import uuid
+import traceback
+
+# COMMAND ----------
+
+# ============================================================
+# EXECUTION HEADER
+# ============================================================
+
+print("=" * 90)
+print("BRAZIL LEGISLATIVE ANALYTICS MEDALLION")
+print("02 - RUN INCREMENTAL EXPENSES CEAP")
+print("=" * 90)
+print(f"Execution Timestamp: {datetime.now()}")
+print(f"Catalog: {CATALOG_NAME}")
+print(f"Environment: {PROJECT_ENVIRONMENT}")
+print("=" * 90)
+
+# COMMAND ----------
+
+# ============================================================
+# JOB CONFIGURATION
+# ============================================================
+
+NOTEBOOK_NAME = "02_run_incremental_expenses_ceap"
+LAYER_NAME = "jobs"
+ENTITY_NAME = "incremental_expenses_ceap"
+
+JOB_RUN_ID = str(uuid.uuid4())
+
+# Options:
+# - "fast"
+# - "ceap_full"
+# - "validation_only"
+RUN_MODE = "fast"
+
+FAIL_ON_STEP_ERROR = False
+
+NOTEBOOK_TIMEOUT_SECONDS = 3600
+
+logger = get_logger(
+    logger_name=NOTEBOOK_NAME,
+    layer_name=LAYER_NAME,
+)
+
+# COMMAND ----------
+
+# ============================================================
+# INCREMENTAL STEP CONFIGURATION
+# ============================================================
+#
+# enabled_modes controls in which run mode each notebook is executed.
+#
+# Performance recommendation:
+# - Keep API-heavy CEAP notebooks out of fast mode.
+# - Use CSV fallback as the operational Bronze CEAP ingestion path.
+# - Enable Silver, Gold and Marts only when those notebooks are available.
+#
+# ============================================================
+
+INCREMENTAL_STEPS = [
     {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "PROJECT CONFIGURATION LOADED SUCCESSFULLY\nPROJECT_NAME: brazil_legislative_analytics\nPROJECT_VERSION: v1.0.0\nPROJECT_ENVIRONMENT: dev\nCATALOG_NAME: brazil_legislative_analytics\nRUN_ID: 043cd2e0-88f0-41d1-bb2a-79de2b280657\n"
-     ]
-    }
-   ],
-   "source": [
-    "%run ../99_utils/utils_table_logger"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "7a80485b-dca6-405c-846c-c62c5e6ef667",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "==========================================================================================\nBRAZIL LEGISLATIVE ANALYTICS MEDALLION\n02 - RUN INCREMENTAL EXPENSES CEAP\n==========================================================================================\nExecution Timestamp: 2026-05-20 04:43:07.468782\nCatalog: brazil_legislative_analytics\nEnvironment: dev\n==========================================================================================\n"
-     ]
+        "step_name": "validate_project_setup",
+        "notebook_path": "../00_setup/90_validate_project_setup",
+        "layer_name": "setup",
+        "entity_name": "project_setup",
+        "enabled_modes": ["validation_only", "ceap_full"],
+        "critical": True,
     },
     {
-     "output_type": "stream",
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "2026-05-20 04:43:08 | INFO | JOBS | jobs.02_run_incremental_expenses_ceap | Starting step: validate_project_setup\n2026-05-20 04:43:31 | INFO | JOBS | jobs.02_run_incremental_expenses_ceap | [SUCCESS] Step completed: validate_project_setup\n2026-05-20 04:43:33 | WARNING | JOBS | jobs.02_run_incremental_expenses_ceap | Step skipped: validate_api_connection\n2026-05-20 04:43:34 | WARNING | JOBS | jobs.02_run_incremental_expenses_ceap | Step skipped: bronze_despesas_ceap\n2026-05-20 04:43:36 | WARNING | JOBS | jobs.02_run_incremental_expenses_ceap | Step skipped: silver_despesas_ceap\n2026-05-20 04:43:37 | WARNING | JOBS | jobs.02_run_incremental_expenses_ceap | Step skipped: silver_fornecedores\n2026-05-20 04:43:40 | WARNING | JOBS | jobs.02_run_incremental_expenses_ceap | Step skipped: gold_dm_fornecedor\n2026-05-20 04:43:42 | WARNING | JOBS | jobs.02_run_incremental_expenses_ceap | Step skipped: gold_ft_despesas_ceap\n2026-05-20 04:43:44 | WARNING | JOBS | jobs.02_run_incremental_expenses_ceap | Step skipped: mart_panorama_despesas_ceap\n2026-05-20 04:43:45 | INFO | JOBS | jobs.02_run_incremental_expenses_ceap | Starting step: quality_bronze_checks\n2026-05-20 04:43:57 | INFO | JOBS | jobs.02_run_incremental_expenses_ceap | [SUCCESS] Step completed: quality_bronze_checks\n2026-05-20 04:43:59 | INFO | JOBS | jobs.02_run_incremental_expenses_ceap | Starting step: quality_silver_checks\n2026-05-20 04:44:11 | INFO | JOBS | jobs.02_run_incremental_expenses_ceap | [SUCCESS] Step completed: quality_silver_checks\n2026-05-20 04:44:12 | INFO | JOBS | jobs.02_run_incremental_expenses_ceap | Starting step: quality_gold_checks\n2026-05-20 04:44:34 | INFO | JOBS | jobs.02_run_incremental_expenses_ceap | [SUCCESS] Step completed: quality_gold_checks\n2026-05-20 04:44:35 | INFO | JOBS | jobs.02_run_incremental_expenses_ceap | Starting step: quality_traceability_checks\n2026-05-20 04:44:57 | INFO | JOBS | jobs.02_run_incremental_expenses_ceap | [SUCCESS] Step completed: quality_traceability_checks\n"
-     ]
+        "step_name": "validate_api_connection",
+        "notebook_path": "../00_setup/92_validate_api_connection",
+        "layer_name": "setup",
+        "entity_name": "api_connection",
+        "enabled_modes": ["ceap_full"],
+        "critical": False,
+    },
+
+    # ========================================================
+    # BRONZE CEAP INGESTION
+    # ========================================================
+
+    {
+        "step_name": "bronze_despesas_ceap_api",
+        "notebook_path": "../01_bronze/06_bronze_despesas_ceap",
+        "layer_name": "bronze",
+        "entity_name": "despesas_ceap",
+        "enabled_modes": ["ceap_full"],
+        "critical": False,
     },
     {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "==========================================================================================\nINCREMENTAL CEAP PIPELINE SUMMARY\n==========================================================================================\nJob Run ID: 3504b5bc-f684-4110-b742-126c4ae3e2e2\nTotal steps: 12\nSuccessful steps: 5\nWarning steps: 7\nFailed steps: 0\nPipeline duration seconds: 110.477459\n==========================================================================================\nINCREMENTAL CEAP PIPELINE EXECUTION COMPLETED\n"
-     ]
+        "step_name": "bronze_despesas_ceap_csv_fallback",
+        "notebook_path": "../01_bronze/06a_bronze_despesas_ceap_csv_fallback",
+        "layer_name": "bronze",
+        "entity_name": "despesas_ceap",
+        "enabled_modes": ["fast", "ceap_full"],
+        "critical": True,
+    },
+
+    # ========================================================
+    # SILVER CEAP TRANSFORMATIONS
+    # Disabled until Silver notebooks are available and validated.
+    # ========================================================
+
+    {
+        "step_name": "silver_despesas_ceap",
+        "notebook_path": "../02_silver/09_silver_despesas_ceap",
+        "layer_name": "silver",
+        "entity_name": "despesas_ceap",
+        "enabled_modes": ["ceap_full"],
+        "critical": True,
     },
     {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_logger loaded successfully.\n"
-     ]
+        "step_name": "silver_fornecedores",
+        "notebook_path": "../02_silver/10_silver_fornecedores",
+        "layer_name": "silver",
+        "entity_name": "fornecedores",
+        "enabled_modes": ["ceap_full"],
+        "critical": True,
+    },
+
+    # ========================================================
+    # GOLD CEAP MODELING
+    # Disabled until Gold notebooks are available and validated.
+    # ========================================================
+
+    {
+        "step_name": "gold_dm_fornecedor",
+        "notebook_path": "../03_gold/11_dm_fornecedor",
+        "layer_name": "gold",
+        "entity_name": "dm_fornecedor",
+        "enabled_modes": ["ceap_full"],
+        "critical": True,
     },
     {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "PROJECT CONFIGURATION LOADED SUCCESSFULLY\nPROJECT_NAME: brazil_legislative_analytics\nPROJECT_VERSION: v1.0.0\nPROJECT_ENVIRONMENT: dev\nCATALOG_NAME: brazil_legislative_analytics\nRUN_ID: e2ba1e99-38a2-4b97-bb59-48cc786c9c83\n"
-     ]
+        "step_name": "gold_ft_despesas_ceap",
+        "notebook_path": "../03_gold/16_ft_despesas_ceap",
+        "layer_name": "gold",
+        "entity_name": "ft_despesas_ceap",
+        "enabled_modes": ["ceap_full"],
+        "critical": True,
+    },
+
+    # ========================================================
+    # CEAP ANALYTICAL MART
+    # Disabled until Marts notebooks are available and validated.
+    # ========================================================
+
+    {
+        "step_name": "mart_panorama_despesas_ceap",
+        "notebook_path": "../04_marts/04_am_panorama_despesas_ceap",
+        "layer_name": "marts",
+        "entity_name": "panorama_despesas_ceap",
+        "enabled_modes": ["ceap_full"],
+        "critical": True,
+    },
+
+    # ========================================================
+    # QUALITY CHECKS
+    # Disabled in fast mode to avoid unnecessary overhead.
+    # ========================================================
+
+    {
+        "step_name": "quality_bronze_checks",
+        "notebook_path": "../06_quality/01_quality_bronze_checks",
+        "layer_name": "quality",
+        "entity_name": "bronze_checks",
+        "enabled_modes": ["ceap_full"],
+        "critical": False,
     },
     {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_config loaded successfully.\n"
-     ]
+        "step_name": "quality_silver_checks",
+        "notebook_path": "../06_quality/02_quality_silver_checks",
+        "layer_name": "quality",
+        "entity_name": "silver_checks",
+        "enabled_modes": ["ceap_full"],
+        "critical": False,
     },
     {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_config loaded successfully.\n"
-     ]
+        "step_name": "quality_gold_checks",
+        "notebook_path": "../06_quality/03_quality_gold_checks",
+        "layer_name": "quality",
+        "entity_name": "gold_checks",
+        "enabled_modes": ["ceap_full"],
+        "critical": False,
     },
     {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_table_logger loaded successfully.\n"
-     ]
-    }
-   ],
-   "source": [
-    "# Databricks notebook source\n",
-    "# MAGIC %md\n",
-    "# MAGIC # 02 Job — Run Incremental Expenses CEAP\n",
-    "# MAGIC\n",
-    "# MAGIC Orchestrates the incremental execution flow for CEAP expenses in the Brazil Legislative Analytics Medallion project.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Purpose\n",
-    "# MAGIC This notebook executes only the pipeline steps required to refresh CEAP expenses data.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Execution Flow\n",
-    "# MAGIC - Validate project setup\n",
-    "# MAGIC - Optionally validate API connection\n",
-    "# MAGIC - Execute Bronze CEAP expenses ingestion\n",
-    "# MAGIC - Execute Silver CEAP expenses transformation\n",
-    "# MAGIC - Execute Silver suppliers transformation\n",
-    "# MAGIC - Execute Gold supplier dimension\n",
-    "# MAGIC - Execute Gold CEAP expenses fact\n",
-    "# MAGIC - Execute CEAP analytical mart\n",
-    "# MAGIC - Execute quality checks\n",
-    "# MAGIC\n",
-    "# MAGIC ## Current Development Note\n",
-    "# MAGIC Some notebooks may still be under development.\n",
-    "# MAGIC In this case, the corresponding execution blocks can remain disabled until the notebooks are available.\n",
-    "# MAGIC\n",
-    "# MAGIC ## API Validation Note\n",
-    "# MAGIC API validation is intentionally disabled by default because external API endpoints may be unstable or slow in Databricks Free Edition.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Documentation Standard\n",
-    "# MAGIC - Python functions and variables are written in English.\n",
-    "# MAGIC - Table and field names follow Portuguese mnemonic standards.\n",
-    "# MAGIC - Comments and documentation are written in English.\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ../99_utils/utils_config\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ../99_utils/utils_logger\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ../99_utils/utils_table_logger\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "from datetime import datetime\n",
-    "import uuid\n",
-    "import traceback\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "print(\"=\" * 90)\n",
-    "print(\"BRAZIL LEGISLATIVE ANALYTICS MEDALLION\")\n",
-    "print(\"02 - RUN INCREMENTAL EXPENSES CEAP\")\n",
-    "print(\"=\" * 90)\n",
-    "print(f\"Execution Timestamp: {datetime.now()}\")\n",
-    "print(f\"Catalog: {CATALOG_NAME}\")\n",
-    "print(f\"Environment: {PROJECT_ENVIRONMENT}\")\n",
-    "print(\"=\" * 90)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# JOB CONFIGURATION\n",
-    "# ============================================================\n",
-    "\n",
-    "NOTEBOOK_NAME = \"02_run_incremental_expenses_ceap\"\n",
-    "LAYER_NAME = \"jobs\"\n",
-    "ENTITY_NAME = \"incremental_expenses_ceap\"\n",
-    "\n",
-    "JOB_RUN_ID = str(uuid.uuid4())\n",
-    "\n",
-    "# During development, keep this as False to avoid stopping\n",
-    "# the job when not-yet-built notebooks are missing.\n",
-    "FAIL_ON_STEP_ERROR = False\n",
-    "\n",
-    "PIPELINE_LOG_TABLE = (\n",
-    "    f\"{CATALOG_NAME}.\"\n",
-    "    f\"{SCHEMA_AUDIT}.\"\n",
-    "    f\"{AUD_TB_LOG_EXECUCAO_PIPELINE}\"\n",
-    ")\n",
-    "\n",
-    "PIPELINE_ERROR_TABLE = (\n",
-    "    f\"{CATALOG_NAME}.\"\n",
-    "    f\"{SCHEMA_AUDIT}.\"\n",
-    "    f\"{AUD_TB_LOG_ERROS_PIPELINE}\"\n",
-    ")\n",
-    "\n",
-    "logger = get_logger(\n",
-    "    logger_name=NOTEBOOK_NAME,\n",
-    "    layer_name=LAYER_NAME,\n",
-    ")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# INCREMENTAL STEP CONFIGURATION\n",
-    "# ============================================================\n",
-    "#\n",
-    "# Set enabled=True only when the referenced notebook exists and\n",
-    "# is ready to execute.\n",
-    "#\n",
-    "# API validation is disabled by default in this job because the\n",
-    "# external API may be slow or unstable.\n",
-    "#\n",
-    "# ============================================================\n",
-    "\n",
-    "INCREMENTAL_STEPS = [\n",
-    "    {\n",
-    "        \"step_name\": \"validate_project_setup\",\n",
-    "        \"notebook_path\": \"../00_setup/90_validate_project_setup\",\n",
-    "        \"layer_name\": \"setup\",\n",
-    "        \"entity_name\": \"project_setup\",\n",
-    "        \"enabled\": True,\n",
-    "        \"critical\": True,\n",
-    "    },\n",
-    "    {\n",
-    "        \"step_name\": \"validate_api_connection\",\n",
-    "        \"notebook_path\": \"../00_setup/92_validate_api_connection\",\n",
-    "        \"layer_name\": \"setup\",\n",
-    "        \"entity_name\": \"api_connection\",\n",
-    "        \"enabled\": False,\n",
-    "        \"critical\": False,\n",
-    "    },\n",
-    "\n",
-    "    # Bronze CEAP ingestion.\n",
-    "    {\n",
-    "        \"step_name\": \"bronze_despesas_ceap\",\n",
-    "        \"notebook_path\": \"../01_bronze/07_bronze_despesas_ceap\",\n",
-    "        \"layer_name\": \"bronze\",\n",
-    "        \"entity_name\": \"despesas_ceap\",\n",
-    "        \"enabled\": False,\n",
-    "        \"critical\": True,\n",
-    "    },\n",
-    "\n",
-    "    # Silver CEAP transformation.\n",
-    "    {\n",
-    "        \"step_name\": \"silver_despesas_ceap\",\n",
-    "        \"notebook_path\": \"../02_silver/09_silver_despesas_ceap\",\n",
-    "        \"layer_name\": \"silver\",\n",
-    "        \"entity_name\": \"despesas_ceap\",\n",
-    "        \"enabled\": False,\n",
-    "        \"critical\": True,\n",
-    "    },\n",
-    "    {\n",
-    "        \"step_name\": \"silver_fornecedores\",\n",
-    "        \"notebook_path\": \"../02_silver/10_silver_fornecedores\",\n",
-    "        \"layer_name\": \"silver\",\n",
-    "        \"entity_name\": \"fornecedores\",\n",
-    "        \"enabled\": False,\n",
-    "        \"critical\": True,\n",
-    "    },\n",
-    "\n",
-    "    # Gold CEAP modeling.\n",
-    "    {\n",
-    "        \"step_name\": \"gold_dm_fornecedor\",\n",
-    "        \"notebook_path\": \"../04_gold/11_dm_fornecedor\",\n",
-    "        \"layer_name\": \"gold\",\n",
-    "        \"entity_name\": \"dm_fornecedor\",\n",
-    "        \"enabled\": False,\n",
-    "        \"critical\": True,\n",
-    "    },\n",
-    "    {\n",
-    "        \"step_name\": \"gold_ft_despesas_ceap\",\n",
-    "        \"notebook_path\": \"../04_gold/16_ft_despesas_ceap\",\n",
-    "        \"layer_name\": \"gold\",\n",
-    "        \"entity_name\": \"ft_despesas_ceap\",\n",
-    "        \"enabled\": False,\n",
-    "        \"critical\": True,\n",
-    "    },\n",
-    "\n",
-    "    # CEAP analytical mart.\n",
-    "    {\n",
-    "        \"step_name\": \"mart_panorama_despesas_ceap\",\n",
-    "        \"notebook_path\": \"../05_marts/04_am_panorama_despesas_ceap\",\n",
-    "        \"layer_name\": \"marts\",\n",
-    "        \"entity_name\": \"panorama_despesas_ceap\",\n",
-    "        \"enabled\": False,\n",
-    "        \"critical\": True,\n",
-    "    },\n",
-    "\n",
-    "    # Quality checks.\n",
-    "    {\n",
-    "        \"step_name\": \"quality_bronze_checks\",\n",
-    "        \"notebook_path\": \"../06_quality/01_quality_bronze_checks\",\n",
-    "        \"layer_name\": \"quality\",\n",
-    "        \"entity_name\": \"bronze_checks\",\n",
-    "        \"enabled\": True,\n",
-    "        \"critical\": False,\n",
-    "    },\n",
-    "    {\n",
-    "        \"step_name\": \"quality_silver_checks\",\n",
-    "        \"notebook_path\": \"../06_quality/02_quality_silver_checks\",\n",
-    "        \"layer_name\": \"quality\",\n",
-    "        \"entity_name\": \"silver_checks\",\n",
-    "        \"enabled\": True,\n",
-    "        \"critical\": False,\n",
-    "    },\n",
-    "    {\n",
-    "        \"step_name\": \"quality_gold_checks\",\n",
-    "        \"notebook_path\": \"../06_quality/03_quality_gold_checks\",\n",
-    "        \"layer_name\": \"quality\",\n",
-    "        \"entity_name\": \"gold_checks\",\n",
-    "        \"enabled\": True,\n",
-    "        \"critical\": False,\n",
-    "    },\n",
-    "    {\n",
-    "        \"step_name\": \"quality_traceability_checks\",\n",
-    "        \"notebook_path\": \"../06_quality/04_traceability_checks\",\n",
-    "        \"layer_name\": \"quality\",\n",
-    "        \"entity_name\": \"traceability_checks\",\n",
-    "        \"enabled\": True,\n",
-    "        \"critical\": False,\n",
-    "    },\n",
-    "]\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# JOB HELPERS\n",
-    "# ============================================================\n",
-    "\n",
-    "def run_notebook_step(\n",
-    "    step_config: dict,\n",
-    ") -> dict:\n",
-    "    \"\"\"\n",
-    "    Executes a configured notebook step and returns execution metadata.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    step_name = step_config[\"step_name\"]\n",
-    "    notebook_path = step_config[\"notebook_path\"]\n",
-    "    step_layer = step_config[\"layer_name\"]\n",
-    "    step_entity = step_config[\"entity_name\"]\n",
-    "    is_enabled = step_config[\"enabled\"]\n",
-    "    is_critical = step_config[\"critical\"]\n",
-    "\n",
-    "    step_log_id = str(uuid.uuid4())\n",
-    "    started_at = datetime.now()\n",
-    "\n",
-    "    if not is_enabled:\n",
-    "\n",
-    "        finished_at = datetime.now()\n",
-    "        duration_seconds = (\n",
-    "            finished_at - started_at\n",
-    "        ).total_seconds()\n",
-    "\n",
-    "        write_pipeline_log(\n",
-    "            log_id=step_log_id,\n",
-    "            execution_id=JOB_RUN_ID,\n",
-    "            notebook_name=NOTEBOOK_NAME,\n",
-    "            layer_name=step_layer,\n",
-    "            entity_name=step_entity,\n",
-    "            target_table=\"not_applicable\",\n",
-    "            status=EXECUTION_STATUS_WARNING,\n",
-    "            message=f\"Step skipped because it is disabled: {step_name}\",\n",
-    "            started_at=started_at,\n",
-    "            finished_at=finished_at,\n",
-    "            duration_seconds=duration_seconds,\n",
-    "            records_read=None,\n",
-    "            records_written=None,\n",
-    "        )\n",
-    "\n",
-    "        log_warning(\n",
-    "            pipeline_logger=logger,\n",
-    "            message=f\"Step skipped: {step_name}\",\n",
-    "        )\n",
-    "\n",
-    "        return {\n",
-    "            \"step_name\": step_name,\n",
-    "            \"status\": EXECUTION_STATUS_WARNING,\n",
-    "            \"message\": \"Step skipped because it is disabled.\",\n",
-    "            \"duration_seconds\": duration_seconds,\n",
-    "            \"critical\": is_critical,\n",
-    "        }\n",
-    "\n",
-    "    try:\n",
-    "\n",
-    "        write_pipeline_log(\n",
-    "            log_id=step_log_id,\n",
-    "            execution_id=JOB_RUN_ID,\n",
-    "            notebook_name=NOTEBOOK_NAME,\n",
-    "            layer_name=step_layer,\n",
-    "            entity_name=step_entity,\n",
-    "            target_table=\"not_applicable\",\n",
-    "            status=EXECUTION_STATUS_STARTED,\n",
-    "            message=f\"Step execution started: {step_name}\",\n",
-    "            started_at=started_at,\n",
-    "            finished_at=None,\n",
-    "            duration_seconds=None,\n",
-    "            records_read=None,\n",
-    "            records_written=None,\n",
-    "        )\n",
-    "\n",
-    "        log_info(\n",
-    "            pipeline_logger=logger,\n",
-    "            message=f\"Starting step: {step_name}\",\n",
-    "        )\n",
-    "\n",
-    "        dbutils.notebook.run(\n",
-    "            notebook_path,\n",
-    "            timeout_seconds=0,\n",
-    "        )\n",
-    "\n",
-    "        finished_at = datetime.now()\n",
-    "        duration_seconds = (\n",
-    "            finished_at - started_at\n",
-    "        ).total_seconds()\n",
-    "\n",
-    "        write_pipeline_log(\n",
-    "            log_id=str(uuid.uuid4()),\n",
-    "            execution_id=JOB_RUN_ID,\n",
-    "            notebook_name=NOTEBOOK_NAME,\n",
-    "            layer_name=step_layer,\n",
-    "            entity_name=step_entity,\n",
-    "            target_table=\"not_applicable\",\n",
-    "            status=EXECUTION_STATUS_SUCCESS,\n",
-    "            message=f\"Step completed successfully: {step_name}\",\n",
-    "            started_at=started_at,\n",
-    "            finished_at=finished_at,\n",
-    "            duration_seconds=duration_seconds,\n",
-    "            records_read=None,\n",
-    "            records_written=None,\n",
-    "        )\n",
-    "\n",
-    "        log_success(\n",
-    "            pipeline_logger=logger,\n",
-    "            message=f\"Step completed: {step_name}\",\n",
-    "        )\n",
-    "\n",
-    "        return {\n",
-    "            \"step_name\": step_name,\n",
-    "            \"status\": EXECUTION_STATUS_SUCCESS,\n",
-    "            \"message\": \"Step completed successfully.\",\n",
-    "            \"duration_seconds\": duration_seconds,\n",
-    "            \"critical\": is_critical,\n",
-    "        }\n",
-    "\n",
-    "    except Exception as error:\n",
-    "\n",
-    "        finished_at = datetime.now()\n",
-    "        duration_seconds = (\n",
-    "            finished_at - started_at\n",
-    "        ).total_seconds()\n",
-    "\n",
-    "        error_message = str(error)\n",
-    "        error_stacktrace = traceback.format_exc()\n",
-    "\n",
-    "        write_pipeline_log(\n",
-    "            log_id=str(uuid.uuid4()),\n",
-    "            execution_id=JOB_RUN_ID,\n",
-    "            notebook_name=NOTEBOOK_NAME,\n",
-    "            layer_name=step_layer,\n",
-    "            entity_name=step_entity,\n",
-    "            target_table=\"not_applicable\",\n",
-    "            status=EXECUTION_STATUS_FAILED,\n",
-    "            message=f\"Step failed: {step_name} | {error_message}\",\n",
-    "            started_at=started_at,\n",
-    "            finished_at=finished_at,\n",
-    "            duration_seconds=duration_seconds,\n",
-    "            records_read=None,\n",
-    "            records_written=None,\n",
-    "        )\n",
-    "\n",
-    "        log_error(\n",
-    "            pipeline_logger=logger,\n",
-    "            message=f\"Step failed: {step_name}\",\n",
-    "            error=error,\n",
-    "        )\n",
-    "\n",
-    "        return {\n",
-    "            \"step_name\": step_name,\n",
-    "            \"status\": EXECUTION_STATUS_FAILED,\n",
-    "            \"message\": error_message,\n",
-    "            \"duration_seconds\": duration_seconds,\n",
-    "            \"critical\": is_critical,\n",
-    "            \"stacktrace\": error_stacktrace,\n",
-    "        }\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 1. Execute Incremental CEAP Steps\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "incremental_results = []\n",
-    "\n",
-    "incremental_started_at = datetime.now()\n",
-    "\n",
-    "for step_config in INCREMENTAL_STEPS:\n",
-    "\n",
-    "    step_result = run_notebook_step(\n",
-    "        step_config=step_config,\n",
-    "    )\n",
-    "\n",
-    "    incremental_results.append(step_result)\n",
-    "\n",
-    "    if (\n",
-    "        step_result[\"status\"] == EXECUTION_STATUS_FAILED\n",
-    "        and step_result[\"critical\"]\n",
-    "        and FAIL_ON_STEP_ERROR\n",
-    "    ):\n",
-    "\n",
-    "        raise Exception(\n",
-    "            f\"Critical incremental CEAP step failed: \"\n",
-    "            f\"{step_result['step_name']} | \"\n",
-    "            f\"{step_result['message']}\"\n",
-    "        )\n",
-    "\n",
-    "incremental_finished_at = datetime.now()\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %md\n",
-    "# MAGIC ## 2. Incremental CEAP Summary\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "total_steps = len(incremental_results)\n",
-    "\n",
-    "success_steps = len([\n",
-    "    result\n",
-    "    for result in incremental_results\n",
-    "    if result[\"status\"] == EXECUTION_STATUS_SUCCESS\n",
-    "])\n",
-    "\n",
-    "warning_steps = len([\n",
-    "    result\n",
-    "    for result in incremental_results\n",
-    "    if result[\"status\"] == EXECUTION_STATUS_WARNING\n",
-    "])\n",
-    "\n",
-    "failed_steps = len([\n",
-    "    result\n",
-    "    for result in incremental_results\n",
-    "    if result[\"status\"] == EXECUTION_STATUS_FAILED\n",
-    "])\n",
-    "\n",
-    "incremental_duration_seconds = (\n",
-    "    incremental_finished_at - incremental_started_at\n",
-    ").total_seconds()\n",
-    "\n",
-    "print(\"=\" * 90)\n",
-    "print(\"INCREMENTAL CEAP PIPELINE SUMMARY\")\n",
-    "print(\"=\" * 90)\n",
-    "print(f\"Job Run ID: {JOB_RUN_ID}\")\n",
-    "print(f\"Total steps: {total_steps}\")\n",
-    "print(f\"Successful steps: {success_steps}\")\n",
-    "print(f\"Warning steps: {warning_steps}\")\n",
-    "print(f\"Failed steps: {failed_steps}\")\n",
-    "print(f\"Pipeline duration seconds: {incremental_duration_seconds}\")\n",
-    "print(\"=\" * 90)\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# FINAL JOB LOG\n",
-    "# ============================================================\n",
-    "\n",
-    "final_status = (\n",
-    "    EXECUTION_STATUS_FAILED\n",
-    "    if failed_steps > 0\n",
-    "    else EXECUTION_STATUS_SUCCESS\n",
-    ")\n",
-    "\n",
-    "write_pipeline_log(\n",
-    "    log_id=str(uuid.uuid4()),\n",
-    "    execution_id=JOB_RUN_ID,\n",
-    "    notebook_name=NOTEBOOK_NAME,\n",
-    "    layer_name=LAYER_NAME,\n",
-    "    entity_name=ENTITY_NAME,\n",
-    "    target_table=PIPELINE_LOG_TABLE,\n",
-    "    status=final_status,\n",
-    "    message=(\n",
-    "        f\"Incremental CEAP pipeline finished. \"\n",
-    "        f\"success={success_steps}, \"\n",
-    "        f\"warning={warning_steps}, \"\n",
-    "        f\"failed={failed_steps}\"\n",
-    "    ),\n",
-    "    started_at=incremental_started_at,\n",
-    "    finished_at=incremental_finished_at,\n",
-    "    duration_seconds=incremental_duration_seconds,\n",
-    "    records_read=None,\n",
-    "    records_written=None,\n",
-    ")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "if failed_steps > 0:\n",
-    "\n",
-    "    print(\n",
-    "        f\"WARNING: Incremental CEAP pipeline finished with \"\n",
-    "        f\"{failed_steps} failed step(s).\"\n",
-    "    )\n",
-    "\n",
-    "    if FAIL_ON_STEP_ERROR:\n",
-    "        raise Exception(\n",
-    "            f\"Incremental CEAP pipeline failed with \"\n",
-    "            f\"{failed_steps} failed step(s).\"\n",
-    "        )\n",
-    "\n",
-    "print(\"INCREMENTAL CEAP PIPELINE EXECUTION COMPLETED\")"
-   ]
-  }
- ],
- "metadata": {
-  "application/vnd.databricks.v1+notebook": {
-   "computePreferences": null,
-   "dashboards": [],
-   "environmentMetadata": {
-    "base_environment": "",
-    "environment_version": "5"
-   },
-   "inputWidgetPreferences": null,
-   "language": "python",
-   "notebookMetadata": {
-    "pythonIndentUnit": 4
-   },
-   "notebookName": "02_run_incremental_expenses_ceap",
-   "widgets": {}
-  },
-  "language_info": {
-   "name": "python"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 0
-}
+        "step_name": "quality_traceability_checks",
+        "notebook_path": "../06_quality/04_traceability_checks",
+        "layer_name": "quality",
+        "entity_name": "traceability_checks",
+        "enabled_modes": ["ceap_full"],
+        "critical": False,
+    },
+]
+
+# COMMAND ----------
+
+# ============================================================
+# JOB HELPER FUNCTION
+# ============================================================
+
+def run_notebook_step(
+    step_config: dict,
+) -> dict:
+    """
+    Executes a configured notebook step and returns execution metadata.
+    """
+
+    step_name = step_config["step_name"]
+    notebook_path = step_config["notebook_path"]
+    step_layer = step_config["layer_name"]
+    step_entity = step_config["entity_name"]
+    enabled_modes = step_config["enabled_modes"]
+    is_critical = step_config["critical"]
+
+    step_log_id = str(uuid.uuid4())
+    step_started_at = datetime.now()
+
+    is_enabled = RUN_MODE in enabled_modes
+
+    if not is_enabled:
+
+        step_finished_at = datetime.now()
+        duration_seconds = (
+            step_finished_at - step_started_at
+        ).total_seconds()
+
+        write_pipeline_log(
+            log_id=step_log_id,
+            execution_id=JOB_RUN_ID,
+            notebook_name=NOTEBOOK_NAME,
+            layer_name=step_layer,
+            entity_name=step_entity,
+            target_table="not_applicable",
+            status=EXECUTION_STATUS_WARNING,
+            message=(
+                f"Step skipped by RUN_MODE "
+                f"| step={step_name} "
+                f"| run_mode={RUN_MODE}"
+            ),
+            started_at=step_started_at,
+            finished_at=step_finished_at,
+            duration_seconds=duration_seconds,
+            records_read=None,
+            records_written=None,
+        )
+
+        log_warning(
+            pipeline_logger=logger,
+            message=(
+                f"Step skipped by RUN_MODE "
+                f"| step={step_name} "
+                f"| run_mode={RUN_MODE}"
+            ),
+        )
+
+        return {
+            "step_name": step_name,
+            "status": EXECUTION_STATUS_WARNING,
+            "message": "Step skipped by RUN_MODE.",
+            "duration_seconds": duration_seconds,
+            "critical": is_critical,
+        }
+
+    try:
+
+        write_pipeline_log(
+            log_id=step_log_id,
+            execution_id=JOB_RUN_ID,
+            notebook_name=NOTEBOOK_NAME,
+            layer_name=step_layer,
+            entity_name=step_entity,
+            target_table="not_applicable",
+            status=EXECUTION_STATUS_STARTED,
+            message=(
+                f"Step execution started "
+                f"| step={step_name} "
+                f"| run_mode={RUN_MODE}"
+            ),
+            started_at=step_started_at,
+            finished_at=None,
+            duration_seconds=None,
+            records_read=None,
+            records_written=None,
+        )
+
+        log_info(
+            pipeline_logger=logger,
+            message=(
+                f"Starting step "
+                f"| step={step_name} "
+                f"| run_mode={RUN_MODE}"
+            ),
+        )
+
+        dbutils.notebook.run(
+            notebook_path,
+            timeout_seconds=NOTEBOOK_TIMEOUT_SECONDS,
+        )
+
+        step_finished_at = datetime.now()
+        duration_seconds = (
+            step_finished_at - step_started_at
+        ).total_seconds()
+
+        write_pipeline_log(
+            log_id=str(uuid.uuid4()),
+            execution_id=JOB_RUN_ID,
+            notebook_name=NOTEBOOK_NAME,
+            layer_name=step_layer,
+            entity_name=step_entity,
+            target_table="not_applicable",
+            status=EXECUTION_STATUS_SUCCESS,
+            message=(
+                f"Step completed successfully "
+                f"| step={step_name} "
+                f"| run_mode={RUN_MODE}"
+            ),
+            started_at=step_started_at,
+            finished_at=step_finished_at,
+            duration_seconds=duration_seconds,
+            records_read=None,
+            records_written=None,
+        )
+
+        log_success(
+            pipeline_logger=logger,
+            message=(
+                f"Step completed "
+                f"| step={step_name}"
+            ),
+        )
+
+        return {
+            "step_name": step_name,
+            "status": EXECUTION_STATUS_SUCCESS,
+            "message": "Step completed successfully.",
+            "duration_seconds": duration_seconds,
+            "critical": is_critical,
+        }
+
+    except Exception as error:
+
+        step_finished_at = datetime.now()
+        duration_seconds = (
+            step_finished_at - step_started_at
+        ).total_seconds()
+
+        error_message = str(error)
+        error_stacktrace = traceback.format_exc()
+
+        write_pipeline_log(
+            log_id=str(uuid.uuid4()),
+            execution_id=JOB_RUN_ID,
+            notebook_name=NOTEBOOK_NAME,
+            layer_name=step_layer,
+            entity_name=step_entity,
+            target_table="not_applicable",
+            status=EXECUTION_STATUS_FAILED,
+            message=(
+                f"Step failed "
+                f"| step={step_name} "
+                f"| error={error_message}"
+            ),
+            started_at=step_started_at,
+            finished_at=step_finished_at,
+            duration_seconds=duration_seconds,
+            records_read=None,
+            records_written=None,
+        )
+
+        log_error(
+            pipeline_logger=logger,
+            message=f"Step failed: {step_name}",
+            error=error,
+        )
+
+        return {
+            "step_name": step_name,
+            "status": EXECUTION_STATUS_FAILED,
+            "message": error_message,
+            "duration_seconds": duration_seconds,
+            "critical": is_critical,
+            "stacktrace": error_stacktrace,
+        }
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 1. Execute Incremental CEAP Steps
+
+# COMMAND ----------
+
+incremental_results = []
+incremental_started_at = datetime.now()
+
+for step_config in INCREMENTAL_STEPS:
+
+    step_result = run_notebook_step(
+        step_config=step_config,
+    )
+
+    incremental_results.append(step_result)
+
+    if (
+        step_result["status"] == EXECUTION_STATUS_FAILED
+        and step_result["critical"]
+        and FAIL_ON_STEP_ERROR
+    ):
+
+        raise Exception(
+            f"Critical incremental CEAP step failed: "
+            f"{step_result['step_name']} | "
+            f"{step_result['message']}"
+        )
+
+incremental_finished_at = datetime.now()
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 2. Incremental CEAP Summary
+
+# COMMAND ----------
+
+total_steps = len(incremental_results)
+
+success_steps = len([
+    result
+    for result in incremental_results
+    if result["status"] == EXECUTION_STATUS_SUCCESS
+])
+
+warning_steps = len([
+    result
+    for result in incremental_results
+    if result["status"] == EXECUTION_STATUS_WARNING
+])
+
+failed_steps = len([
+    result
+    for result in incremental_results
+    if result["status"] == EXECUTION_STATUS_FAILED
+])
+
+incremental_duration_seconds = (
+    incremental_finished_at - incremental_started_at
+).total_seconds()
+
+print("=" * 90)
+print("INCREMENTAL CEAP PIPELINE SUMMARY")
+print("=" * 90)
+print(f"Job Run ID: {JOB_RUN_ID}")
+print(f"Run Mode: {RUN_MODE}")
+print(f"Total steps: {total_steps}")
+print(f"Successful steps: {success_steps}")
+print(f"Warning/skipped steps: {warning_steps}")
+print(f"Failed steps: {failed_steps}")
+print(f"Pipeline duration seconds: {incremental_duration_seconds}")
+print("=" * 90)
+
+# COMMAND ----------
+
+# ============================================================
+# FINAL JOB LOG
+# ============================================================
+
+final_status = (
+    EXECUTION_STATUS_FAILED
+    if failed_steps > 0
+    else EXECUTION_STATUS_SUCCESS
+)
+
+write_pipeline_log(
+    log_id=str(uuid.uuid4()),
+    execution_id=JOB_RUN_ID,
+    notebook_name=NOTEBOOK_NAME,
+    layer_name=LAYER_NAME,
+    entity_name=ENTITY_NAME,
+    target_table="not_applicable",
+    status=final_status,
+    message=(
+        f"Incremental CEAP pipeline finished "
+        f"| run_mode={RUN_MODE} "
+        f"| success={success_steps} "
+        f"| warning={warning_steps} "
+        f"| failed={failed_steps}"
+    ),
+    started_at=incremental_started_at,
+    finished_at=incremental_finished_at,
+    duration_seconds=incremental_duration_seconds,
+    records_read=None,
+    records_written=None,
+)
+
+# COMMAND ----------
+
+if failed_steps > 0:
+
+    print(
+        f"WARNING: Incremental CEAP pipeline finished with "
+        f"{failed_steps} failed step(s)."
+    )
+
+    if FAIL_ON_STEP_ERROR:
+
+        raise Exception(
+            f"Incremental CEAP pipeline failed with "
+            f"{failed_steps} failed step(s)."
+        )
+
+print("INCREMENTAL CEAP PIPELINE EXECUTION COMPLETED")

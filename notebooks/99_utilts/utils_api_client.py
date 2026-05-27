@@ -1,475 +1,364 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "9dff7d1c-6d39-4169-8320-6622b95148d9",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [],
-   "source": [
-    "# ============================================================\n",
-    "# LOAD GLOBAL PROJECT CONFIGURATION\n",
-    "# ============================================================\n",
-    "\n",
-    "# Loads reusable constants, API parameters,\n",
-    "# naming conventions and audit configuration\n",
-    "# shared across the project.\n",
-    "\n",
-    "# MAGIC %run ./utils_config"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "07caa689-c1a8-45e9-8e86-afc0c20115a8",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "PROJECT CONFIGURATION LOADED SUCCESSFULLY\nPROJECT_NAME: brazil_legislative_analytics\nPROJECT_VERSION: v1.0.0\nPROJECT_ENVIRONMENT: dev\nCATALOG_NAME: brazil_legislative_analytics\nRUN_ID: a926ff8a-70f4-467e-a2a3-77be77328083\n"
-     ]
-    }
-   ],
-   "source": [
-    "%run ./utils_config"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "4ee7808c-8391-4d61-a41a-eccfcd8938bb",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_api_client loaded successfully.\n"
-     ]
-    },
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_config loaded successfully.\n"
-     ]
-    }
-   ],
-   "source": [
-    "# Databricks notebook source\n",
-    "# MAGIC %md\n",
-    "# MAGIC # 99 Utils — Câmara API Client\n",
-    "# MAGIC\n",
-    "# MAGIC **Notebook:** `utils_api_client`\n",
-    "# MAGIC\n",
-    "# MAGIC Provides reusable functions to request data from the Câmara dos Deputados Open Data API.\n",
-    "# MAGIC\n",
-    "# MAGIC This notebook centralizes API access logic used by Bronze ingestion notebooks.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Responsibilities\n",
-    "# MAGIC\n",
-    "# MAGIC - Execute HTTP GET requests against Câmara Open Data API\n",
-    "# MAGIC - Apply timeout and retry strategy\n",
-    "# MAGIC - Standardize API response handling\n",
-    "# MAGIC - Support resilient Bronze ingestion\n",
-    "# MAGIC - Preserve error details for auditability\n",
-    "# MAGIC\n",
-    "# MAGIC ## Naming Standard\n",
-    "# MAGIC\n",
-    "# MAGIC - Table and field names use Portuguese mnemonics.\n",
-    "# MAGIC - Comments and documentation are written in English.\n",
-    "# MAGIC - Utility functions use descriptive English names for reuse and readability.\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "import time\n",
-    "import requests\n",
-    "\n",
-    "from typing import (\n",
-    "    Optional,\n",
-    "    Dict,\n",
-    "    Any,\n",
-    "    List,\n",
-    ")\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ./utils_config\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# ============================================================\n",
-    "# API CLIENT CONFIGURATION\n",
-    "# ============================================================\n",
-    "\n",
-    "DEFAULT_REQUEST_HEADERS = {\n",
-    "    \"Accept\": \"application/json\",\n",
-    "    \"User-Agent\": (\n",
-    "        \"brazil-legislative-analytics/\"\n",
-    "        f\"{PROJECT_VERSION}\"\n",
-    "    ),\n",
-    "}\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def build_request_url(\n",
-    "    endpoint_path: str,\n",
-    ") -> str:\n",
-    "    \"\"\"\n",
-    "    Builds the full Câmara API request URL.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if endpoint_path is None:\n",
-    "        raise ValueError(\n",
-    "            \"Endpoint path cannot be None.\"\n",
-    "        )\n",
-    "\n",
-    "    normalized_endpoint = (\n",
-    "        str(endpoint_path)\n",
-    "        .strip()\n",
-    "    )\n",
-    "\n",
-    "    if normalized_endpoint == \"\":\n",
-    "        raise ValueError(\n",
-    "            \"Endpoint path cannot be empty.\"\n",
-    "        )\n",
-    "\n",
-    "    if not normalized_endpoint.startswith(\"/\"):\n",
-    "        normalized_endpoint = (\n",
-    "            f\"/{normalized_endpoint}\"\n",
-    "        )\n",
-    "\n",
-    "    return (\n",
-    "        f\"{CAMARA_API_BASE_URL}\"\n",
-    "        f\"{normalized_endpoint}\"\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def parse_json_response(\n",
-    "    api_response: requests.Response,\n",
-    "    endpoint_path: str,\n",
-    ") -> Dict[str, Any]:\n",
-    "    \"\"\"\n",
-    "    Parses an HTTP response as JSON.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    try:\n",
-    "        parsed_response = (\n",
-    "            api_response.json()\n",
-    "        )\n",
-    "\n",
-    "    except Exception as error:\n",
-    "\n",
-    "        raise ValueError(\n",
-    "            f\"Failed to parse API response as JSON \"\n",
-    "            f\"| endpoint={endpoint_path} \"\n",
-    "            f\"| status_code={api_response.status_code} \"\n",
-    "            f\"| error={str(error)}\"\n",
-    "        )\n",
-    "\n",
-    "    if not isinstance(parsed_response, dict):\n",
-    "\n",
-    "        raise ValueError(\n",
-    "            f\"API response is not a dictionary \"\n",
-    "            f\"| endpoint={endpoint_path}\"\n",
-    "        )\n",
-    "\n",
-    "    return parsed_response\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def fetch_camara_api_data(\n",
-    "    endpoint_path: str,\n",
-    "    query_params: Optional[Dict[str, Any]] = None,\n",
-    "    request_timeout_seconds: int = API_REQUEST_TIMEOUT_SECONDS,\n",
-    "    max_retry_attempts: int = API_MAX_RETRY_ATTEMPTS,\n",
-    "    retry_sleep_seconds: int = API_RETRY_SLEEP_SECONDS,\n",
-    "    request_headers: Optional[Dict[str, str]] = None,\n",
-    ") -> Dict[str, Any]:\n",
-    "    \"\"\"\n",
-    "    Requests data from a Câmara dos Deputados Open Data API endpoint.\n",
-    "\n",
-    "    Parameters\n",
-    "    ----------\n",
-    "    endpoint_path : str\n",
-    "        API endpoint path, for example: \"/deputados\".\n",
-    "\n",
-    "    query_params : dict, optional\n",
-    "        Query parameters sent to the API request.\n",
-    "\n",
-    "    request_timeout_seconds : int\n",
-    "        Maximum request timeout in seconds.\n",
-    "\n",
-    "    max_retry_attempts : int\n",
-    "        Maximum number of retry attempts.\n",
-    "\n",
-    "    retry_sleep_seconds : int\n",
-    "        Waiting time between retry attempts.\n",
-    "\n",
-    "    request_headers : dict, optional\n",
-    "        Additional request headers.\n",
-    "\n",
-    "    Returns\n",
-    "    -------\n",
-    "    dict\n",
-    "        JSON response returned by the API.\n",
-    "\n",
-    "    Raises\n",
-    "    ------\n",
-    "    RuntimeError\n",
-    "        Raised when all retry attempts fail.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    request_url = build_request_url(\n",
-    "        endpoint_path=endpoint_path,\n",
-    "    )\n",
-    "\n",
-    "    headers = (\n",
-    "        request_headers\n",
-    "        or DEFAULT_REQUEST_HEADERS\n",
-    "    )\n",
-    "\n",
-    "    last_error = None\n",
-    "\n",
-    "    for attempt_number in range(\n",
-    "        1,\n",
-    "        max_retry_attempts + 1,\n",
-    "    ):\n",
-    "\n",
-    "        try:\n",
-    "\n",
-    "            api_response = requests.get(\n",
-    "                request_url,\n",
-    "                params=query_params,\n",
-    "                timeout=request_timeout_seconds,\n",
-    "                headers=headers,\n",
-    "            )\n",
-    "\n",
-    "            api_response.raise_for_status()\n",
-    "\n",
-    "            return parse_json_response(\n",
-    "                api_response=api_response,\n",
-    "                endpoint_path=endpoint_path,\n",
-    "            )\n",
-    "\n",
-    "        except requests.exceptions.Timeout as error:\n",
-    "\n",
-    "            last_error = error\n",
-    "            error_type = \"timeout\"\n",
-    "\n",
-    "        except requests.exceptions.HTTPError as error:\n",
-    "\n",
-    "            last_error = error\n",
-    "\n",
-    "            status_code = (\n",
-    "                error.response.status_code\n",
-    "                if error.response is not None\n",
-    "                else \"unknown\"\n",
-    "            )\n",
-    "\n",
-    "            error_type = (\n",
-    "                f\"http_error_{status_code}\"\n",
-    "            )\n",
-    "\n",
-    "        except requests.exceptions.RequestException as error:\n",
-    "\n",
-    "            last_error = error\n",
-    "            error_type = \"request_error\"\n",
-    "\n",
-    "        except Exception as error:\n",
-    "\n",
-    "            last_error = error\n",
-    "            error_type = \"unexpected_error\"\n",
-    "\n",
-    "        print(\n",
-    "            f\"[WARNING] API request failed \"\n",
-    "            f\"| endpoint={endpoint_path} \"\n",
-    "            f\"| attempt={attempt_number}/{max_retry_attempts} \"\n",
-    "            f\"| error_type={error_type} \"\n",
-    "            f\"| error={str(last_error)}\"\n",
-    "        )\n",
-    "\n",
-    "        if (\n",
-    "            attempt_number\n",
-    "            < max_retry_attempts\n",
-    "        ):\n",
-    "\n",
-    "            time.sleep(\n",
-    "                retry_sleep_seconds\n",
-    "                * attempt_number\n",
-    "            )\n",
-    "\n",
-    "    raise RuntimeError(\n",
-    "        f\"API request failed after \"\n",
-    "        f\"{max_retry_attempts} attempt(s) \"\n",
-    "        f\"| endpoint={endpoint_path} \"\n",
-    "        f\"| params={query_params} \"\n",
-    "        f\"| last_error={str(last_error)}\"\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def extract_response_records(\n",
-    "    api_response: Dict[str, Any],\n",
-    "    data_field_name: str = API_RESPONSE_DATA_FIELD,\n",
-    ") -> List[Dict[str, Any]]:\n",
-    "    \"\"\"\n",
-    "    Extracts the data records list from a Câmara API JSON response.\n",
-    "\n",
-    "    Parameters\n",
-    "    ----------\n",
-    "    api_response : dict\n",
-    "        Full API JSON response.\n",
-    "\n",
-    "    data_field_name : str\n",
-    "        Field name that contains the data records.\n",
-    "\n",
-    "    Returns\n",
-    "    -------\n",
-    "    list\n",
-    "        List of records found in the API response.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if api_response is None:\n",
-    "        return []\n",
-    "\n",
-    "    if not isinstance(api_response, dict):\n",
-    "        return []\n",
-    "\n",
-    "    records = api_response.get(\n",
-    "        data_field_name,\n",
-    "        [],\n",
-    "    )\n",
-    "\n",
-    "    if records is None:\n",
-    "        return []\n",
-    "\n",
-    "    if not isinstance(records, list):\n",
-    "        return []\n",
-    "\n",
-    "    return records\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def check_endpoint_availability(\n",
-    "    endpoint_path: str,\n",
-    "    query_params: Optional[Dict[str, Any]] = None,\n",
-    "    request_timeout_seconds: int = 15,\n",
-    "    fail_silently: bool = True,\n",
-    ") -> bool:\n",
-    "    \"\"\"\n",
-    "    Checks whether an API endpoint is available.\n",
-    "\n",
-    "    Parameters\n",
-    "    ----------\n",
-    "    endpoint_path : str\n",
-    "        API endpoint path.\n",
-    "\n",
-    "    query_params : dict, optional\n",
-    "        Query parameters sent to the API request.\n",
-    "\n",
-    "    request_timeout_seconds : int\n",
-    "        Maximum timeout used for the availability check.\n",
-    "\n",
-    "    fail_silently : bool\n",
-    "        When True, returns False instead of raising exceptions.\n",
-    "\n",
-    "    Returns\n",
-    "    -------\n",
-    "    bool\n",
-    "        True when the endpoint returns a valid response,\n",
-    "        otherwise False.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    try:\n",
-    "\n",
-    "        fetch_camara_api_data(\n",
-    "            endpoint_path=endpoint_path,\n",
-    "            query_params=query_params,\n",
-    "            request_timeout_seconds=request_timeout_seconds,\n",
-    "            max_retry_attempts=1,\n",
-    "        )\n",
-    "\n",
-    "        return True\n",
-    "\n",
-    "    except Exception as error:\n",
-    "\n",
-    "        if not fail_silently:\n",
-    "            raise error\n",
-    "\n",
-    "        print(\n",
-    "            f\"[WARNING] Endpoint availability check failed \"\n",
-    "            f\"| endpoint={endpoint_path} \"\n",
-    "            f\"| error={str(error)}\"\n",
-    "        )\n",
-    "\n",
-    "        return False\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "print(\"utils_api_client loaded successfully.\")"
-   ]
-  }
- ],
- "metadata": {
-  "application/vnd.databricks.v1+notebook": {
-   "computePreferences": null,
-   "dashboards": [],
-   "environmentMetadata": {
-    "base_environment": "",
-    "environment_version": "5"
-   },
-   "inputWidgetPreferences": null,
-   "language": "python",
-   "notebookMetadata": {
-    "pythonIndentUnit": 4
-   },
-   "notebookName": "utils_api_client",
-   "widgets": {}
-  },
-  "language_info": {
-   "name": "python"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 0
-}
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # Utils Layer — Câmara API Client
+# MAGIC
+# MAGIC **Notebook:** `utils_api_client`  
+# MAGIC **Layer:** `Utils`  
+# MAGIC **Source/Endpoint:** `Câmara dos Deputados Open Data API`  
+# MAGIC **Target:** `Reusable API request and response handling functions`
+# MAGIC
+# MAGIC Provides reusable functions to request and process data from the
+# MAGIC Câmara dos Deputados Open Data API.
+# MAGIC
+# MAGIC This notebook centralizes API access logic used across Bronze ingestion
+# MAGIC and validation workflows.
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Responsibilities
+# MAGIC
+# MAGIC - Execute HTTP GET requests against Câmara Open Data API
+# MAGIC - Build standardized API request URLs
+# MAGIC - Apply timeout and retry strategies
+# MAGIC - Standardize JSON response handling
+# MAGIC - Extract records from API payloads
+# MAGIC - Validate endpoint availability
+# MAGIC - Support resilient ingestion workflows
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Notes
+# MAGIC
+# MAGIC - Shared utility notebook across ingestion workflows
+# MAGIC - Supports configurable timeout and retry strategies
+# MAGIC - Preserves detailed error messages for troubleshooting
+# MAGIC - Optimized for reusable and resilient API integration patterns
+# MAGIC
+# MAGIC For additional architectural and governance details, refer to:
+# MAGIC
+# MAGIC - `/docs/architecture/medallion_architecture.md`
+# MAGIC - `/docs/integration/api_integration_patterns.md`
+# MAGIC - `/docs/standards/coding_standards.md`
+
+# COMMAND ----------
+
+# MAGIC %run ./utils_config
+
+# COMMAND ----------
+
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # 99 Utils — API Client
+# MAGIC
+# MAGIC **Notebook:** `utils_api_client`
+# MAGIC
+# MAGIC Provides reusable HTTP request utilities for the Câmara dos Deputados
+# MAGIC Open Data API.
+# MAGIC
+# MAGIC ## Responsibilities
+# MAGIC
+# MAGIC - Centralize API request logic
+# MAGIC - Apply timeout and retry strategy
+# MAGIC - Standardize API error classification
+# MAGIC - Return parsed JSON responses
+# MAGIC - Extract API response records
+# MAGIC - Preserve backward compatibility with older notebooks
+# MAGIC - Support `utils_pagination`
+
+# COMMAND ----------
+
+# MAGIC %run ../00_setup/01_project_config
+
+# COMMAND ----------
+
+import time
+import requests
+from typing import Optional, Dict, Any, List
+
+# COMMAND ----------
+
+# ============================================================
+# API CLIENT CONFIGURATION
+# ============================================================
+
+DEFAULT_REQUEST_TIMEOUT_SECONDS = globals().get(
+    "API_REQUEST_TIMEOUT_SECONDS",
+    120,
+)
+
+DEFAULT_MAX_RETRY_ATTEMPTS = globals().get(
+    "API_MAX_RETRY_ATTEMPTS",
+    3,
+)
+
+DEFAULT_RETRY_SLEEP_SECONDS = globals().get(
+    "API_RETRY_SLEEP_SECONDS",
+    2,
+)
+
+DEFAULT_RESPONSE_DATA_FIELD = globals().get(
+    "API_RESPONSE_DATA_FIELD",
+    "dados",
+)
+
+# COMMAND ----------
+
+def classify_api_error(
+    error: Exception,
+) -> str:
+    """
+    Classifies API errors into operational categories.
+    """
+
+    error_text = str(error).lower()
+
+    if "timeout" in error_text or "timed out" in error_text:
+        return "timeout"
+
+    if "connection" in error_text:
+        return "connection"
+
+    if "404" in error_text:
+        return "not_found"
+
+    if "400" in error_text:
+        return "bad_request"
+
+    if "429" in error_text:
+        return "rate_limit"
+
+    if (
+        "500" in error_text
+        or "502" in error_text
+        or "503" in error_text
+        or "504" in error_text
+    ):
+        return "server_error"
+
+    return "unknown"
+
+# COMMAND ----------
+
+def build_api_url(
+    endpoint_path: str,
+) -> str:
+    """
+    Builds a full API URL from a relative endpoint path.
+    """
+
+    normalized_base_url = CAMARA_API_BASE_URL.rstrip("/")
+    normalized_endpoint = endpoint_path.strip()
+
+    if not normalized_endpoint.startswith("/"):
+        normalized_endpoint = f"/{normalized_endpoint}"
+
+    return f"{normalized_base_url}{normalized_endpoint}"
+
+# COMMAND ----------
+
+def make_api_request(
+    endpoint_path: str,
+    params: Optional[Dict[str, Any]] = None,
+    request_timeout: Optional[int] = None,
+    max_retries: Optional[int] = None,
+    sleep_seconds: Optional[float] = None,
+) -> Dict[str, Any]:
+    """
+    Executes a GET request against the Câmara API and returns the JSON payload.
+
+    Parameters
+    ----------
+    endpoint_path:
+        Relative API endpoint path, for example `/deputados`.
+
+    params:
+        Optional query parameters.
+
+    request_timeout:
+        Request timeout in seconds.
+
+    max_retries:
+        Number of retry attempts.
+
+    sleep_seconds:
+        Seconds to wait between retries.
+
+    Returns
+    -------
+    dict
+        Parsed JSON response payload.
+    """
+
+    request_params = params or {}
+
+    timeout_seconds = (
+        request_timeout
+        if request_timeout is not None
+        else DEFAULT_REQUEST_TIMEOUT_SECONDS
+    )
+
+    retry_attempts = (
+        max_retries
+        if max_retries is not None
+        else DEFAULT_MAX_RETRY_ATTEMPTS
+    )
+
+    retry_sleep = (
+        sleep_seconds
+        if sleep_seconds is not None
+        else DEFAULT_RETRY_SLEEP_SECONDS
+    )
+
+    url = build_api_url(
+        endpoint_path=endpoint_path,
+    )
+
+    last_error = None
+
+    for attempt_number in range(
+        1,
+        retry_attempts + 1,
+    ):
+
+        try:
+
+            response = requests.get(
+                url=url,
+                params=request_params,
+                timeout=timeout_seconds,
+                headers={
+                    "accept": "application/json",
+                    "User-Agent": "brazil-legislative-analytics/1.0",
+                },
+            )
+
+            response.raise_for_status()
+
+            response_payload = response.json()
+
+            if response_payload is None:
+                return {}
+
+            return response_payload
+
+        except Exception as error:
+
+            last_error = error
+            error_type = classify_api_error(
+                error=error,
+            )
+
+            print(
+                "[WARNING] API request failed "
+                f"| endpoint={endpoint_path} "
+                f"| attempt={attempt_number}/{retry_attempts} "
+                f"| error_type={error_type} "
+                f"| error={str(error)}"
+            )
+
+            if attempt_number < retry_attempts:
+                time.sleep(retry_sleep)
+
+    raise Exception(
+        f"API request failed after {retry_attempts} attempt(s) "
+        f"| endpoint={endpoint_path} "
+        f"| params={request_params} "
+        f"| last_error={str(last_error)}"
+    )
+
+# COMMAND ----------
+
+def extract_response_records(
+    api_response: Dict[str, Any],
+    data_field: str = DEFAULT_RESPONSE_DATA_FIELD,
+) -> List[Dict[str, Any]]:
+    """
+    Extracts the records list from a Câmara API response payload.
+
+    This function is used by `utils_pagination`.
+    """
+
+    if api_response is None:
+        return []
+
+    if not isinstance(api_response, dict):
+        return []
+
+    records = api_response.get(
+        data_field,
+        [],
+    )
+
+    if records is None:
+        return []
+
+    if isinstance(records, list):
+        return records
+
+    return [records]
+
+# COMMAND ----------
+
+def get_api_data(
+    endpoint_path: str,
+    params: Optional[Dict[str, Any]] = None,
+    request_timeout: Optional[int] = None,
+    max_retries: Optional[int] = None,
+    sleep_seconds: Optional[float] = None,
+    data_field: str = DEFAULT_RESPONSE_DATA_FIELD,
+) -> List[Dict[str, Any]]:
+    """
+    Executes an API request and returns only the data records list.
+    """
+
+    response_payload = make_api_request(
+        endpoint_path=endpoint_path,
+        params=params,
+        request_timeout=request_timeout,
+        max_retries=max_retries,
+        sleep_seconds=sleep_seconds,
+    )
+
+    return extract_response_records(
+        api_response=response_payload,
+        data_field=data_field,
+    )
+
+# COMMAND ----------
+
+def fetch_camara_api_data(
+    endpoint_path: str,
+    query_params: Optional[Dict[str, Any]] = None,
+    request_timeout_seconds: Optional[int] = None,
+    max_retry_attempts: Optional[int] = None,
+) -> Dict[str, Any]:
+    """
+    Backward-compatible wrapper used by `utils_pagination`
+    and older Bronze notebooks.
+    """
+
+    return make_api_request(
+        endpoint_path=endpoint_path,
+        params=query_params or {},
+        request_timeout=request_timeout_seconds,
+        max_retries=max_retry_attempts,
+    )
+
+# COMMAND ----------
+
+# ============================================================
+# BACKWARD-COMPATIBILITY ALIASES
+# ============================================================
+#
+# These aliases keep older notebooks working without requiring
+# immediate refactoring.
+#
+# ============================================================
+
+api_get = make_api_request
+request_api = make_api_request
+get_api_response = make_api_request
+
+# COMMAND ----------
+
+print("utils_api_client loaded successfully.")

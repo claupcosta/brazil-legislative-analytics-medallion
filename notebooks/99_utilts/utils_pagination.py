@@ -1,379 +1,307 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "faec42df-a08a-414e-a947-3c29e7d36aab",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "PROJECT CONFIGURATION LOADED SUCCESSFULLY\nPROJECT_NAME: brazil_legislative_analytics\nPROJECT_VERSION: v1.0.0\nPROJECT_ENVIRONMENT: dev\nCATALOG_NAME: brazil_legislative_analytics\nRUN_ID: 8efd01bd-509e-44a3-9bbf-020e61788e3f\n"
-     ]
-    }
-   ],
-   "source": [
-    "%run ./utils_api_client"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 0,
-   "metadata": {
-    "application/vnd.databricks.v1+cell": {
-     "cellMetadata": {
-      "byteLimit": 2048000,
-      "rowLimit": 10000
-     },
-     "inputWidgets": {},
-     "nuid": "d0f7e67a-f8ea-4f7d-a6b2-8fcae6c29ef4",
-     "showTitle": false,
-     "tableResultSettingsMap": {},
-     "title": ""
-    }
-   },
-   "outputs": [
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_pagination loaded successfully.\n"
-     ]
-    },
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_config loaded successfully.\n"
-     ]
-    },
-    {
-     "output_type": "stream",
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "utils_api_client loaded successfully.\n"
-     ]
-    }
-   ],
-   "source": [
-    "# Databricks notebook source\n",
-    "# MAGIC %md\n",
-    "# MAGIC # 99 Utils — Câmara API Pagination\n",
-    "# MAGIC\n",
-    "# MAGIC **Notebook:** `utils_pagination`\n",
-    "# MAGIC\n",
-    "# MAGIC Provides reusable pagination functions for Câmara dos Deputados Open Data API endpoints.\n",
-    "# MAGIC\n",
-    "# MAGIC This notebook preserves a simple and resilient pagination strategy because the API may present intermittent instability, empty pages, timeout errors or inconsistent endpoint behavior.\n",
-    "# MAGIC\n",
-    "# MAGIC ## Responsibilities\n",
-    "# MAGIC - Control page-based API extraction\n",
-    "# MAGIC - Apply `pagina` and `itens` parameters\n",
-    "# MAGIC - Reuse centralized API request function\n",
-    "# MAGIC - Support retry behavior for unstable endpoints\n",
-    "# MAGIC - Stop pagination safely when no records are returned\n",
-    "# MAGIC - Support execution limits for tests and controlled ingestion\n",
-    "# MAGIC\n",
-    "# MAGIC ## Technical Notes\n",
-    "# MAGIC - Python functions and variables are written in English.\n",
-    "# MAGIC - Table and field names follow Portuguese mnemonic standards.\n",
-    "# MAGIC - Comments and technical documentation are written in English.\n",
-    "# MAGIC - The implementation intentionally keeps direct loop logic for operational stability.\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "from typing import (\n",
-    "    Optional,\n",
-    "    Dict,\n",
-    "    Any,\n",
-    "    List,\n",
-    ")\n",
-    "\n",
-    "import time\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ./utils_config\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "# MAGIC %run ./utils_api_client\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def collect_pages(\n",
-    "    endpoint_path: str,\n",
-    "    base_params: Optional[Dict[str, Any]] = None,\n",
-    "    record_limit: Optional[int] = None,\n",
-    "    page_size: Optional[int] = None,\n",
-    "    request_timeout: Optional[int] = None,\n",
-    "    max_retries: Optional[int] = None,\n",
-    "    sleep_seconds: float = 0.5,\n",
-    "    max_pages: Optional[int] = None,\n",
-    ") -> List[Dict[str, Any]]:\n",
-    "    \"\"\"\n",
-    "    Collects records from a paginated Câmara dos Deputados API endpoint.\n",
-    "\n",
-    "    Parameters\n",
-    "    ----------\n",
-    "    endpoint_path : str\n",
-    "        API endpoint path.\n",
-    "\n",
-    "    base_params : dict, optional\n",
-    "        Base query parameters.\n",
-    "\n",
-    "    record_limit : int, optional\n",
-    "        Maximum number of records to collect.\n",
-    "\n",
-    "    page_size : int, optional\n",
-    "        Number of records per page.\n",
-    "\n",
-    "    request_timeout : int, optional\n",
-    "        API request timeout in seconds.\n",
-    "\n",
-    "    max_retries : int, optional\n",
-    "        Maximum retry attempts per page.\n",
-    "\n",
-    "    sleep_seconds : float\n",
-    "        Waiting time between requests.\n",
-    "\n",
-    "    max_pages : int, optional\n",
-    "        Maximum number of pages to collect.\n",
-    "\n",
-    "    Returns\n",
-    "    -------\n",
-    "    list\n",
-    "        List containing collected records.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if page_size is None:\n",
-    "        page_size = API_DEFAULT_PAGE_SIZE\n",
-    "\n",
-    "    if request_timeout is None:\n",
-    "        request_timeout = API_REQUEST_TIMEOUT_SECONDS\n",
-    "\n",
-    "    if max_retries is None:\n",
-    "        max_retries = API_MAX_RETRY_ATTEMPTS\n",
-    "\n",
-    "    collected_records = []\n",
-    "    page_number = 1\n",
-    "\n",
-    "    while True:\n",
-    "\n",
-    "        if max_pages is not None and page_number > max_pages:\n",
-    "\n",
-    "            print(\n",
-    "                f\"[INFO] Pagination stopped by max_pages \"\n",
-    "                f\"| endpoint={endpoint_path} \"\n",
-    "                f\"| max_pages={max_pages}\"\n",
-    "            )\n",
-    "\n",
-    "            break\n",
-    "\n",
-    "        page_params = dict(base_params or {})\n",
-    "\n",
-    "        page_params[\n",
-    "            API_PAGE_PARAMETER_NAME\n",
-    "        ] = page_number\n",
-    "\n",
-    "        page_params[\n",
-    "            API_PAGE_SIZE_PARAMETER_NAME\n",
-    "        ] = page_size\n",
-    "\n",
-    "        last_error = None\n",
-    "        page_records = []\n",
-    "\n",
-    "        for retry_number in range(\n",
-    "            1,\n",
-    "            max_retries + 1,\n",
-    "        ):\n",
-    "\n",
-    "            try:\n",
-    "\n",
-    "                api_response = (\n",
-    "                    fetch_camara_api_data(\n",
-    "                        endpoint_path=endpoint_path,\n",
-    "                        query_params=page_params,\n",
-    "                        request_timeout_seconds=request_timeout,\n",
-    "                        max_retry_attempts=1,\n",
-    "                    )\n",
-    "                )\n",
-    "\n",
-    "                page_records = (\n",
-    "                    extract_response_records(\n",
-    "                        api_response=api_response,\n",
-    "                    )\n",
-    "                )\n",
-    "\n",
-    "                break\n",
-    "\n",
-    "            except Exception as error:\n",
-    "\n",
-    "                last_error = error\n",
-    "\n",
-    "                print(\n",
-    "                    f\"[WARNING] Pagination request failed \"\n",
-    "                    f\"| endpoint={endpoint_path} \"\n",
-    "                    f\"| page={page_number} \"\n",
-    "                    f\"| attempt={retry_number}/{max_retries} \"\n",
-    "                    f\"| error={str(error)}\"\n",
-    "                )\n",
-    "\n",
-    "                if retry_number == max_retries:\n",
-    "                    raise last_error\n",
-    "\n",
-    "                time.sleep(\n",
-    "                    sleep_seconds\n",
-    "                    * retry_number\n",
-    "                )\n",
-    "\n",
-    "        if not page_records:\n",
-    "\n",
-    "            print(\n",
-    "                f\"[INFO] Pagination finished with empty response \"\n",
-    "                f\"| endpoint={endpoint_path} \"\n",
-    "                f\"| page={page_number}\"\n",
-    "            )\n",
-    "\n",
-    "            break\n",
-    "\n",
-    "        collected_records.extend(\n",
-    "            page_records\n",
-    "        )\n",
-    "\n",
-    "        print(\n",
-    "            f\"[INFO] Page collected \"\n",
-    "            f\"| endpoint={endpoint_path} \"\n",
-    "            f\"| page={page_number} \"\n",
-    "            f\"| page_records={len(page_records)} \"\n",
-    "            f\"| total_records={len(collected_records)}\"\n",
-    "        )\n",
-    "\n",
-    "        if len(page_records) < page_size:\n",
-    "\n",
-    "            print(\n",
-    "                f\"[INFO] Pagination finished with partial last page \"\n",
-    "                f\"| endpoint={endpoint_path} \"\n",
-    "                f\"| page={page_number}\"\n",
-    "            )\n",
-    "\n",
-    "            break\n",
-    "\n",
-    "        if (\n",
-    "            record_limit is not None\n",
-    "            and len(collected_records)\n",
-    "            >= record_limit\n",
-    "        ):\n",
-    "\n",
-    "            print(\n",
-    "                f\"[INFO] Pagination stopped by record limit \"\n",
-    "                f\"| endpoint={endpoint_path} \"\n",
-    "                f\"| limit={record_limit}\"\n",
-    "            )\n",
-    "\n",
-    "            break\n",
-    "\n",
-    "        page_number += 1\n",
-    "\n",
-    "        if sleep_seconds > 0:\n",
-    "\n",
-    "            time.sleep(\n",
-    "                sleep_seconds\n",
-    "            )\n",
-    "\n",
-    "    if record_limit is not None:\n",
-    "\n",
-    "        return collected_records[\n",
-    "            :record_limit\n",
-    "        ]\n",
-    "\n",
-    "    return collected_records\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "def collect_first_page(\n",
-    "    endpoint_path: str,\n",
-    "    base_params: Optional[Dict[str, Any]] = None,\n",
-    "    page_size: Optional[int] = None,\n",
-    "    request_timeout: Optional[int] = None,\n",
-    ") -> List[Dict[str, Any]]:\n",
-    "    \"\"\"\n",
-    "    Collects only the first page from a Câmara API endpoint.\n",
-    "    \"\"\"\n",
-    "\n",
-    "    if page_size is None:\n",
-    "        page_size = API_DEFAULT_PAGE_SIZE\n",
-    "\n",
-    "    if request_timeout is None:\n",
-    "        request_timeout = API_REQUEST_TIMEOUT_SECONDS\n",
-    "\n",
-    "    first_page_params = dict(\n",
-    "        base_params or {}\n",
-    "    )\n",
-    "\n",
-    "    first_page_params[\n",
-    "        API_PAGE_PARAMETER_NAME\n",
-    "    ] = 1\n",
-    "\n",
-    "    first_page_params[\n",
-    "        API_PAGE_SIZE_PARAMETER_NAME\n",
-    "    ] = page_size\n",
-    "\n",
-    "    api_response = (\n",
-    "        fetch_camara_api_data(\n",
-    "            endpoint_path=endpoint_path,\n",
-    "            query_params=first_page_params,\n",
-    "            request_timeout_seconds=request_timeout,\n",
-    "        )\n",
-    "    )\n",
-    "\n",
-    "    return extract_response_records(\n",
-    "        api_response=api_response,\n",
-    "    )\n",
-    "\n",
-    "# COMMAND ----------\n",
-    "\n",
-    "print(\"utils_pagination loaded successfully.\")"
-   ]
-  }
- ],
- "metadata": {
-  "application/vnd.databricks.v1+notebook": {
-   "computePreferences": null,
-   "dashboards": [],
-   "environmentMetadata": {
-    "base_environment": "",
-    "environment_version": "5"
-   },
-   "inputWidgetPreferences": null,
-   "language": "python",
-   "notebookMetadata": {
-    "pythonIndentUnit": 4
-   },
-   "notebookName": "utils_pagination",
-   "widgets": {}
-  },
-  "language_info": {
-   "name": "python"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 0
-}
+# Databricks notebook source
+# MAGIC %md
+# MAGIC
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC # Utils Layer — Câmara API Pagination
+# MAGIC
+# MAGIC **Notebook:** `utils_pagination`  
+# MAGIC **Layer:** `Utils`  
+# MAGIC **Source/Endpoint:** `Câmara dos Deputados Open Data API`  
+# MAGIC **Target:** `Reusable API pagination and extraction functions`
+# MAGIC
+# MAGIC Provides reusable pagination functions for Câmara dos Deputados
+# MAGIC Open Data API endpoints.
+# MAGIC
+# MAGIC This notebook centralizes resilient page-based extraction logic
+# MAGIC used across Bronze ingestion and validation workflows.
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Responsibilities
+# MAGIC
+# MAGIC - Control page-based API extraction
+# MAGIC - Apply pagination request parameters
+# MAGIC - Reuse centralized API request functions
+# MAGIC - Support retry behavior for unstable endpoints
+# MAGIC - Handle empty and partial page responses safely
+# MAGIC - Support controlled extraction limits for testing and development
+# MAGIC - Provide reusable pagination helper functions
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC ## Notes
+# MAGIC
+# MAGIC - Shared utility notebook across ingestion workflows
+# MAGIC - Designed for resilient API extraction patterns
+# MAGIC - Supports configurable retry and timeout strategies
+# MAGIC - Pagination logic intentionally remains simple for operational stability
+# MAGIC
+# MAGIC For additional architectural and governance details, refer to:
+# MAGIC
+# MAGIC - `/docs/integration/api_integration_patterns.md`
+# MAGIC - `/docs/monitoring/api_validation.md`
+# MAGIC - `/docs/architecture/medallion_architecture.md`
+# MAGIC
+
+# COMMAND ----------
+
+# MAGIC %run ./utils_api_client
+
+# COMMAND ----------
+
+
+from typing import (
+    Optional,
+    Dict,
+    Any,
+    List,
+)
+
+import time
+
+# COMMAND ----------
+
+# MAGIC %run ./utils_config
+
+# COMMAND ----------
+
+# MAGIC %run ./utils_api_client
+
+# COMMAND ----------
+
+def collect_pages(
+    endpoint_path: str,
+    base_params: Optional[Dict[str, Any]] = None,
+    record_limit: Optional[int] = None,
+    page_size: Optional[int] = None,
+    request_timeout: Optional[int] = None,
+    max_retries: Optional[int] = None,
+    sleep_seconds: float = 0.5,
+    max_pages: Optional[int] = None,
+) -> List[Dict[str, Any]]:
+    """
+    Collects records from a paginated Câmara dos Deputados API endpoint.
+
+    Parameters
+    ----------
+    endpoint_path : str
+        API endpoint path.
+
+    base_params : dict, optional
+        Base query parameters.
+
+    record_limit : int, optional
+        Maximum number of records to collect.
+
+    page_size : int, optional
+        Number of records per page.
+
+    request_timeout : int, optional
+        API request timeout in seconds.
+
+    max_retries : int, optional
+        Maximum retry attempts per page.
+
+    sleep_seconds : float
+        Waiting time between requests.
+
+    max_pages : int, optional
+        Maximum number of pages to collect.
+
+    Returns
+    -------
+    list
+        List containing collected records.
+    """
+
+    if page_size is None:
+        page_size = API_DEFAULT_PAGE_SIZE
+
+    if request_timeout is None:
+        request_timeout = API_REQUEST_TIMEOUT_SECONDS
+
+    if max_retries is None:
+        max_retries = API_MAX_RETRY_ATTEMPTS
+
+    collected_records = []
+    page_number = 1
+
+    while True:
+
+        if max_pages is not None and page_number > max_pages:
+
+            print(
+                f"[INFO] Pagination stopped by max_pages "
+                f"| endpoint={endpoint_path} "
+                f"| max_pages={max_pages}"
+            )
+
+            break
+
+        page_params = dict(base_params or {})
+
+        page_params[
+            API_PAGE_PARAMETER_NAME
+        ] = page_number
+
+        page_params[
+            API_PAGE_SIZE_PARAMETER_NAME
+        ] = page_size
+
+        last_error = None
+        page_records = []
+
+        for retry_number in range(
+            1,
+            max_retries + 1,
+        ):
+
+            try:
+
+                api_response = (
+                    fetch_camara_api_data(
+                        endpoint_path=endpoint_path,
+                        query_params=page_params,
+                        request_timeout_seconds=request_timeout,
+                        max_retry_attempts=1,
+                    )
+                )
+
+                page_records = (
+                    extract_response_records(
+                        api_response=api_response,
+                    )
+                )
+
+                break
+
+            except Exception as error:
+
+                last_error = error
+
+                print(
+                    f"[WARNING] Pagination request failed "
+                    f"| endpoint={endpoint_path} "
+                    f"| page={page_number} "
+                    f"| attempt={retry_number}/{max_retries} "
+                    f"| error={str(error)}"
+                )
+
+                if retry_number == max_retries:
+                    raise last_error
+
+                time.sleep(
+                    sleep_seconds
+                    * retry_number
+                )
+
+        if not page_records:
+
+            print(
+                f"[INFO] Pagination finished with empty response "
+                f"| endpoint={endpoint_path} "
+                f"| page={page_number}"
+            )
+
+            break
+
+        collected_records.extend(
+            page_records
+        )
+
+        print(
+            f"[INFO] Page collected "
+            f"| endpoint={endpoint_path} "
+            f"| page={page_number} "
+            f"| page_records={len(page_records)} "
+            f"| total_records={len(collected_records)}"
+        )
+
+        if len(page_records) < page_size:
+
+            print(
+                f"[INFO] Pagination finished with partial last page "
+                f"| endpoint={endpoint_path} "
+                f"| page={page_number}"
+            )
+
+            break
+
+        if (
+            record_limit is not None
+            and len(collected_records)
+            >= record_limit
+        ):
+
+            print(
+                f"[INFO] Pagination stopped by record limit "
+                f"| endpoint={endpoint_path} "
+                f"| limit={record_limit}"
+            )
+
+            break
+
+        page_number += 1
+
+        if sleep_seconds > 0:
+
+            time.sleep(
+                sleep_seconds
+            )
+
+    if record_limit is not None:
+
+        return collected_records[
+            :record_limit
+        ]
+
+    return collected_records
+
+# COMMAND ----------
+
+def collect_first_page(
+    endpoint_path: str,
+    base_params: Optional[Dict[str, Any]] = None,
+    page_size: Optional[int] = None,
+    request_timeout: Optional[int] = None,
+) -> List[Dict[str, Any]]:
+    """
+    Collects only the first page from a Câmara API endpoint.
+    """
+
+    if page_size is None:
+        page_size = API_DEFAULT_PAGE_SIZE
+
+    if request_timeout is None:
+        request_timeout = API_REQUEST_TIMEOUT_SECONDS
+
+    first_page_params = dict(
+        base_params or {}
+    )
+
+    first_page_params[
+        API_PAGE_PARAMETER_NAME
+    ] = 1
+
+    first_page_params[
+        API_PAGE_SIZE_PARAMETER_NAME
+    ] = page_size
+
+    api_response = (
+        fetch_camara_api_data(
+            endpoint_path=endpoint_path,
+            query_params=first_page_params,
+            request_timeout_seconds=request_timeout,
+        )
+    )
+
+    return extract_response_records(
+        api_response=api_response,
+    )
+
+# COMMAND ----------
+
+print("utils_pagination loaded successfully.")
