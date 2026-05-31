@@ -46,7 +46,6 @@
 
 # COMMAND ----------
 
-# Databricks notebook source
 # MAGIC %md
 # MAGIC # 99 Utils — API Client
 # MAGIC

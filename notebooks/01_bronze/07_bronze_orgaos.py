@@ -70,74 +70,7 @@
 
 # COMMAND ----------
 
-# Databricks notebook source
-# MAGIC %md
-# MAGIC # Bronze Layer — Legislative Bodies API Ingestion
-# MAGIC
-# MAGIC **Notebook:** `07_bronze_orgaos`  
-# MAGIC **Layer:** `Bronze`  
-# MAGIC **Source/Endpoint:** `/orgaos`  
-# MAGIC **Target:** `brazil_legislative_analytics.bronze.br_orgaos`
-# MAGIC
-# MAGIC Extracts legislative body records from the Câmara dos Deputados
-# MAGIC Open Data API and persists them into the Bronze layer.
-# MAGIC
-# MAGIC This notebook preserves raw API extraction fidelity,
-# MAGIC including ingestion metadata, original payloads and traceability fields.
-# MAGIC
-# MAGIC ---
-# MAGIC
-# MAGIC ## Responsibilities
-# MAGIC
-# MAGIC - Extract legislative body records from the Câmara API
-# MAGIC - Use direct API request strategy for institutional reference data
-# MAGIC - Preserve raw API payloads
-# MAGIC - Generate ingestion traceability metadata
-# MAGIC - Generate deterministic record hashes
-# MAGIC - Persist Bronze Delta tables
-# MAGIC - Register operational execution logs
-# MAGIC - Apply governance comments to tables and columns
-# MAGIC
-# MAGIC ---
-# MAGIC
-# MAGIC ## Notes
-# MAGIC
-# MAGIC - Bronze preserves source-system extraction fidelity
-# MAGIC - CPI classification is intentionally handled in Silver and Gold layers
-# MAGIC - The `/orgaos` endpoint may present timeout behavior with broad filters or pagination
-# MAGIC - This notebook avoids broad date filters and pagination to improve execution stability
-# MAGIC - This notebook is recommended mainly for validation and controlled extraction scenarios
-# MAGIC - Technical duplicates and business validation are handled in Silver
-# MAGIC - Governance comments are applied to tables and columns
-# MAGIC
-# MAGIC For additional architectural and governance details, refer to:
-# MAGIC
-# MAGIC - `/docs/architecture/medallion_architecture.md`
-# MAGIC - `/docs/governance/data_lineage.md`
-# MAGIC - `/docs/governance/data_quality_rules.md`
-# MAGIC - `/docs/decisions/api_limitations.md`
 
-# COMMAND ----------
-
-# MAGIC %run ../00_setup/01_project_config
-
-# COMMAND ----------
-
-# MAGIC %run ../99_utils/utils_api_client
-
-# COMMAND ----------
-
-# MAGIC %run ../99_utils/utils_hash
-
-# COMMAND ----------
-
-# MAGIC %run ../99_utils/utils_logger
-
-# COMMAND ----------
-
-# MAGIC %run ../99_utils/utils_table_logger
-
-# COMMAND ----------
 
 from datetime import datetime
 import json

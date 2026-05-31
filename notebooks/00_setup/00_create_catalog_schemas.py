@@ -159,4 +159,3 @@ if missing_schemas:
 print("=" * 80)
 print("CATALOG AND SCHEMAS CREATED SUCCESSFULLY")
 print("=" * 80)
-
