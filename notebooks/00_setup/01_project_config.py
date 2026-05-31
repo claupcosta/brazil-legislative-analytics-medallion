@@ -308,9 +308,9 @@ MNEMONICS = {
 BRONZE_TABLES = {
     "deputados": "br_deputados",
     "frentes": "br_frentes",
-    "frentes_detalhes": "br_frentes_detalhes",
     "frentes_membros": "br_frentes_membros",
     "eventos": "br_eventos",
+    "presencas_eventos": "br_presencas_eventos",
     "votacoes": "br_votacoes",
     "votos": "br_votos",
     "despesas_ceap": "br_despesas_ceap",
@@ -336,10 +336,14 @@ SILVER_TABLES = {
     "votos": "slv_votos",
     "despesas_ceap": "slv_despesas_ceap",
     "fornecedores": "slv_fornecedores",
+    "fornecedores_cnpj_api": "slv_fornecedores_cnpj_api",
+    "fornecedores_enriched": "slv_fornecedores_enriched",
     "orgaos": "slv_orgaos",
     "orgaos_membros": "slv_orgaos_membros",
     "cpis": "slv_cpis",
     "proposicoes": "slv_proposicoes",
+    "registros_rejeitados": "slv_registros_rejeitados",
+    "cnpj_enriquecido": "slv_cnpj_enriquecido",
 }
 
 # COMMAND ----------

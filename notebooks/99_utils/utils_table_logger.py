@@ -47,14 +47,21 @@
 
 from datetime import datetime
 from typing import Optional
+
+from pyspark.sql import SparkSession
 from pyspark.sql.types import (
     StructType,
     StructField,
     StringType,
     LongType,
     DoubleType,
-    TimestampType,
+    TimestampType
 )
+
+spark = SparkSession.getActiveSession()
+
+if spark is None:
+    spark = SparkSession.builder.getOrCreate()
 
 # COMMAND ----------
 

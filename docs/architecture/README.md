@@ -195,7 +195,7 @@ Implemented capabilities:
 - execution monitoring
 - data traceability
 - lineage preservation
-- schema standardization
+- schema standardization 
 
 Audit tables:
 

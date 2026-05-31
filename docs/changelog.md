@@ -1,5 +1,108 @@
 # Changelog
 
+## v2.0.0 — Silver Layer Implementation and Analytical Standardization
+
+### Added
+
+* Added complete Silver standardization notebooks for:
+
+  * registros rejeitados
+  * deputados
+  * partidos
+  * estados
+  * frentes parlamentares
+  * frentes membros
+  * eventos
+  * votações
+  * votos
+  * despesas CEAP
+  * fornecedores
+  * fornecedores enrichment
+  * CPIs
+  * CPI eventos
+  * proposições
+  * presenças em eventos
+  * órgãos
+
+* Added Silver quality checkpoint notebook:
+
+  * 99_silver_quality_checkpoint
+
+* Added Bronze quality checkpoint notebook:
+
+  * 99_bronze_quality_checkpoint
+
+* Added centralized rejected records process using:
+
+  * slv_registros_rejeitados
+
+* Added governance comments for Silver tables and columns.
+
+### Changed
+
+* Standardized Silver notebooks using a consistent structure:
+
+  * execution header
+  * global configuration
+  * source loading
+  * standardization rules
+  * quality validation
+  * rejected records handling
+  * Delta persistence
+  * governance comments
+  * execution summary
+
+* Updated Silver notebooks to use normalized business keys and deterministic hashes.
+
+* Updated Silver layer to follow a unified curated model instead of multiple Silver sublayers.
+
+* Updated documentation approach with Bronze and Silver decision summaries.
+
+* Updated project execution strategy to freeze Bronze and Silver before starting Gold.
+
+### Improved
+
+* Improved traceability across Bronze and Silver through audit metadata.
+* Improved data quality validation using mandatory field checks, duplicate detection and referential checks.
+* Improved consistency across Silver table naming, column naming and comments.
+* Improved operational resilience by separating functional Silver processing from optional backlog items.
+* Improved project governance with checkpoint notebooks for Bronze and Silver.
+* Improved readiness for Gold modeling and analytical marts.
+
+### Fixed
+
+* Fixed missing imports and function references in Silver notebooks.
+* Fixed party acronym normalization issues.
+* Fixed deputy party enrichment inconsistencies.
+* Fixed front member integration with Silver fronts and deputies.
+* Fixed column naming inconsistencies in validation queries.
+* Fixed metadata comment gaps in several Silver tables.
+* Fixed validation logic for state dimension, party dimension and presence-event records.
+
+### Paused
+
+* Paused `17_silver_temas`.
+
+  * Reason: thematic classification source was identified but not ingested into Bronze during this project phase.
+  * Status: backlog / future enhancement.
+
+* Paused `18_silver_tramitacoes`.
+
+  * Reason: tramitações are optional for the current mandatory scope and no Bronze source table was available.
+  * Status: backlog / future enhancement.
+
+### Notes
+
+This release consolidates the Silver layer of the Brazil Legislative Analytics Medallion project.
+
+Bronze and Silver are now considered stable and frozen for Gold layer development.
+
+The project is ready to move forward to dimensional modeling, Gold facts, Gold dimensions and analytical marts.
+
+Future release:
+
+* v3.0.0 — Gold Layer Dimensional Modeling and Analytical Marts
+
 
 ## v1.3.0 — Bronze Layer Stabilization and Operational Resilience
 

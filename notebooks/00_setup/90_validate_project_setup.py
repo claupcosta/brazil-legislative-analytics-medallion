@@ -471,4 +471,3 @@ if warning_count > 0:
         "Please review deprecated schemas or "
         "non-blocking setup issues."
     )
-
