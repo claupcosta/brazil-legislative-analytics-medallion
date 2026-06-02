@@ -220,7 +220,7 @@ brazil_legislative_analytics.marts.am_correlacao_frentes_votacoes
 
 ## Status
 
-✅ Aprovado para consumo analítico
+* Aprovado para consumo analítico
 
 ### Resultado da Homologação
 
