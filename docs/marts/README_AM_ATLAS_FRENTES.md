@@ -96,4 +96,4 @@ brazil_legislative_analytics.marts.am_atlas_frentes
 
 ## Status
 
-✅ Aprovado para consumo analítico.
+ * Aprovado para consumo analítico.
