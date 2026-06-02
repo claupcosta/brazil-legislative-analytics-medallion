@@ -1,4 +1,4 @@
-# 🇺🇸 Brazil Legislative Analytics Medallion
+# Brazil Legislative Analytics Medallion
 
 ## Legislative Analytics Platform Built on Databricks Medallion Architecture
 
@@ -14,7 +14,7 @@ The solution was designed following modern Data Engineering, Analytics Engineeri
 
 ---
 
-# 🚀 How to Evaluate This Project
+# How to Evaluate This Project
 
 ## Repository
 
@@ -72,7 +72,7 @@ Data quality, traceability, and governance strategies implemented throughout the
 
 ---
 
-# 📋 Executive Summary
+# Executive Summary
 
 The platform implements a complete Medallion Architecture using Databricks for processing legislative data from the Brazilian Chamber of Deputies.
 
@@ -102,7 +102,7 @@ The platform implements a complete Medallion Architecture using Databricks for p
 
 ---
 
-# 🎯 Project Objective
+# Project Objective
 
 This project was developed for educational purposes, Data Engineering studies, portfolio development, and demonstration of modern data architecture best practices.
 
@@ -120,7 +120,7 @@ The solution simulates patterns commonly found in enterprise Data Engineering en
 
 ---
 
-# 🏗️ Solution Architecture
+# Solution Architecture
 
 ```text
 Brazilian Chamber of Deputies API
@@ -153,7 +153,7 @@ Brazilian Chamber of Deputies API
 
 ---
 
-# ⚙️ Technologies Used
+# Technologies Used
 
 | Category        | Technology             |
 | --------------- | ---------------------- |
@@ -169,7 +169,7 @@ Brazilian Chamber of Deputies API
 
 ---
 
-# 📊 Analytical Products
+# Analytical Products
 
 The Marts layer provides the following analytical products:
 
@@ -184,7 +184,7 @@ The Marts layer provides the following analytical products:
 
 ---
 
-# 📁 Repository Structure
+# Repository Structure
 
 ```text
 BRAZIL-LEGISLATIVE-ANALYTICS-MEDALLION/
@@ -213,7 +213,7 @@ notebooks/
 
 ---
 
-# 📚 Documentation Structure
+# Documentation Structure
 
 ```text
 docs/
@@ -228,7 +228,7 @@ docs/
 
 ---
 
-# 🔍 Governance and Observability
+# Governance and Observability
 
 The platform implements end-to-end governance mechanisms.
 
@@ -247,7 +247,7 @@ The platform implements end-to-end governance mechanisms.
 
 ---
 
-# 🔗 Project Links
+# Project Links
 
 | Resource                  | Path                                                                 |
 | ------------------------- | -------------------------------------------------------------------- |
@@ -278,7 +278,7 @@ For a complete evaluation of the solution, the following reading sequence is rec
 10. Changelog
 
 ---
-# 👩‍💻 Author
+# Author
 
 ## Claudia Costa
 
@@ -288,7 +288,7 @@ Project developed for educational purposes, technical portfolio development, and
 
 ---
 
-# 📄 License
+# License
 
 This project uses exclusively public data made available by the Brazilian Chamber of Deputies and complementary public data sources.
 
