@@ -168,15 +168,8 @@
 
 # COMMAND ----------
 
-5. Diagnóstico Final
-
-# COMMAND ----------
-
 # MAGIC %sql
 # MAGIC SELECT
 # MAGIC     COUNT(*) AS total_tabelas
 # MAGIC FROM brazil_legislative_analytics.information_schema.tables
 # MAGIC WHERE table_schema = 'bronze';
-
-# COMMAND ----------
-

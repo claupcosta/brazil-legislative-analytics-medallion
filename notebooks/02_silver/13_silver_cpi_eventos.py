@@ -1258,6 +1258,126 @@ column_comments = {
 
     "aud_tx_hash_registro_silver":
         "Deterministic Silver hash used for CPI event traceability.",
+    "cpi_tx_tipo_descricao":
+    "Detailed description of the CPI type provided by the source system.",
+
+    "cpi_tx_abrangencia":
+        "Scope or jurisdiction associated with the CPI investigation.",
+
+    "cpi_tx_status_analitico":
+        "Standardized analytical status assigned to the CPI during Silver processing.",
+
+    "cpi_nr_ano_inicio":
+        "Year when the CPI investigation started.",
+
+    "leg_id_legislatura_cpi":
+        "Legislature identifier associated with the CPI.",   
+    "evt_tx_sigla_orgao":
+    "Acronym of the legislative body associated with the event.",
+
+    "evt_tx_nome_orgao":
+        "Name of the legislative body associated with the event.",
+
+    "evt_tx_tipo_orgao":
+        "Type of legislative body associated with the event.",
+
+    "evt_tx_uri":
+        "Source URI identifying the legislative event.",
+
+    "evt_tx_situacao":
+        "Current status of the legislative event from the source system.",
+
+    "evt_tx_local":
+        "Physical or virtual location where the event occurred.",
+
+    "evt_dh_inicio_origem":
+        "Original event start datetime received from the source system.",
+
+    "evt_dh_fim_origem":
+        "Original event end datetime received from the source system.",
+
+    "evt_nr_ano":
+        "Event year derived from the event date.",
+
+    "evt_nr_mes":
+        "Event month derived from the event date.",
+
+    "leg_id_legislatura_evento":
+        "Legislature identifier associated with the event.",     
+    "cpi_evt_tx_status_evento_analitico":
+    "Analytical classification of the event execution status.",
+
+    "cpi_evt_tx_texto_base_normalizado":
+        "Normalized text used for CPI semantic classification.",
+
+    "cpi_evt_fl_termo_comissao_inquerito":
+        "Flag indicating detection of Parliamentary Inquiry Commission terminology.",
+
+    "cpi_evt_fl_evento_semantico_cpi":
+        "Flag indicating semantic classification of the event as CPI related.",
+
+    "cpi_evt_fl_cpi_identificada":
+        "Flag indicating whether a CPI entity was successfully identified.",
+
+    "cpi_evt_fl_evento_com_data":
+        "Flag indicating whether the event contains valid date information.",
+
+    "cpi_evt_fl_evento_realizado":
+        "Flag indicating whether the event was effectively carried out.",
+
+    "cpi_evt_fl_mesma_legislatura_cpi":
+        "Flag indicating whether CPI and event belong to the same legislature.",
+
+    "cpi_evt_fl_evento_apos_inicio_cpi":
+        "Flag indicating whether the event occurred after CPI start date.",
+
+    "cpi_evt_fl_evento_antes_fim_cpi":
+        "Flag indicating whether the event occurred before CPI end date.",
+
+    "cpi_evt_fl_temporalmente_consistente":
+        "Flag indicating temporal consistency between CPI and event dates.",
+
+    "cpi_evt_fl_periodo_evento_valido":
+        "Flag indicating whether the event period is valid.",
+
+    "cpi_evt_fl_id_relacao_valido":
+        "Flag indicating whether the CPI-event relationship identifier is valid.",
+
+    "cpi_evt_fl_evento_identificado":
+        "Flag indicating whether the event identifier was successfully detected.",
+
+    "cpi_evt_fl_orgao_evento_identificado":
+        "Flag indicating whether the event organization identifier was detected.",
+
+    "cpi_evt_fl_texto_classificacao_informado":
+        "Flag indicating whether classification text was available.",
+
+    "cpi_evt_fl_regra_semantica_valida":
+        "Flag indicating whether semantic classification rules were satisfied.",
+    "aud_id_execucao_silver":
+    "Execution identifier generated during Silver processing.",
+
+    "aud_dh_processamento":
+        "Timestamp when the Silver record was processed.",
+
+    "aud_tx_camada_origem":
+        "Source layer used during Silver processing.",
+
+    "aud_tx_tabela_origem_cpis":
+        "Source CPI table used during processing.",
+
+    "aud_tx_tabela_origem_eventos":
+        "Source event table used during processing.",
+
+    "aud_tx_tabela_origem_orgaos":
+        "Source organization table used during processing.",
+
+    "aud_tx_tabela_destino":
+        "Destination Silver table name.",
+
+    "aud_tx_versao_pipeline_silver":
+        "Pipeline version used during Silver processing."    
+
 }
 
 if APPLY_GOVERNANCE_COMMENTS:

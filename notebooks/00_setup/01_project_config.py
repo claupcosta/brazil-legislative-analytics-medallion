@@ -64,7 +64,7 @@ import uuid
 # ============================================================
 
 PROJECT_NAME = "brazil_legislative_analytics"
-PROJECT_VERSION = "v1.0.0"
+PROJECT_VERSION = "v 2.0.0"
 PROJECT_ENVIRONMENT = "dev"
 
 PIPELINE_VERSION = PROJECT_VERSION
@@ -353,18 +353,15 @@ SILVER_TABLES = {
 # ============================================================
 
 GOLD_DIMENSION_TABLES = {
-    "deputado": "dm_deputado",
-    "partido": "dm_partido",
-    "estado": "dm_estado",
-    "data": "dm_data",
-    "orgao": "dm_orgao",
-    "tipo_evento": "dm_tipo_evento",
-    "evento": "dm_evento",
-    "votacao": "dm_votacao",
-    "tipo_votacao": "dm_tipo_votacao",
-    "frente": "dm_frente",
-    "fornecedor": "dm_fornecedor",
-    "cpi": "dm_cpi",
+    "deputados": "dm_deputados",
+    "partidos": "dm_partidos",
+    "estados": "dm_estados",
+    "datas": "dm_datas",
+    "frentes": "dm_frentes",
+    "eventos": "dm_eventos",
+    "votacoes": "dm_votacoes",
+    "cpis": "dm_cpis",
+    "fornecedores": "dm_fornecedores",
 }
 
 # COMMAND ----------
@@ -375,12 +372,10 @@ GOLD_DIMENSION_TABLES = {
 
 GOLD_FACT_TABLES = {
     "frentes_membros": "ft_frentes_membros",
-    "eventos_presencas": "ft_eventos_presencas",
+    "presencas_eventos": "ft_presencas_eventos",
     "resultados_votacoes": "ft_resultados_votacoes",
     "despesas_ceap": "ft_despesas_ceap",
-    "orgaos_membros": "ft_orgaos_membros",
-    "cpi_membros": "ft_cpi_membros",
-    "cpi_eventos": "ft_cpi_eventos",
+    "eventos_cpis": "ft_eventos_cpis",
 }
 
 # COMMAND ----------

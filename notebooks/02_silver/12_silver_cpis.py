@@ -990,6 +990,18 @@ column_comments = {
     "aud_dh_processamento":
         "Timestamp when CPI record was processed in this Silver notebook.",
 
+    "aud_tx_camada_origem":
+    "Source data layer used during Silver CPI processing.",
+
+    "aud_tx_tabela_origem":
+        "Source Silver table used to derive CPI records.",
+
+    "aud_tx_tabela_destino":
+        "Destination Silver table where standardized CPI records are persisted.",
+
+    "aud_tx_versao_pipeline_silver":
+        "Pipeline version used during Silver CPI processing.",
+
     "aud_tx_regra_derivacao":
         "Textual description of the CPI derivation rule.",
 
