@@ -1,5 +1,245 @@
 # Changelog
 
+All notable changes to this project are documented in this file.
+
+---
+
+## v3.0.0 — Brazil Legislative Analytics Medallion Platform
+Release Date: 2026-06-01
+
+### Overview
+
+This release represents the final consolidated version of the Brazil Legislative Analytics Medallion project.
+
+The solution evolved from a raw ingestion platform into a complete analytical ecosystem composed of:
+
+* Medallion Architecture
+* Dimensional Modeling Layer
+* Analytical Data Marts
+* Data Governance Framework
+* Data Quality Controls
+* Data Traceability Controls
+* Operational Documentation
+* Business Documentation
+* Technical Diagrams
+
+---
+
+### Added
+
+#### Medallion Architecture
+
+Implemented complete Medallion architecture:
+
+```text
+Bronze
+   ↓
+Silver
+   ↓
+Gold
+   ↓
+MAT (Analytical Marts)
+```
+
+Features:
+
+* API ingestion
+* CSV fallback strategy
+* Delta Lake storage
+* Incremental processing
+* Audit metadata
+* Data lineage support
+
+---
+
+#### Gold Layer
+
+Added dimensional modeling layer.
+
+Dimensions:
+
+* dm_deputados
+* dm_partidos
+* dm_estados
+* dm_datas
+* dm_frentes
+* dm_eventos
+* dm_votacoes
+* dm_fornecedores
+* dm_cpis
+
+Fact Tables:
+
+* ft_frentes_membros
+* ft_presencas_eventos
+* ft_resultados_votacoes
+* ft_despesas_ceap
+* ft_eventos_cpis
+
+Added surrogate key strategy for all dimensions.
+
+Added referential integrity controls.
+
+---
+
+#### Analytical Marts
+
+Implemented analytical marts focused on business consumption.
+
+Added:
+
+* am_atlas_frentes
+* am_calendario_eventos
+* am_correlacao_frentes_votacoes
+* am_despesas_ceap
+* am_auditoria_cpis
+* am_presenca_absenteismo
+
+---
+
+#### Documentation
+
+Created complete project documentation.
+
+Architecture:
+
+* 01_solution_architecture.md
+* 07_architectural_decisions.md
+
+Operations:
+
+* 03_pipeline_orchestration.md
+* 06_runbook.md
+
+Governance:
+
+* 04_data_quality_strategy.md
+* 05_traceability.md
+
+Data Dictionary:
+
+* 02_data_dictionary.md
+* legislative_data_dictionary.xlsx
+
+Challenge:
+
+* 08_solution_adherence_matrix.md
+
+Marts:
+
+* 01_business_glossary.md
+* README_AM_ATLAS_FRENTES.md
+* README_AM_CALENDARIO_EVENTOS.md
+* README_AM_CORRELACAO_FRENTES_VOTACOES.md
+* README_AM_DESPESAS_CEAP.md
+* README_AM_AUDITORIA_CPIS.md
+* README_AM_PRESENCA_ABSENTEISMO.md
+
+---
+
+#### Technical Diagrams
+
+Added:
+
+* 01_medallion_architecture_overview.png
+* 02_end_to_end_data_flow.png
+* 03_star_schema_model.png
+
+---
+
+#### Governance
+
+Implemented governance framework including:
+
+* Data Quality
+* Data Lineage
+* Data Traceability
+* Metadata Management
+* Audit Logging
+* Documentation Standards
+
+---
+
+### Improved
+
+Improved architecture standardization.
+
+Improved naming conventions across all layers.
+
+Improved dimensional consistency.
+
+Improved business documentation.
+
+Improved repository organization.
+
+Improved traceability across Bronze, Silver, Gold and MAT layers.
+
+Improved analytical readiness.
+
+Improved maintainability and readability.
+
+Improved portfolio presentation quality.
+
+---
+
+### Fixed
+
+Fixed dimensional relationship inconsistencies.
+
+Fixed naming inconsistencies across layers.
+
+Fixed business key mapping issues.
+
+Fixed lineage documentation inconsistencies.
+
+Fixed quality validation mappings.
+
+Fixed traceability validation mappings.
+
+Fixed architecture documentation alignment.
+
+Fixed dimensional model documentation alignment.
+
+---
+
+### Repository Structure
+
+Final repository organization:
+
+```text
+docs/
+├── architecture/
+├── data_dictionary/
+├── governance/
+├── operations/
+├── marts/
+├── challenge/
+├── CHANGELOG.md
+├── README.md
+└── README.pt-BR.md
+```
+
+---
+
+### Author
+
+Claudia Costa
+
+---
+
+### Next Release
+
+v3.1.0
+
+Planned enhancements:
+
+* CI/CD automation
+* Unit testing framework
+* Monitoring dashboards
+* Automated documentation generation
+* Data observability metrics
+
+
 ## v2.0.0 — Silver Layer Implementation and Analytical Standardization
 
 ### Added
