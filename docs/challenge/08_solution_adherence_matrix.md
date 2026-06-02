@@ -54,7 +54,7 @@ Principais capacidades:
 
 ### Status
 
-✅ Atendido
+* Atendido
 
 ### Evidência
 
@@ -78,7 +78,7 @@ Documento:
 
 ### Status
 
-✅ Atendido
+* Atendido
 
 ### Evidência
 
@@ -101,7 +101,7 @@ Documentos:
 
 ### Status
 
-✅ Atendido
+* Atendido
 
 Validações implementadas:
 
@@ -120,7 +120,7 @@ Documento:
 
 ### Status
 
-✅ Atendido
+* Atendido
 
 Estrutura implementada:
 
@@ -138,7 +138,7 @@ Documento:
 
 ### Status
 
-✅ Atendido
+* Atendido
 
 Caso implementado:
 
@@ -160,7 +160,7 @@ Documento:
 
 ### Status
 
-✅ Atendido
+* Atendido
 
 Tabelas implementadas:
 
@@ -180,7 +180,7 @@ Documento:
 
 ### Status
 
-✅ Atendido
+* Atendido
 
 Recursos implementados:
 
@@ -201,7 +201,7 @@ Documento:
 
 ### Status
 
-✅ Atendido
+* Atendido
 
 Fluxo implementado:
 
@@ -228,7 +228,7 @@ Documento:
 
 ### Status
 
-✅ Atendido
+* Atendido
 
 Camadas suportadas:
 
