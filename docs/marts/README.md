@@ -58,7 +58,7 @@ The platform uses several legislative and parliamentary concepts.
 
 For terminology reference, consult:
 
-📖 [Business Glossary](01_business_glossary.md)
+[Business Glossary](01_business_glossary.md)
 
 ---
 
@@ -76,7 +76,7 @@ Provides visibility into:
 
 Reference:
 
-📄 [README_AM_ATLAS_FRENTES.md](README_AM_ATLAS_FRENTES.md)
+[README_AM_ATLAS_FRENTES.md](README_AM_ATLAS_FRENTES.md)
 
 ---
 
@@ -92,7 +92,7 @@ Provides visibility into:
 
 Reference:
 
-📄 [README_AM_CALENDARIO_EVENTOS.md](README_AM_CALENDARIO_EVENTOS.md)
+ [README_AM_CALENDARIO_EVENTOS.md](README_AM_CALENDARIO_EVENTOS.md)
 
 ---
 
@@ -108,7 +108,7 @@ Provides visibility into:
 
 Reference:
 
-📄 [README_AM_CORRELACAO_FRENTES_VOTACOES.md](README_AM_CORRELACAO_FRENTES_VOTACOES.md)
+ [README_AM_CORRELACAO_FRENTES_VOTACOES.md](README_AM_CORRELACAO_FRENTES_VOTACOES.md)
 
 ---
 
@@ -124,7 +124,7 @@ Provides visibility into:
 
 Reference:
 
-📄 [README_AM_DESPESAS_CEAP.md](README_AM_DESPESAS_CEAP.md)
+ [README_AM_DESPESAS_CEAP.md](README_AM_DESPESAS_CEAP.md)
 
 ---
 
@@ -140,7 +140,7 @@ Provides visibility into:
 
 Reference:
 
-📄 [README_AM_AUDITORIA_CPIS.md](README_AM_AUDITORIA_CPIS.md)
+ [README_AM_AUDITORIA_CPIS.md](README_AM_AUDITORIA_CPIS.md)
 
 ---
 
@@ -156,7 +156,7 @@ Provides visibility into:
 
 Reference:
 
-📄 [README_AM_PRESENCA_ABSENTEISMO.md](README_AM_PRESENCA_ABSENTEISMO.md)
+ [README_AM_PRESENCA_ABSENTEISMO.md](README_AM_PRESENCA_ABSENTEISMO.md)
 
 ---
 
