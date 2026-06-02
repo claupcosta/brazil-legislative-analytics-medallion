@@ -213,7 +213,7 @@ brazil_legislative_analytics.marts.am_despesas_ceap
 
 ## Status
 
-✅ Aprovado para consumo analítico
+* Aprovado para consumo analítico
 
 ### Resultado da Homologação
 
