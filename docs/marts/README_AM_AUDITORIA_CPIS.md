@@ -189,7 +189,7 @@ brazil_legislative_analytics.marts.am_auditoria_cpis
 
 ## Status
 
-✅ Aprovado para consumo analítico
+* Aprovado para consumo analítico
 
 ### Resultado da Homologação
 
