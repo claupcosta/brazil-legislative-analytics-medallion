@@ -14,7 +14,7 @@ O detalhamento completo de tabelas, colunas, tipos de dados, regras de negócio 
 
 A documentação detalhada de todas as tabelas e colunas está disponível no artefato abaixo:
 
-📊 **Legislative Data Dictionary**
+**Legislative Data Dictionary**
 
 ```text
 data_dictionary/legislative_data_dictionary.xlsx
