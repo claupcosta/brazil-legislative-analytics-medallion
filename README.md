@@ -72,7 +72,7 @@ The platform implements a complete Medallion Architecture using Databricks to pr
 
 # Solution Overview
 
-![Medallion Architecture](docs/architecture/01_medallion_architecture_overview.png)
+![Medallion Architecture](docs/images/01_medallion_architecture_overview.png)
 
 The solution was built using Databricks Medallion Architecture, clearly separating ingestion, curation, dimensional modeling, and analytical consumption layers.
 

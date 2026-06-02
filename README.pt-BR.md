@@ -89,7 +89,7 @@ A plataforma implementa uma Arquitetura Medalhão completa utilizando Databricks
 
 # Visão Geral da Solução
 
-![Arquitetura Medalhão](docs/architecture/01_medallion_architecture_overview.png)
+![Arquitetura Medalhão](docs/images/01_medallion_architecture_overview.png)
 
 A solução foi construída utilizando Arquitetura Medalhão no Databricks, separando claramente ingestão, tratamento, modelagem e consumo analítico.
 
