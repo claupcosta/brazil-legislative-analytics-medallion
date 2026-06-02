@@ -143,7 +143,7 @@ brazil_legislative_analytics.marts.am_calendario_eventos
 
 ## Status
 
-✅ Aprovado para consumo analítico
+* Aprovado para consumo analítico
 
 ### Resultado da Homologação
 
@@ -154,4 +154,4 @@ brazil_legislative_analytics.marts.am_calendario_eventos
 | Qualidade      | Aprovado |
 | Publicação     | Aprovado |
 
-O MART está validado e disponível para utilização analítica.
+O Mart está validado e disponível para utilização analítica.
