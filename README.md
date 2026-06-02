@@ -2,8 +2,6 @@
 
 ## Legislative Analytics Platform Built on Databricks Medallion Architecture
 
-[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/claupcosta/brazil-legislative-analytics-medallion)
-
 **Repository:**  
 https://github.com/claupcosta/brazil-legislative-analytics-medallion
 
@@ -78,27 +76,27 @@ The platform implements a complete Medallion Architecture using Databricks for p
 
 ## Key Deliverables
 
-✅ Complete Medallion Architecture (Bronze, Silver, Gold, and Marts)
+* Complete Medallion Architecture (Bronze, Silver, Gold, and Marts)
 
-✅ Dimensional Model (Star Schema)
+* Dimensional Model (Star Schema)
 
-✅ 6 Analytical Data Marts
+* 6 Analytical Data Marts
 
-✅ Data Quality Framework
+* Data Quality Framework
 
-✅ Traceability Framework
+* Traceability Framework
 
-✅ Metadata Governance
+* Metadata Governance
 
-✅ Incremental Processing
+* Incremental Processing
 
-✅ CSV Fallback Strategy
+* CSV Fallback Strategy
 
-✅ Operational Auditing
+* Operational Auditing
 
-✅ Replay and Recovery Mechanisms
+* Replay and Recovery Mechanisms
 
-✅ Enterprise-Level Documentation
+* Enterprise-Level Documentation
 
 ---
 
