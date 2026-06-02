@@ -2,13 +2,15 @@
 
 ## Legislative Analytics Platform Built on Databricks Medallion Architecture
 
-**Repository:**  
+🇺 English | [🇧 Português](README.pt-BR.md)
+
+GitHub Repository:
+
 https://github.com/claupcosta/brazil-legislative-analytics-medallion
 
-Project developed for ingestion, curation, dimensional modeling, and analytical consumption of public data from the Brazilian Chamber of Deputies using Databricks, Apache Spark, Delta Lake, and Medallion Architecture.
+A complete data platform developed for ingestion, curation, dimensional modeling, governance, quality control, and analytical consumption of Brazilian Chamber of Deputies open data using Databricks, Apache Spark, Delta Lake, and Medallion Architecture.
 
-
-The solution was designed following modern Data Engineering, Analytics Engineering, Data Governance, Data Quality, and Observability practices, simulating patterns commonly found in enterprise-grade Data Platform environments.
+The solution follows modern Data Engineering, Analytics Engineering, Data Governance, Data Quality, and Observability best practices, simulating enterprise-grade data platform standards.
 
 ---
 
@@ -16,19 +18,15 @@ The solution was designed following modern Data Engineering, Analytics Engineeri
 
 ## Repository
 
-GitHub Repository:
+This repository contains all source code, notebooks, architecture diagrams, dimensional models, governance artifacts, analytical products, and supporting documentation.
 
-https://github.com/claupcosta/brazil-legislative-analytics-medallion
+---
 
-The complete source code, documentation, notebooks, dimensional models, governance artifacts, and analytical products are available in this repository.
-
-The recommended evaluation order is:
-
-## 1. Solution Overview
+## 1. Solution Understanding
 
 * `docs/challenge/08_solution_adherence_matrix.md`
 
-Challenge adherence matrix containing the complete mapping between challenge requirements, implementation details, and technical evidence.
+A complete traceability matrix mapping challenge requirements to implementation evidence.
 
 ---
 
@@ -39,7 +37,7 @@ Challenge adherence matrix containing the complete mapping between challenge req
 * `docs/architecture/02_end_to_end_data_flow.png`
 * `docs/architecture/03_star_schema_model.png`
 
-Architecture documentation, end-to-end data flow, and dimensional model.
+Architecture, end-to-end data flow, and dimensional modeling documentation.
 
 ---
 
@@ -52,59 +50,56 @@ Technical data dictionary containing tables, columns, business rules, and metada
 
 ---
 
-## 4. Operations
+## Executive Summary
 
-* `docs/operations/03_pipeline_orchestration.md`
-* `docs/operations/06_runbook.md`
+The platform implements a complete Medallion Architecture using Databricks to process legislative data from the Brazilian Chamber of Deputies.
 
-Operational workflow, orchestration strategy, and execution procedures.
+### Key Deliverables
 
----
-
-## 5. Governance
-
-* `docs/governance/04_data_quality_strategy.md`
-* `docs/governance/05_traceability.md`
-
-Data quality, traceability, and governance strategies implemented throughout the platform.
-
----
-
-# Executive Summary
-
-The platform implements a complete Medallion Architecture using Databricks for processing legislative data from the Brazilian Chamber of Deputies.
-
-## Key Deliverables
-
-* Complete Medallion Architecture (Bronze, Silver, Gold, and Marts)
-
-* Dimensional Model (Star Schema)
-
+* Medallion Architecture (Bronze, Silver, Gold and Marts)
+* Star Schema Dimensional Model
 * 6 Analytical Data Marts
-
 * Data Quality Framework
-
 * Traceability Framework
-
 * Metadata Governance
-
 * Incremental Processing
-
 * CSV Fallback Strategy
-
 * Operational Auditing
+* Replay and Recovery Capabilities
+* Comprehensive Technical Documentation
 
-* Replay and Recovery Mechanisms
+---
 
-* Enterprise-Level Documentation
+# Solution Overview
+
+![Medallion Architecture](docs/architecture/01_medallion_architecture_overview.png)
+
+The solution was built using Databricks Medallion Architecture, clearly separating ingestion, curation, dimensional modeling, and analytical consumption layers.
+
+### Main Characteristics
+
+* Medallion Architecture
+* Delta Lake
+* Dimensional Modeling
+* Governance
+* Auditing
+* Data Quality
+* Incremental Processing
+* CSV Fallback
+* Specialized Analytical Data Marts
+
+📷 Additional Diagrams
+
+* [End-to-End Data Flow](docs/architecture/02_end_to_end_data_flow.png)
+* [Dimensional Model (Star Schema)](docs/architecture/03_star_schema_model.png)
 
 ---
 
 # Project Objective
 
-This project was developed for educational purposes, Data Engineering studies, portfolio development, and demonstration of modern data architecture best practices.
+This project was developed for educational purposes, Data Engineering portfolio development, and demonstration of enterprise-grade data platform practices.
 
-The solution simulates patterns commonly found in enterprise Data Engineering environments, including:
+The solution simulates modern data engineering environments including:
 
 * Medallion Architecture
 * Data Governance
@@ -120,34 +115,35 @@ The solution simulates patterns commonly found in enterprise Data Engineering en
 
 # Solution Architecture
 
-```text
-Brazilian Chamber of Deputies API
-               │
-               ▼
-          01_Bronze
-               │
-               ▼
-          02_Silver
-               │
-               ▼
-           03_Gold
-               │
-               ▼
-           04_Marts
-               │
-               ▼
-     05_Quality & Governance
-```
-
 ## Layers
 
-| Layer   | Purpose                                        |
-| ------- | ---------------------------------------------- |
-| Bronze  | Raw data ingestion and preservation            |
-| Silver  | Data curation, standardization, and enrichment |
-| Gold    | Enterprise dimensional model                   |
-| Marts   | Specialized analytical products                |
-| Quality | Governance, quality, and traceability          |
+| Layer   | Purpose                                 |
+| ------- | --------------------------------------- |
+| Bronze  | Raw data ingestion and preservation     |
+| Silver  | Data curation, cleansing and enrichment |
+| Gold    | Enterprise dimensional model            |
+| Marts   | Analytical consumption layer            |
+| Quality | Governance, quality and traceability    |
+
+---
+
+## Schema Organization
+
+The platform physically separates data into schemas following Medallion Architecture principles.
+
+| Schema | Purpose                    |
+| ------ | -------------------------- |
+| audit  | Auditing and observability |
+| bronze | Raw data                   |
+| silver | Curated data               |
+| gold   | Dimensional model          |
+| marts  | Analytical products        |
+
+📷 Evidence
+
+[View Catalog Organization](docs/images/catalog_structure.png)
+
+This segregation improves governance, traceability, and layer independence.
 
 ---
 
@@ -171,14 +167,18 @@ Brazilian Chamber of Deputies API
 
 The Marts layer provides the following analytical products:
 
-| Data Mart                          | Purpose                                                 |
-| ---------------------------------- | ------------------------------------------------------- |
-| am_atlas_frentes                   | Parliamentary caucus composition and diversity analysis |
-| am_calendario_eventos_legislativos | Legislative calendar and parliamentary participation    |
-| am_correlacao_frentes_votacoes     | Correlation between caucuses and voting behavior        |
-| am_visao_geral_despesas_ceap       | Parliamentary expense monitoring                        |
-| am_auditoria_cpis                  | CPI auditing and monitoring                             |
-| am_monitor_presenca_absenteismo    | Attendance and engagement indicators                    |
+| Data Mart                      | Purpose                                        |
+| ------------------------------ | ---------------------------------------------- |
+| am_atlas_frentes               | Parliamentary fronts composition and diversity |
+| am_calendario_eventos          | Legislative events calendar                    |
+| am_correlacao_frentes_votacoes | Fronts versus voting behavior analysis         |
+| am_despesas_ceap               | Parliamentary expenses analysis                |
+| am_auditoria_cpis              | CPI monitoring and auditing                    |
+| am_presenca_absenteismo        | Attendance and engagement indicators           |
+
+📷 Evidence
+
+[View Analytical Product Example](docs/images/produto_analiticos.png)
 
 ---
 
@@ -195,99 +195,75 @@ BRAZIL-LEGISLATIVE-ANALYTICS-MEDALLION/
 └── .gitignore
 ```
 
-## Pipeline Structure
-
-```text
-notebooks/
-├── 00_setup/
-├── 01_bronze/
-├── 02_silver/
-├── 03_gold/
-├── 04_marts/
-├── 05_quality/
-├── 06_jobs/
-└── 99_utils/
-```
-
----
-
-# Documentation Structure
-
-```text
-docs/
-├── architecture/
-├── challenge/
-├── data_dictionary/
-├── governance/
-├── marts/
-├── operations/
-└── changelog.md
-```
-
 ---
 
 # Governance and Observability
 
-The platform implements end-to-end governance mechanisms.
-
-## Implemented Features
+Implemented governance capabilities include:
 
 * Operational Auditing
 * Data Quality Framework
 * Traceability Framework
 * Metadata Governance
 * Technical Logging
-* Layer-Based Replay
-* Reprocessing Controls
+* Replay Capabilities
+* Reprocessing Control
 * Rejected Records Management
 * Data Lineage
 * Delta Lake Versioning
 
 ---
 
-# Project Links
+# Visual Evidence
 
-| Resource                  | Path                                                                 |
-| ------------------------- | -------------------------------------------------------------------- |
-| GitHub Repository         | https://github.com/claupcosta/brazil-legislative-analytics-medallion |
-| Architecture              | docs/architecture                                                    |
-| Data Dictionary           | docs/data_dictionary                                                 |
-| Governance                | docs/governance                                                      |
-| Operations                | docs/operations                                                      |
-| Data Marts                | docs/marts                                                           |
-| Solution Adherence Matrix | docs/challenge/08_solution_adherence_matrix.md                       |
-| Version History           | docs/changelog.md                                                    |
+## Medallion Architecture
+
+![Architecture](docs/architecture/01_medallion_architecture_overview.png)
 
 ---
 
-## Recommended Documentation Reading Order
+## End-to-End Data Flow
 
-For a complete evaluation of the solution, the following reading sequence is recommended:
-
-1. Solution Adherence Matrix
-2. Solution Architecture
-3. Dimensional Model
-4. Data Dictionary
-5. Pipeline Orchestration
-6. Data Quality Strategy
-7. Traceability Strategy
-8. Operational Runbook
-9. Architectural Decisions
-10. Changelog
+![Flow](docs/architecture/02_end_to_end_data_flow.png)
 
 ---
+
+## Star Schema
+
+![Star Schema](docs/architecture/03_star_schema_model.png)
+
+---
+
+## Databricks Workspace
+
+![Workspace](docs/images/databricks_workspace_structure.png)
+
+---
+
+## Catalog Structure
+
+![Catalog](docs/images/catalog_structure.png)
+
+---
+
+## Analytical Product Example
+
+![Mart](docs/images/produto_analiticos.png)
+
+---
+
 # Author
 
 ## Claudia Costa
 
-Data Engineer focused on analytics platforms, Lakehouse architecture, Databricks, data governance, data quality, traceability, and scalable analytical solutions.
+Data Engineer focused on Lakehouse Architecture, Databricks, Data Governance, Data Quality, Traceability, and Analytical Platforms.
 
-Project developed for educational purposes, technical portfolio development, and demonstration of Data Engineering capabilities.
+This project was developed for educational purposes, technical portfolio development, and demonstration of Data Engineering skills.
 
 ---
 
 # License
 
-This project uses exclusively public data made available by the Brazilian Chamber of Deputies and complementary public data sources.
+This project uses exclusively public data provided by the Brazilian Chamber of Deputies and complementary public sources.
 
-All analytical artifacts were developed for educational purposes, technical studies, and demonstration of modern data architecture practices.
+All analytical artifacts were developed for educational, research, and portfolio purposes.

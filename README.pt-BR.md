@@ -2,23 +2,20 @@
 
 ## Plataforma Analítica Legislativa baseada em Arquitetura Medalhão no Databricks
 
+🇧 Português | [🇺 English](README.md)
 
 **Repositório GitHub:**
 https://github.com/claupcosta/brazil-legislative-analytics-medallion
 
 Projeto desenvolvido para ingestão, curadoria, modelagem dimensional e disponibilização analítica dos dados públicos da Câmara dos Deputados utilizando Databricks, Apache Spark, Delta Lake e Arquitetura Medalhão.
 
-
 A solução foi construída seguindo práticas modernas de Engenharia de Dados, Analytics Engineering, Governança, Qualidade de Dados e Observabilidade, simulando padrões encontrados em ambientes corporativos de Data Platform.
 
 ---
+
 # Como Avaliar Este Projeto
 
 ## Repositório
-
-Repositório GitHub:
-
-https://github.com/claupcosta/brazil-legislative-analytics-medallion
 
 Todo o código-fonte, documentação, notebooks, diagramas, modelo dimensional, artefatos de governança e produtos analíticos estão disponíveis neste repositório.
 
@@ -77,26 +74,41 @@ A plataforma implementa uma Arquitetura Medalhão completa utilizando Databricks
 ## Principais Entregas
 
 * Arquitetura Medalhão (Bronze, Silver, Gold e Marts)
-
 * Modelo Dimensional (Star Schema)
-
 * 6 Data Marts Analíticos
-
 * Framework de Qualidade de Dados
-
 * Framework de Rastreabilidade
-
 * Governança de Metadados
-
 * Processamento Incremental
-
 * Estratégia de Fallback CSV
-
 * Auditoria Operacional
-
 * Replay e Recuperação
-
 * Documentação Corporativa Completa
+
+---
+
+# Visão Geral da Solução
+
+![Arquitetura Medalhão](docs/architecture/01_medallion_architecture_overview.png)
+
+A solução foi construída utilizando Arquitetura Medalhão no Databricks, separando claramente ingestão, tratamento, modelagem e consumo analítico.
+
+### Principais características
+
+* Arquitetura Medalhão
+* Delta Lake
+* Modelo Dimensional
+* Governança
+* Auditoria
+* Data Quality
+* Processamento Incremental
+* Fallback CSV
+* Data Marts Especializados
+
+📷 Diagramas complementares:
+
+* [Fluxo End-to-End](docs/architecture/02_end_to_end_data_flow.png)
+* [Modelo Dimensional (Star Schema)](docs/architecture/03_star_schema_model.png)
 
 ---
 
@@ -120,25 +132,6 @@ A solução busca simular padrões encontrados em ambientes corporativos de Data
 
 # Arquitetura da Solução
 
-```text
-API Câmara dos Deputados
-           │
-           ▼
-      01_Bronze
-           │
-           ▼
-      02_Silver
-           │
-           ▼
-       03_Gold
-           │
-           ▼
-       04_Marts
-           │
-           ▼
-05_Quality & Governance
-```
-
 ## Camadas
 
 | Camada  | Objetivo                                 |
@@ -148,6 +141,26 @@ API Câmara dos Deputados
 | Gold    | Modelo dimensional corporativo           |
 | Marts   | Produtos analíticos especializados       |
 | Quality | Governança, qualidade e rastreabilidade  |
+
+---
+
+## Organização dos Schemas
+
+A solução utiliza segregação física por schemas seguindo os princípios da Arquitetura Medalhão.
+
+| Schema | Objetivo                    |
+| ------ | --------------------------- |
+| audit  | Auditoria e observabilidade |
+| bronze | Dados brutos                |
+| silver | Dados tratados              |
+| gold   | Modelo dimensional          |
+| marts  | Produtos analíticos         |
+
+📷 Evidência:
+
+[Visualizar Organização do Catálogo](docs/images/catalog_structure.png)
+
+Essa segregação permite rastreabilidade, governança e independência entre camadas.
 
 ---
 
@@ -180,6 +193,10 @@ A camada Marts disponibiliza os seguintes produtos analíticos:
 | am_auditoria_cpis                  | Auditoria e acompanhamento de CPIs                  |
 | am_monitor_presenca_absenteismo    | Indicadores de presença e engajamento               |
 
+📷 Evidência:
+
+[Visualizar Produtos Analíticos](docs/images/produto_analiticos.png)
+
 ---
 
 # Estrutura do Repositório
@@ -195,6 +212,8 @@ BRAZIL-LEGISLATIVE-ANALYTICS-MEDALLION/
 └── .gitignore
 ```
 
+---
+
 ## Estrutura dos Pipelines
 
 ```text
@@ -208,6 +227,12 @@ notebooks/
 ├── 06_jobs/
 └── 99_utils/
 ```
+
+A organização dos notebooks segue a separação de responsabilidades por camada.
+
+📷 Evidência:
+
+[Visualizar Workspace Databricks](docs/images/databricks_workspace_structure.png)
 
 ---
 
@@ -244,22 +269,60 @@ A solução implementa mecanismos de governança ponta a ponta.
 * Versionamento Delta Lake
 
 ---
+
 # Links do Projeto
 
-| Recurso              | Caminho                                                              |
-| -------------------- | -------------------------------------------------------------------- |
-| Repositório GitHub   | https://github.com/claupcosta/brazil-legislative-analytics-medallion |
-| Arquitetura          | docs/architecture                                                    |
-| Dicionário de Dados  | docs/data_dictionary                                                 |
-| Governança           | docs/governance                                                      |
-| Operação             | docs/operations                                                      |
-| Data Marts           | docs/marts                                                           |
-| Matriz de Aderência  | docs/challenge/08_solution_adherence_matrix.md                       |
-| Histórico de Versões | docs/changelog.md                                                    |
+| Recurso              | Caminho                                        |
+| -------------------- | ---------------------------------------------- |
+| Arquitetura          | docs/architecture                              |
+| Dicionário de Dados  | docs/data_dictionary                           |
+| Governança           | docs/governance                                |
+| Operação             | docs/operations                                |
+| Data Marts           | docs/marts                                     |
+| Matriz de Aderência  | docs/challenge/08_solution_adherence_matrix.md |
+| Histórico de Versões | docs/changelog.md                              |
 
 ---
 
-## Documentação Recomendada
+# Evidências Visuais
+
+## Arquitetura Medalhão
+
+![Arquitetura Medalhão](docs/architecture/01_medallion_architecture_overview.png)
+
+---
+
+## Fluxo End-to-End
+
+![Fluxo End-to-End](docs/architecture/02_end_to_end_data_flow.png)
+
+---
+
+## Modelo Dimensional (Star Schema)
+
+![Star Schema](docs/architecture/03_star_schema_model.png)
+
+---
+
+## Estrutura do Workspace Databricks
+
+![Workspace](docs/images/databricks_workspace_structure.png)
+
+---
+
+## Organização do Catálogo
+
+![Catalog](docs/images/catalog_structure.png)
+
+---
+
+## Exemplo de Produto Analítico
+
+![Produto Analítico](docs/images/produto_analiticos.png)
+
+---
+
+# Documentação Recomendada
 
 Para uma avaliação completa da solução, recomenda-se seguir a seguinte sequência:
 
@@ -275,6 +338,7 @@ Para uma avaliação completa da solução, recomenda-se seguir a seguinte sequ�
 10. Changelog
 
 ---
+
 # Autora
 
 ## Claudia Costa
